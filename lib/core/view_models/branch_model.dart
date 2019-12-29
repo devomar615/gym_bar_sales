@@ -1,0 +1,27 @@
+import 'package:gym_bar_sales/core/enums/viewstate.dart';
+import 'package:gym_bar_sales/core/models/branch.dart';
+import 'package:gym_bar_sales/core/services/api.dart';
+import 'package:gym_bar_sales/core/view_models/base_model.dart';
+
+import '../../locator.dart';
+
+class BranchModel extends BaseModel {
+  Api _api = locator<Api>();
+
+  List<Branch> branches;
+
+  Future addBranch(Branch branch) async {
+    setState(ViewState.Busy);
+    await _api.addDocument(branch.toJson(), "branches");
+    setState(ViewState.Idle);
+  }
+
+  Future fetchBranches() async {
+    setState(ViewState.Busy);
+    var result = await _api.getDataCollection("branches");
+    branches = result.documents
+        .map((doc) => Branch.fromMap(doc.data, doc.documentID))
+        .toList();
+    setState(ViewState.Idle);
+  }
+}
