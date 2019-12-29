@@ -33,7 +33,7 @@ dependencies:
   provider: ^3.2.0
   image_picker: ^0.6.2+3
   permission_handler: ^4.0.0
-  unicorndial: ^1.1.5
+  flutter_speed_dial: ^1.2.5
 
 
   # rflutter_alert: ^1.0.3
