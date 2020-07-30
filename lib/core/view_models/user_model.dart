@@ -1,7 +1,6 @@
-import 'package:gym_bar_sales/core/enums/viewstate.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/services/authentication_service.dart';
-
-import '../../locator.dart';
+import '../locator.dart';
 import 'base_model.dart';
 
 class UserModel extends BaseModel {

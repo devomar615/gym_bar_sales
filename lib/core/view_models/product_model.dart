@@ -1,42 +1,23 @@
-import 'package:gym_bar_sales/core/enums/viewstate.dart';
-import 'package:gym_bar_sales/core/models/branch.dart';
-import 'package:gym_bar_sales/core/models/category.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/services/api.dart';
 import 'package:gym_bar_sales/core/view_models/base_model.dart';
-
-import '../../locator.dart';
+import '../locator.dart';
 
 class ProductModel extends BaseModel {
   Api _api = locator<Api>();
 
   List<Product> products;
-  List<Branch> branches;
-  List<Category> categories;
 
-  Future<List<Product>> fetchProducts(String path) async {
+  Future<List<Product>> fetchProducts({categoryName, branchName}) async {
     setState(ViewState.Busy);
-    var result = await _api.getDataCollection(path);
+    var result = await _api.getDataCollection(
+        "products/branches/$branchName/categories/$categoryName");
     products = result.documents
         .map((doc) => Product.fromMap(doc.data, doc.documentID))
         .toList();
     setState(ViewState.Idle);
     return products;
-  }
-
-  Future fetchBranchesAndCategories() async {
-    setState(ViewState.Busy);
-    var branchResult = await _api.getDataCollection("branches");
-    var categoryResult = await _api.getDataCollection("categories");
-    branches = branchResult.documents
-        .map((doc) => Branch.fromMap(doc.data, doc.documentID))
-        .toList();
-
-    categories = categoryResult.documents
-        .map((doc) => Category.fromMap(doc.data, doc.documentID))
-        .toList();
-
-    setState(ViewState.Idle);
   }
 
   // Stream<QuerySnapshot> fetchProductsAsStream(String path) {
@@ -58,10 +39,9 @@ class ProductModel extends BaseModel {
   Future<Product> getProductById(String id, String path) async {
     setState(ViewState.Busy);
     var doc = await _api.getDocumentById(id, path);
-    var prod = Product.fromMap(doc.data, doc.documentID);
+    Product product = Product.fromMap(doc.data, doc.documentID);
     setState(ViewState.Idle);
-
-    return prod;
+    return product;
   }
 
   Future<Product> getProductByBranch(String path) async {
@@ -77,12 +57,5 @@ class ProductModel extends BaseModel {
     return;
   }
 
-  Future updateProduct(Product data, String id, String path) async {
-    setState(ViewState.Busy);
 
-    await _api.updateDocument(data.toJson(), id, path);
-    setState(ViewState.Idle);
-
-    return;
-  }
 }

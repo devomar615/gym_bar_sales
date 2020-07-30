@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:gym_bar_sales/core/locator.dart';
 import 'package:gym_bar_sales/ui/routers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import 'core/view_models/product_model.dart';
-import 'locator.dart';
 
 void main() {
-  permission() async {
-    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
-  }
+  WidgetsFlutterBinding.ensureInitialized();
+  permission() async => await Permission.storage.request();
 
   permission();
   SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+      [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
   runApp(MyApp());
   setupLocator();
 }
@@ -24,13 +23,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          builder: (_) => locator<ProductModel>(),
-          create: (BuildContext context) {},
-        ),
-      ],
-      child: MaterialApp(
+        providers: [ChangeNotifierProvider(create: (_) => ProductModel())],
+        child: MaterialApp(
           debugShowCheckedModeBanner: false,
           initialRoute: '/',
           title: 'Gym Bar',
@@ -40,10 +34,6 @@ class MyApp extends StatelessWidget {
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
           ],
-          supportedLocales: [
-            Locale("ar", "EG"), // OR Locale('ar', 'AE') OR Other RTL locales
-          ],
-          locale: Locale("ar", "EG")),
-    );
+        ));
   }
 }

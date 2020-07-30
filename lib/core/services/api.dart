@@ -3,7 +3,7 @@ import 'package:gym_bar_sales/core/models/user.dart';
 
 class Api {
   final Firestore _db = Firestore.instance;
-  CollectionReference ref;
+  var ref;
 
   Future<User> getUserProfile(userId) async {
     User user;
@@ -18,7 +18,62 @@ class Api {
   }
 
   Future<QuerySnapshot> getDataCollection(String path) {
-    ref = _db.collection(path);
+    ref = _db.collection(path).getDocuments();
+    return ref;
+  }
+
+  Future<QuerySnapshot> getCustomDataCollection({
+    path,
+    field,
+    equalTo,
+    field2,
+    equalTo2,
+    field3,
+    equalTo3,
+    field4,
+    equalTo4,
+  }) {
+    if (field2 != null &&
+        equalTo2 != null &&
+        field3 != null &&
+        equalTo3 != null &&
+        field4 != null &&
+        equalTo4 != null) {
+      ref = _db
+          .collection(path)
+          .where(field, isEqualTo: equalTo)
+          .where(field2, isEqualTo: equalTo2)
+          .where(field3, isEqualTo: equalTo3)
+          .where(field4, isEqualTo: equalTo4);
+    } else if (field2 != null &&
+        equalTo2 != null &&
+        field3 != null &&
+        equalTo3 != null &&
+        field4 == null &&
+        equalTo4 == null) {
+      ref = _db
+          .collection(path)
+          .where(field, isEqualTo: equalTo)
+          .where(field2, isEqualTo: equalTo2)
+          .where(field3, isEqualTo: equalTo3);
+    } else if (field2 != null &&
+        equalTo2 != null &&
+        field3 == null &&
+        equalTo3 == null &&
+        field4 == null &&
+        equalTo4 == null) {
+      ref = _db
+          .collection(path)
+          .where(field, isEqualTo: equalTo)
+          .where(field2, isEqualTo: equalTo2);
+    } else if (field2 == null &&
+        equalTo2 == null &&
+        field3 == null &&
+        equalTo3 == null &&
+        field4 == null &&
+        equalTo4 == null) {
+      ref = _db.collection(path).where(field, isEqualTo: equalTo);
+    }
     return ref.getDocuments();
   }
 
@@ -27,9 +82,9 @@ class Api {
     return ref.snapshots();
   }
 
-  Future<DocumentSnapshot> getDocumentById(String id, String path) {
-    ref = _db.collection(path);
-    return ref.document(id).get();
+  Future<DocumentSnapshot> getDocumentById(String path, String id) {
+    ref = _db.collection(path).document(id).get();
+    return ref;
   }
 
   Future<void> removeDocument(String id, String path) {
@@ -42,9 +97,32 @@ class Api {
     return ref.add(data);
   }
 
-  Future<void> updateDocument(Map data, String id, String path) {
+  Future<DocumentReference> addDocumentCustomId(docID, Map data, String path) {
     ref = _db.collection(path);
+    return ref.document(docID).setData(data);
+  }
 
+  Future<void> updateDocument(
+    id,
+    Map<String, dynamic> data,
+    String path,
+  ) {
+    ref = _db.collection(path);
     return ref.document(id).updateData(data);
+  }
+
+  static Future<bool> checkDocExist(path, String userId) async {
+    bool exists = false;
+    try {
+      await Firestore.instance.document("$path/$userId").get().then((doc) {
+        if (doc.exists)
+          exists = true;
+        else
+          exists = false;
+      });
+      return exists;
+    } catch (e) {
+      return false;
+    }
   }
 }

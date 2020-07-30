@@ -1,14 +1,15 @@
-import 'package:gym_bar_sales/core/enums/viewstate.dart';
+import 'package:gym_bar_sales/core/models/product.dart';
+import 'package:gym_bar_sales/core/view_models/base_model.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
 import 'package:gym_bar_sales/core/services/api.dart';
-import 'package:gym_bar_sales/core/view_models/base_model.dart';
 
-import '../../locator.dart';
+import '../locator.dart';
 
 class CategoryModel extends BaseModel {
   Api _api = locator<Api>();
-
-  List<Category> categories;
+  List<Product> products;
+  List<Category>  categories;
 
   Future addCategory(Category category) async {
     setState(ViewState.Busy);
@@ -24,5 +25,29 @@ class CategoryModel extends BaseModel {
         .toList();
     setState(ViewState.Idle);
     return categories;
+  }
+
+  Future fetchCategories() async {
+    setState(ViewState.Busy);
+    var result = await _api.getDataCollection("categories");
+    categories = result.documents
+        .map((doc) => Category.fromMap(doc.data, doc.documentID))
+        .toList();
+    setState(ViewState.Idle);
+
+  }
+  Future fetchCategoriesAndProducts({branchName}) async {
+    setState(ViewState.Busy);
+    var result = await _api.getDataCollection("categories");
+    categories = result.documents
+        .map((doc) => Category.fromMap(doc.data, doc.documentID))
+        .toList();
+
+    var result2 = await _api.getDataCollection(
+        "products/branches/$branchName/");
+    products = result2.documents
+        .map((doc) => Product.fromMap(doc.data, doc.documentID))
+        .toList();
+    setState(ViewState.Idle);
   }
 }

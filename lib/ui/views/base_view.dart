@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gym_bar_sales/locator.dart';
+import 'package:gym_bar_sales/core/locator.dart';
 import 'package:provider/provider.dart';
 
 class BaseView<T extends ChangeNotifier> extends StatefulWidget {
@@ -20,6 +20,7 @@ class _BaseViewState<T extends ChangeNotifier> extends State<BaseView<T>> {
     if (widget.onModelReady != null) {
       widget.onModelReady(model);
     }
+
     super.initState();
   }
 
