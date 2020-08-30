@@ -3,8 +3,9 @@ import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
+import 'package:gym_bar_sales/ui/views/Add/sliding_app_panel.dart';
 import 'package:gym_bar_sales/ui/views/base_view.dart';
-import 'package:gym_bar_sales/ui/widgets/grid_item.dart';
+import 'package:gym_bar_sales/ui/widgets/home_item.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class AddBill extends StatefulWidget {
@@ -47,7 +48,7 @@ class _AddBillState extends State<AddBill> {
       filteredProduct = products;
     }
     choices.add(Container(
-        padding: const EdgeInsets.all(2.0),
+        padding: const EdgeInsets.only(left: 10.0),
         child: ChoiceChip(
           label: Text("All"),
           selected: selectedCategory == "All",
@@ -60,7 +61,7 @@ class _AddBillState extends State<AddBill> {
         )));
     for (int i = 0; i < category.length; i++) {
       choices.add(Container(
-        padding: const EdgeInsets.all(2.0),
+        padding: const EdgeInsets.only(left: 50.0),
         child: ChoiceChip(
           label: Text(category[i].name),
           selected: selectedCategory == category[i].name,
@@ -91,8 +92,8 @@ class _AddBillState extends State<AddBill> {
                   backdropOpacity: 0.3,
                   maxHeight: 630,
                   borderRadius: radius,
-                  panel: Center(
-                    child: Text("This is the sliding Widget"),
+                  panel: SlidingUpPanelWidget(
+                    billProducts: selectedList,
                   ),
                   collapsed: Container(
                     decoration: BoxDecoration(
@@ -128,36 +129,47 @@ class _AddBillState extends State<AddBill> {
                                 ),
                                 delegate: SliverChildBuilderDelegate(
                                   (BuildContext context, int index) {
-                                    return GridItem(
-                                      key: Key(
-                                          filteredProduct[index].id.toString()),
-                                      topSpace: SizedBox(height: 50),
-                                      betweenSpace: SizedBox(height: 20),
-                                      title: filteredProduct[index].name,
-                                      statistics:
-                                          "${filteredProduct[index].netTotalQuantity}"
-                                          "${filteredProduct[index].unit} ",
-                                      assetImage: "",
-                                      backGround: Colors.black,
-                                      isSelected: (bool value) {
-                                        setState(() {
-                                          if (value) {
-                                            print(
-                                                "valuee true : ${filteredProduct[index].name}");
+                                    return item(
+                                        onPressIcon: () {
+                                          if (filteredProduct[index]
+                                                  .selectionNo >
+                                              0) {
+                                            setState(() {
+                                              filteredProduct[index]
+                                                      .selectionNo =
+                                                  filteredProduct[index]
+                                                          .selectionNo -
+                                                      1;
+                                            });
+                                          }
+                                        },
+                                        selectionNo:
+                                            filteredProduct[index].selectionNo,
+                                        topSpace: SizedBox(height: 50),
+                                        betweenSpace: SizedBox(height: 20),
+                                        title: filteredProduct[index].name,
+                                        statistics:
+                                            "${filteredProduct[index].netTotalQuantity}"
+                                            "${filteredProduct[index].unit} ",
+                                        assetImage: "",
+                                        backGround: Colors.black,
+                                        onPress: () {
+                                          setState(() {
+                                            filteredProduct[index].selectionNo =
+                                                filteredProduct[index]
+                                                        .selectionNo +
+                                                    1;
+                                          });
+                                          if (!selectedList.contains(
+                                              filteredProduct[index])) {
                                             selectedList
                                                 .add(filteredProduct[index]);
-                                          } else {
-                                            print(
-                                                "valuee false : ${filteredProduct[index]}");
-                                            selectedList.remove(
-                                                filteredProduct[index]
-                                                    .category);
                                           }
+                                          print(
+                                              "i will print new productNo. in the next line!");
+                                          print(filteredProduct[index]
+                                              .selectionNo);
                                         });
-                                        print(
-                                            "dataaaaaaaaaaaa $index : $value");
-                                      },
-                                    );
                                   },
                                   childCount: filteredProduct.length,
                                 ),

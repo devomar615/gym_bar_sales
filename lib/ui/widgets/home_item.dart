@@ -8,8 +8,10 @@ Widget item({
   String networkImage,
   backGround = Colors.black,
   Function onPress,
+  Function onPressIcon,
   topSpace,
   betweenSpace,
+  selectionNo,
 }) {
   return GestureDetector(
     onTap: onPress,
@@ -42,9 +44,31 @@ Widget item({
                   statistics: statistics,
                   topSpace: topSpace,
                   betweenSpace: betweenSpace),
+          selectionNo > 0
+              ? Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: onPressIcon,
+                          icon: Icon(
+                            Icons.remove_circle,
+                            color: Colors.red,
+                          ),
+                        ),
+                        Container(
+                          color: Colors.blue,
+                          child: Text(selectionNo.toString()),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Container()
         ],
       ),
-
     ),
   );
 }

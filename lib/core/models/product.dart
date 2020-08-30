@@ -15,6 +15,7 @@ class Product {
       supplierName,
       netTotalQuantity,
       photo;
+  int selectionNo = 0;
 
   Product({
     this.id,
@@ -33,7 +34,11 @@ class Product {
     this.netTotalQuantity,
     this.quantityLimit,
     this.photo,
+    this.selectionNo = 0,
   });
+
+
+
   Product.initial()
       : id = '0',
         name = '';
