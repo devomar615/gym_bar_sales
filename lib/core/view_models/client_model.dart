@@ -4,7 +4,6 @@ import 'package:gym_bar_sales/core/view_models/base_model.dart';
 import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/services/api.dart';
 
-
 class ClientModel extends BaseModel {
   Api _api = locator<Api>();
 
@@ -19,9 +18,8 @@ class ClientModel extends BaseModel {
   Future fetchClients(branchName) async {
     setState(ViewState.Busy);
     var result = await _api.getDataCollection("branches/$branchName/clients");
-    client = result.documents
-        .map((doc) => Client.fromMap(doc.data, doc.documentID))
-        .toList();
+    client =
+        result.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
   }
 
@@ -48,9 +46,8 @@ class ClientModel extends BaseModel {
       field4: field4,
       equalTo4: equalTo4,
     );
-    client = result.documents
-        .map((doc) => Client.fromMap(doc.data, doc.documentID))
-        .toList();
+    client =
+        result.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
   }
 }

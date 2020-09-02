@@ -9,38 +9,40 @@ import 'api.dart';
 
 class AuthenticationService {
   Api _api = locator<Api>();
-  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  StreamController<User> userController = StreamController<User>();
+  StreamController<UserProfile> userController =
+      StreamController<UserProfile>();
 
   Future<bool> login(String email, String password) async {
-    final FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
+    final UserCredential userCredential =
+        (await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
-    ))
-        .user;
-    print("agagagaggagagaagagaga user ID is:  ${user.uid}");
-    var fetchedUser = await _api.getUserProfile(user.uid);
-    if (user != null) {
+    ));
+
+    print("agagagaggagagaagagaga user ID is:  ${userCredential.user.uid}");
+    var fetchedUser = await _api.getUserProfile(userCredential.user.uid);
+    if (userCredential != null) {
       userController.add(fetchedUser);
     }
-    return user != null;
+    return userCredential != null;
   }
 
   Future<String> signUp(String email, String password) async {
-    final FirebaseUser user =
-        (await _firebaseAuth.createUserWithEmailAndPassword(
+    final UserCredential userCredential =
+        (await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
-    ))
-            .user;
-    return user.uid;
+    ));
+    return userCredential.user.uid;
   }
 
-  static void addUserDB(User user) async {
+  static void addUserDB(UserProfile user) async {
     Api.checkDocExist("users", user.id).then((value) {
       if (!value) {
         print("user ${user.name} ${user.email} ${user.photo}added");
-        Firestore.instance.document("users/${user.id}").setData(user.toJson());
+        FirebaseFirestore.instance
+            .collection("users/${user.id}")
+            .add(user.toJson());
       } else {
         print("user ${user.name} ${user.email} exists");
       }
@@ -50,9 +52,9 @@ class AuthenticationService {
   static void addEmployeeDB(Employee employee, branchName) async {
     Api.checkDocExist("employees", employee.id).then((value) {
       if (!value) {
-        Firestore.instance
-            .document("employees/branches/$branchName/${employee.id}")
-            .setData(employee.toJson());
+        FirebaseFirestore.instance
+            .collection("employees/branches/$branchName/${employee.id}")
+            .add(employee.toJson());
       } else {
         print("user ${employee.name} ${employee.email} exists");
       }
@@ -62,11 +64,12 @@ class AuthenticationService {
   static Future<bool> checkEmployeeExist(String employeeId) async {
     bool exists = false;
     try {
-      await Firestore.instance
-          .document("employee/$employeeId")
+      await FirebaseFirestore.instance
+          .collection("employee")
+          .doc(employeeId)
           .get()
-          .then((doc) {
-        if (doc.exists)
+          .then((DocumentSnapshot documentSnapshot) {
+        if (documentSnapshot.exists)
           exists = true;
         else
           exists = false;

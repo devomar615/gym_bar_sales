@@ -14,8 +14,8 @@ class EmployeeModel extends BaseModel {
     setState(ViewState.Busy);
     var result =
         await _api.getDataCollection("employees/branches/$branchName/");
-    employees = result.documents
-        .map((doc) => Employee.fromMap(doc.data, doc.documentID))
+    employees = result.docs
+        .map((doc) => Employee.fromMap(doc.data(), doc.id))
         .toList();
     setState(ViewState.Idle);
   }
@@ -43,8 +43,8 @@ class EmployeeModel extends BaseModel {
       field4: field4,
       equalTo4: equalTo4,
     );
-    employees = result.documents
-        .map((doc) => Employee.fromMap(doc.data, doc.documentID))
+    employees = result.docs
+        .map((doc) => Employee.fromMap(doc.data(), doc.id))
         .toList();
     setState(ViewState.Idle);
   }

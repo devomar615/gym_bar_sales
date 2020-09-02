@@ -2,23 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gym_bar_sales/core/models/user.dart';
 
 class Api {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   var ref;
 
-  Future<User> getUserProfile(userId) async {
-    User user;
+  Future<UserProfile> getUserProfile(userId) async {
+    UserProfile user;
     if (userId != null) {
-      user = await Firestore.instance
-          .collection('users')
-          .document(userId)
-          .get()
-          .then((documentSnapshot) => User.fromDocument(documentSnapshot));
+      user = await _db.collection('users').doc(userId).get().then(
+          (documentSnapshot) => UserProfile.fromDocument(documentSnapshot));
     }
     return user;
   }
 
   Future<QuerySnapshot> getDataCollection(String path) {
-    ref = _db.collection(path).getDocuments();
+    ref = _db.collection(path).get();
     return ref;
   }
 
@@ -83,7 +80,7 @@ class Api {
   }
 
   Future<DocumentSnapshot> getDocumentById(String path, String id) {
-    ref = _db.collection(path).document(id).get();
+    ref = _db.collection(path).doc(id).get();
     return ref;
   }
 
@@ -114,7 +111,7 @@ class Api {
   static Future<bool> checkDocExist(path, String userId) async {
     bool exists = false;
     try {
-      await Firestore.instance.document("$path/$userId").get().then((doc) {
+      await FirebaseFirestore.instance.doc("$path/$userId").get().then((doc) {
         if (doc.exists)
           exists = true;
         else

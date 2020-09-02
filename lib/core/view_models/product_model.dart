@@ -13,9 +13,8 @@ class ProductModel extends BaseModel {
     setState(ViewState.Busy);
     var result = await _api.getDataCollection(
         "products/branches/$branchName/categories/$categoryName");
-    products = result.documents
-        .map((doc) => Product.fromMap(doc.data, doc.documentID))
-        .toList();
+    products =
+        result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
     return products;
   }
@@ -39,7 +38,7 @@ class ProductModel extends BaseModel {
   Future<Product> getProductById(String id, String path) async {
     setState(ViewState.Busy);
     var doc = await _api.getDocumentById(id, path);
-    Product product = Product.fromMap(doc.data, doc.documentID);
+    Product product = Product.fromMap(doc.data(), doc.id);
     setState(ViewState.Idle);
     return product;
   }
@@ -56,6 +55,4 @@ class ProductModel extends BaseModel {
 
     return;
   }
-
-
 }

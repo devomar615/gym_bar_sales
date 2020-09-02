@@ -9,6 +9,19 @@ import 'package:gym_bar_sales/ui/views/base_view.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
 import 'package:gym_bar_sales/ui/widgets/home_item.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
 
 class AddBill extends StatefulWidget {
   @override
@@ -500,3 +513,4 @@ class _AddBillState extends State<AddBill> {
             ));
   }
 }
+//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;

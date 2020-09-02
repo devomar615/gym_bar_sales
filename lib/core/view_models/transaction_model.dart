@@ -22,8 +22,8 @@ class TransactionModel extends BaseModel {
   Future<List<Transaction>> fetchTransaction({branchName}) async {
     var result =
         await _api.getDataCollection("transactions/branches/$branchName/");
-    transaction = result.documents
-        .map((doc) => Transaction.fromMap(doc.data, doc.documentID))
+    transaction = result.docs
+        .map((doc) => Transaction.fromMap(doc.data(), doc.id))
         .toList();
     return transaction;
   }
@@ -51,8 +51,8 @@ class TransactionModel extends BaseModel {
       field4: field4,
       equalTo4: equalTo4,
     );
-    transaction = result.documents
-        .map((doc) => Transaction.fromMap(doc.data, doc.documentID))
+    transaction = result.docs
+        .map((doc) => Transaction.fromMap(doc.data(), doc.id))
         .toList();
     setState(ViewState.Idle);
   }
@@ -60,7 +60,7 @@ class TransactionModel extends BaseModel {
   Future fetchTotal({docId}) async {
     setState(ViewState.Busy);
     await _api.getDocumentById('total', docId).then((ds) {
-      total = Total.fromMap(ds.data, ds.documentID);
+      total = Total.fromMap(ds.data(), ds.id);
     });
     setState(ViewState.Idle);
   }
@@ -69,14 +69,14 @@ class TransactionModel extends BaseModel {
       {docId, categoryName, branchName, productId}) async {
     setState(ViewState.Busy);
     await _api.getDocumentById('total', docId).then((ds) {
-      total = Total.fromMap(ds.data, ds.documentID);
+      total = Total.fromMap(ds.data(), ds.id);
     });
 
     await _api
         .getDocumentById(
             "products/branches/$branchName/categories/$categoryName", productId)
         .then((ds) {
-      product = Product.fromMap(ds.data, ds.documentID);
+      product = Product.fromMap(ds.data(), ds.id);
     });
 
     setState(ViewState.Idle);

@@ -9,7 +9,7 @@ import '../locator.dart';
 class CategoryModel extends BaseModel {
   Api _api = locator<Api>();
   List<Product> products;
-  List<Category>  categories;
+  List<Category> categories;
 
   Future addCategory(Category category) async {
     setState(ViewState.Busy);
@@ -20,9 +20,8 @@ class CategoryModel extends BaseModel {
   Future<List<Category>> fetchAttendance(String path) async {
     setState(ViewState.Busy);
     var result = await _api.getDataCollection(path);
-    categories = result.documents
-        .map((doc) => Category.fromMap(doc.data, doc.documentID))
-        .toList();
+    categories =
+        result.docs.map((doc) => Category.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
     return categories;
   }
@@ -30,24 +29,21 @@ class CategoryModel extends BaseModel {
   Future fetchCategories() async {
     setState(ViewState.Busy);
     var result = await _api.getDataCollection("categories");
-    categories = result.documents
-        .map((doc) => Category.fromMap(doc.data, doc.documentID))
-        .toList();
+    categories =
+        result.docs.map((doc) => Category.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
-
   }
+
   Future fetchCategoriesAndProducts({branchName}) async {
     setState(ViewState.Busy);
     var result = await _api.getDataCollection("categories");
-    categories = result.documents
-        .map((doc) => Category.fromMap(doc.data, doc.documentID))
-        .toList();
+    categories =
+        result.docs.map((doc) => Category.fromMap(doc.data(), doc.id)).toList();
 
-    var result2 = await _api.getDataCollection(
-        "products/branches/$branchName/");
-    products = result2.documents
-        .map((doc) => Product.fromMap(doc.data, doc.documentID))
-        .toList();
+    var result2 =
+        await _api.getDataCollection("products/branches/$branchName/");
+    products =
+        result2.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
   }
 }

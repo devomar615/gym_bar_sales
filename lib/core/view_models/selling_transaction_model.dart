@@ -19,8 +19,8 @@ class SellingTransactionModel extends BaseModel {
   Future<List<SellingTransaction>> fetchAttendance(String path) async {
     setState(ViewState.Busy);
     var result = await _api.getDataCollection(path);
-    transactions = result.documents
-        .map((doc) => SellingTransaction.fromMap(doc.data, doc.documentID))
+    transactions = result.docs
+        .map((doc) => SellingTransaction.fromMap(doc.data(), doc.id))
         .toList();
     setState(ViewState.Idle);
     return transactions;
