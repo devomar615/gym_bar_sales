@@ -25,6 +25,7 @@ formTextFieldTemplate({
   ValueChanged<String> onChanged,
   secure = false,
   double height = 51,
+  double width,
   double left = 10,
   double right = 10,
   double bottom = 0,
@@ -36,6 +37,7 @@ formTextFieldTemplate({
       textDirection: TextDirection.rtl,
       child: Container(
         height: height,
+        width: width,
         child: TextFormField(
           onChanged: onChanged,
           controller: controller,
@@ -74,7 +76,7 @@ Widget formButtonTemplate({
     minWidth: 300.0,
     height: 40,
     child: RaisedButton(
-      color: color,
+      color: Colors.blueAccent,
       child: Text(
         text,
         style: formButtonStyle,

@@ -16,7 +16,7 @@ const signLogHintStyle = TextStyle(
     fontFamily: 'Tajawal');
 
 const formTitleStyle =
-    TextStyle(fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'Tajawal');
+    TextStyle(fontWeight: FontWeight.bold, fontSize: 25, fontFamily: 'Tajawal');
 const formTitleStyleSmall =
     TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Tajawal');
 const formTitleStyleWhite = TextStyle(
@@ -24,16 +24,18 @@ const formTitleStyleWhite = TextStyle(
     fontWeight: FontWeight.bold,
     fontSize: 20,
     fontFamily: 'Tajawal');
-const formTitleStyleLight = TextStyle(fontSize: 20, fontFamily: 'Tajawal');
+const formTitleStyleLight = TextStyle(fontSize: 25, fontFamily: 'Tajawal');
+const chipLabelStyleLight =
+    TextStyle(fontSize: 25, fontFamily: 'Tajawal', color: Colors.black);
 
 const tableTitleStyle = TextStyle(
     fontWeight: FontWeight.bold,
-    fontSize: 20,
+    fontSize: 30,
     fontFamily: 'Tajawal',
     color: Colors.black);
-const tableTitleStyleSmall = TextStyle(
-    fontWeight: FontWeight.bold,
-    fontSize: 15,
+const tableContentStyle = TextStyle(
+//    fontWeight: FontWeight.bold,
+    fontSize: 25,
     fontFamily: 'Tajawal',
     color: Colors.black);
 
