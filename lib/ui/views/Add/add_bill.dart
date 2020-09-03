@@ -9,19 +9,6 @@ import 'package:gym_bar_sales/ui/views/base_view.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
 import 'package:gym_bar_sales/ui/widgets/home_item.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
 
 class AddBill extends StatefulWidget {
   @override
@@ -237,15 +224,14 @@ class _AddBillState extends State<AddBill> {
                             iconSize: 50,
                             icon: Icon(Icons.remove_circle),
                             onPressed: () {
-                              if (selectedList[index].selectionNo > 0) {
-                                setState(() {
-                                  selectedList[index].selectionNo =
-                                      selectedList[index].selectionNo - 1;
-                                });
-                              }
-                              if (selectedList[index].selectionNo == 0) {
-                                selectedList.removeAt(index);
-                              }
+                              final product = filteredProduct.firstWhere(
+                                  (product) =>
+                                      product.name == selectedList[index].name);
+                              setState(() {
+                                product.selectionNo -= 1;
+                                selectedList.removeWhere((selectedList) =>
+                                    selectedList.selectionNo == 0);
+                              });
                             },
                           ),
                         ),
@@ -270,9 +256,12 @@ class _AddBillState extends State<AddBill> {
                               iconSize: 50,
                               icon: Icon(Icons.add_circle),
                               onPressed: () {
+                                final product = filteredProduct.firstWhere(
+                                    (product) =>
+                                        product.name ==
+                                        selectedList[index].name);
                                 setState(() {
-                                  selectedList[index].selectionNo =
-                                      selectedList[index].selectionNo + 1;
+                                  product.selectionNo += 1;
                                 });
                               }),
                         ),
@@ -457,15 +446,13 @@ class _AddBillState extends State<AddBill> {
                                               0) {
                                             setState(() {
                                               filteredProduct[index]
-                                                      .selectionNo =
-                                                  filteredProduct[index]
-                                                          .selectionNo -
-                                                      1;
+                                                  .selectionNo -= 1;
+                                              selectedList.removeWhere(
+                                                  (selectedList) =>
+                                                      selectedList
+                                                          .selectionNo ==
+                                                      0);
                                             });
-                                          }
-                                          if (selectedList[index].selectionNo ==
-                                              0) {
-                                            selectedList.removeAt(index);
                                           }
                                         },
                                         selectionNo:
@@ -484,20 +471,14 @@ class _AddBillState extends State<AddBill> {
                                         backGround: Colors.black,
                                         onPress: () {
                                           setState(() {
-                                            filteredProduct[index].selectionNo =
-                                                filteredProduct[index]
-                                                        .selectionNo +
-                                                    1;
+                                            filteredProduct[index]
+                                                .selectionNo += 1;
                                           });
                                           if (!selectedList.contains(
                                               filteredProduct[index])) {
                                             selectedList
                                                 .add(filteredProduct[index]);
                                           }
-                                          print(
-                                              "i will print new productNo. in the next line!");
-                                          print(filteredProduct[index]
-                                              .selectionNo);
                                         },
                                       ),
                                     );
@@ -513,4 +494,3 @@ class _AddBillState extends State<AddBill> {
             ));
   }
 }
-//todo: make one list only for bill table by filtering ther filterd product where selectionNo > 0;
