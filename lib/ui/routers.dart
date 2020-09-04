@@ -25,8 +25,7 @@ class Routers {
 //        return MaterialPageRoute(builder: (_) => Products(args: args));
       case '/TransactionView':
         Map productDetails = settings.arguments;
-        return MaterialPageRoute(
-            builder: (_) => TransactionView(productDetails: productDetails));
+        return MaterialPageRoute(builder: (_) => TransactionView(productDetails: productDetails));
       default:
         return MaterialPageRoute(
             builder: (_) => Scaffold(

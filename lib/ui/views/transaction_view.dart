@@ -3,8 +3,7 @@ import 'package:gym_bar_sales/core/models/client.dart';
 import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/total.dart';
 import 'package:gym_bar_sales/core/models/transaction.dart';
-import 'package:gym_bar_sales/core/view_models/client_model.dart';
-import 'package:gym_bar_sales/core/view_models/employee_model.dart';
+import 'package:gym_bar_sales/core/view_models/employee_client_model.dart';
 import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/shared/ui_helpers.dart';
@@ -17,8 +16,7 @@ class TransactionView extends StatefulWidget {
   TransactionView({this.productDetails});
 
   @override
-  _TransactionViewState createState() =>
-      _TransactionViewState(productDetails: productDetails);
+  _TransactionViewState createState() => _TransactionViewState(productDetails: productDetails);
 }
 
 class _TransactionViewState extends State<TransactionView> {
@@ -52,8 +50,7 @@ class _TransactionViewState extends State<TransactionView> {
           print(_selectedClient);
         },
         items: client.map((client) {
-          return DropdownMenuItem<String>(
-              child: Text("${client.name}"), value: "${client.name}");
+          return DropdownMenuItem<String>(child: Text("${client.name}"), value: "${client.name}");
         }).toList(),
       )),
     );
@@ -108,19 +105,16 @@ class _TransactionViewState extends State<TransactionView> {
   }
 
   updateProductWholesaleQuantity() {
-    print("what is in itttttt:quantityOfWholesaleUnit " +
-        productDetails["quantityOfWholesaleUnit"]);
-    double currentWholesaleAmount =
-        double.parse(productDetails["quantityOfWholesaleUnit"]);
-    double newWholesaleQuantity =
-        double.parse(updateProductQuantity()) / currentWholesaleAmount;
+    print(
+        "what is in itttttt:quantityOfWholesaleUnit " + productDetails["quantityOfWholesaleUnit"]);
+    double currentWholesaleAmount = double.parse(productDetails["quantityOfWholesaleUnit"]);
+    double newWholesaleQuantity = double.parse(updateProductQuantity()) / currentWholesaleAmount;
     return newWholesaleQuantity.toString();
   }
 
   actions() {
     return BaseView<TransactionModel>(
-        onModelReady: (model) =>
-            model.fetchTotal(docId: productDetails["branch"]),
+        onModelReady: (model) => model.fetchTotal(docId: productDetails["branch"]),
         builder: (context, model, child) => Row(
               children: <Widget>[
                 formButtonTemplate(
@@ -149,13 +143,11 @@ class _TransactionViewState extends State<TransactionView> {
                           productId: productDetails["id"],
                           data: {
                             "netTotalQuantity": updateProductQuantity(),
-                            "wholesaleQuantity":
-                                updateProductWholesaleQuantity()
+                            "wholesaleQuantity": updateProductWholesaleQuantity()
                           });
                     },
                     text: "الدفع الان"),
-                formButtonTemplate(
-                    context: context, onTab: () {}, text: "الدفع مسبقا"),
+                formButtonTemplate(context: context, onTab: () {}, text: "الدفع مسبقا"),
               ],
             ));
   }
@@ -190,16 +182,12 @@ class _TransactionViewState extends State<TransactionView> {
       ),
       body: form(
           context: context,
-          dropdownEmployeesWidget: BaseView<EmployeeModel>(
-              onModelReady: (model) =>
-                  model.fetchEmployees(branchName: productDetails["branch"]),
-              builder: (context, model, child) =>
-                  dropdownEmployees(model.employees)),
-          dropdownClientsWidget: BaseView<ClientModel>(
-              onModelReady: (model) =>
-                  model.fetchClients(productDetails["branch"]),
-              builder: (context, model, child) =>
-                  dropdownClients(model.client))),
+          dropdownEmployeesWidget: BaseView<EmployeeClientModel>(
+              onModelReady: (model) => model.fetchEmployees(branchName: productDetails["branch"]),
+              builder: (context, model, child) => dropdownEmployees(model.employees)),
+          dropdownClientsWidget: BaseView<EmployeeClientModel>(
+              onModelReady: (model) => model.fetchClients(productDetails["branch"]),
+              builder: (context, model, child) => dropdownClients(model.clients))),
     );
   }
 }

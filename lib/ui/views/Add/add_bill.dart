@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
+import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
+import 'package:gym_bar_sales/core/view_models/employee_client_model.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
-import 'package:gym_bar_sales/ui/shared/ui_helpers.dart';
 import 'package:gym_bar_sales/ui/views/base_view.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
 import 'package:gym_bar_sales/ui/widgets/home_item.dart';
+import 'package:search_widget/search_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class AddBill extends StatefulWidget {
@@ -16,10 +18,14 @@ class AddBill extends StatefulWidget {
 }
 
 class _AddBillState extends State<AddBill> {
+  String selectedBuyerName = "";
+
   final TextEditingController name = TextEditingController();
   String selectedCategory = "All";
+  String selectedBuyerType = "Employee";
   List<Product> filteredProduct;
   List<Product> selectedList = List<Product>();
+
   BorderRadiusGeometry radius = BorderRadius.only(
     topLeft: Radius.circular(28.0),
     topRight: Radius.circular(28.0),
@@ -38,12 +44,92 @@ class _AddBillState extends State<AddBill> {
           onPressed: () {},
         ),
         RaisedButton(
-          child: Text("menu"),
+          child: Text(selectedBuyerName),
           onPressed: () {},
         )
       ],
     );
   }
+
+  searchWidget(List<Employee> employees, context) {
+    if (selectedBuyerType == "Employee") {
+      return Container(
+        width: 400,
+        child: SearchWidget<Employee>(
+          dataList: employees,
+          hideSearchBoxWhenItemSelected: false,
+          listContainerHeight: MediaQuery.of(context).size.height / 4,
+          queryBuilder: (String query, List<Employee> employee) {
+            return employee
+                .where((Employee employee) =>
+                    employee.name.toLowerCase().contains(query.toLowerCase()))
+                .toList();
+          },
+          popupListItemBuilder: (Employee employee) {
+            return Column(
+              children: <Widget>[
+                Container(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      employee.name,
+                      style: const TextStyle(fontSize: 16),
+                    )),
+              ],
+            );
+          },
+          selectedItemBuilder:
+              // ignore: missing_return
+              (Employee selectedItem, VoidCallback deleteSelectedItem) {},
+          onItemSelected: (Employee employee) {
+            setState(() {
+              selectedBuyerName = employee.name;
+            });
+            print(selectedBuyerName);
+          },
+          noItemsFoundWidget: Center(child: Text("No item Found")),
+          textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
+            return searchTextField(controller, focusNode, context);
+          },
+        ),
+      );
+    } else
+      return Container();
+  }
+
+//  searchWidget2(List<Employee> employees) {
+//    List<String> employeesNames = [];
+////    List<String> clientsNames;
+//
+//    for (int i = 0; i < employees.length; i++) {
+//      employeesNames.add(employees[i].name);
+//    }
+////    for (int i = 0; i < clients.length; i++) {
+////      clientsNames.add(clients[i].name);
+////    }
+////    print("first employee name is: ${employeesNames[1]}");
+////    print("first client name is: ${clientsNames[1]}");
+//    return Container(
+//      width: 400,
+//      child: AutoSearchInput(
+//          data: employeesNames,
+////        selectedBuyerName == "Employee" ?? employeesNames
+////            ? selectedBuyerName == "Client"
+////            : clientsNames,
+//          maxElementsToDisplay: 5,
+//          onItemTap: (int index) {
+////          if (selectedBuyerType == "Client") {
+////            setState(() {
+////              selectedBuyerName = clientsNames[index];
+////            });
+////          }
+//            if (selectedBuyerType == "Employee") {
+//              setState(() {
+//                selectedBuyerName = employeesNames[index];
+//              });
+//            }
+//          }),
+//    );
+//  }
 
   _buildCategoryList({List<Category> category, List<Product> products}) {
     List<Widget> choices = List();
@@ -81,9 +167,8 @@ class _AddBillState extends State<AddBill> {
           onSelected: (selected) {
             setState(() {
               selectedCategory = category[i].name;
-              filteredProduct = products
-                  .where((product) => product.category == selectedCategory)
-                  .toList();
+              filteredProduct =
+                  products.where((product) => product.category == selectedCategory).toList();
             });
           },
         ),
@@ -92,7 +177,59 @@ class _AddBillState extends State<AddBill> {
     return choices;
   }
 
-  billHeader() {
+  List<Widget> buyerTypeChoices() {
+    return [
+      ChoiceChip(
+        labelStyle: chipLabelStyleLight,
+        selectedColor: Colors.blue,
+        backgroundColor: Colors.white,
+        shape: StadiumBorder(
+          side: BorderSide(color: Colors.blue),
+        ),
+        label: Text("عميل"),
+        selected: selectedBuyerType == "Client",
+        onSelected: (selected) {
+          setState(() {
+            selectedBuyerType = "Client";
+          });
+        },
+      ),
+      SizedBox(width: 20),
+      ChoiceChip(
+        labelStyle: chipLabelStyleLight,
+        backgroundColor: Colors.white,
+        selectedColor: Colors.blue,
+        shape: StadiumBorder(
+          side: BorderSide(color: Colors.blue),
+        ),
+        label: Text("عامل"),
+        selected: selectedBuyerType == "House",
+        onSelected: (selected) {
+          setState(() {
+            selectedBuyerType = "House";
+          });
+        },
+      ),
+      SizedBox(width: 20),
+      ChoiceChip(
+        labelStyle: chipLabelStyleLight,
+        backgroundColor: Colors.white,
+        selectedColor: Colors.blue,
+        shape: StadiumBorder(
+          side: BorderSide(color: Colors.blue),
+        ),
+        label: Text("موظف"),
+        selected: selectedBuyerType == "Employee",
+        onSelected: (selected) {
+          setState(() {
+            selectedBuyerType = "Employee";
+          });
+        },
+      )
+    ];
+  }
+
+  billHeader({List<Employee> employees, context}) {
     return Column(
       children: [
         SizedBox(
@@ -109,14 +246,7 @@ class _AddBillState extends State<AddBill> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Flexible(
-              child: formTextFieldTemplate(
-                width: 400,
-                controller: name,
-                hint: "hint here",
-                onChanged: (data) {},
-              ),
-            ),
+            Flexible(child: searchWidget(employees, context)),
             SizedBox(
               width: 15,
             ),
@@ -124,28 +254,8 @@ class _AddBillState extends State<AddBill> {
           ],
         ),
         SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            RaisedButton(
-              child: Text("موظف"),
-              color: Colors.black12,
-              onPressed: () {},
-            ),
-            UIHelper.horizontalSpaceLarge(),
-            RaisedButton(
-              child: Text("عامل"),
-              color: Colors.blue,
-              onPressed: () {},
-            ),
-            UIHelper.horizontalSpaceLarge(),
-            RaisedButton(
-              child: Text("عميل"),
-              color: Colors.black12,
-              onPressed: () {},
-            ),
-          ],
+        Wrap(
+          children: buyerTypeChoices(),
         ),
         SizedBox(height: 10),
       ],
@@ -204,8 +314,7 @@ class _AddBillState extends State<AddBill> {
                   children: <Widget>[
                     SizedBox(width: 200),
                     Container(
-                      child: Text(selectedList[index].customerPrice,
-                          style: tableContentStyle),
+                      child: Text(selectedList[index].customerPrice, style: tableContentStyle),
                       constraints: BoxConstraints(
                         maxWidth: 100.0,
                         minWidth: 100,
@@ -225,12 +334,11 @@ class _AddBillState extends State<AddBill> {
                             icon: Icon(Icons.remove_circle),
                             onPressed: () {
                               final product = filteredProduct.firstWhere(
-                                  (product) =>
-                                      product.name == selectedList[index].name);
+                                  (product) => product.name == selectedList[index].name);
                               setState(() {
                                 product.selectionNo -= 1;
-                                selectedList.removeWhere((selectedList) =>
-                                    selectedList.selectionNo == 0);
+                                selectedList
+                                    .removeWhere((selectedList) => selectedList.selectionNo == 0);
                               });
                             },
                           ),
@@ -241,8 +349,7 @@ class _AddBillState extends State<AddBill> {
                             maxWidth: 100.0,
                             minWidth: 50,
                           ),
-                          child: Text(
-                              selectedList[index].selectionNo.toString(),
+                          child: Text(selectedList[index].selectionNo.toString(),
                               style: tableContentStyle),
                         ),
                         SizedBox(width: 10),
@@ -257,9 +364,7 @@ class _AddBillState extends State<AddBill> {
                               icon: Icon(Icons.add_circle),
                               onPressed: () {
                                 final product = filteredProduct.firstWhere(
-                                    (product) =>
-                                        product.name ==
-                                        selectedList[index].name);
+                                    (product) => product.name == selectedList[index].name);
                                 setState(() {
                                   product.selectionNo += 1;
                                 });
@@ -275,8 +380,7 @@ class _AddBillState extends State<AddBill> {
                           maxWidth: 100.0,
                           minWidth: 100,
                         ),
-                        child: Text(selectedList[index].name,
-                            style: tableContentStyle))
+                        child: Text(selectedList[index].name, style: tableContentStyle))
                   ],
                 ),
               ),
@@ -358,13 +462,9 @@ class _AddBillState extends State<AddBill> {
           height: 40,
           child: RaisedButton(
             color: Colors.blueAccent,
-            child: Text(
-              "إتمام العمليه",
-              style: formButtonStyle,
-            ),
+            child: Text("إتمام العمليه", style: formButtonStyle),
             onPressed: () {},
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         )),
         SizedBox(height: 20),
@@ -375,8 +475,7 @@ class _AddBillState extends State<AddBill> {
   @override
   Widget build(BuildContext context) {
     return BaseView<CategoryModel>(
-        onModelReady: (model) =>
-            model.fetchCategoriesAndProducts(branchName: branch),
+        onModelReady: (model) => model.fetchCategoriesAndProducts(branchName: branch),
         builder: (context, model, child) => SafeArea(
               child: Scaffold(
                 body: SlidingUpPanel(
@@ -385,23 +484,27 @@ class _AddBillState extends State<AddBill> {
                   backdropOpacity: 0.3,
                   maxHeight: 800,
                   borderRadius: radius,
-                  panel: Column(
-                    children: [
-                      billHeader(),
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            tableHead(),
-                            Expanded(child: tableBuilder()),
-                          ],
-                        ),
-                      ),
-                      billFooter(context),
-                    ],
+                  panel: BaseView<EmployeeClientModel>(
+                    onModelReady: (model) => model.fetchEmployees(branchName: branch),
+                    builder: (context, model, child) => model.state == ViewState.Busy
+                        ? Center(child: CircularProgressIndicator())
+                        : Column(
+                            children: [
+                              billHeader(employees: model.employees, context: context),
+                              Expanded(
+                                child: Column(
+                                  children: <Widget>[
+                                    tableHead(),
+                                    Expanded(child: tableBuilder()),
+                                  ],
+                                ),
+                              ),
+                              billFooter(context),
+                            ],
+                          ),
                   ),
                   collapsed: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.white, borderRadius: radius),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: radius),
                     child: Center(
                       child: Text("الفاتوره", style: headerStyle),
                     ),
@@ -412,58 +515,41 @@ class _AddBillState extends State<AddBill> {
                           child: CustomScrollView(
                             slivers: <Widget>[
                               SliverList(
-                                delegate: SliverChildListDelegate(
-                                  [
-                                    appBar(),
-                                  ],
-                                ),
-                              ),
+                                  delegate: SliverChildListDelegate(
+                                [appBar()],
+                              )),
                               SliverToBoxAdapter(
                                 child: Container(
                                   height: 50.0,
                                   child: ListView(
                                     scrollDirection: Axis.horizontal,
                                     children: _buildCategoryList(
-                                        category: model.categories,
-                                        products: model.products),
+                                        category: model.categories, products: model.products),
                                   ),
                                 ),
                               ),
                               SliverGrid(
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 4,
                                 ),
                                 delegate: SliverChildBuilderDelegate(
                                   (BuildContext context, int index) {
                                     return Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 20.0, top: 20.0, right: 20),
+                                      padding: EdgeInsets.only(left: 20.0, top: 20.0, right: 20),
                                       child: item(
                                         onPressIcon: () {
-                                          if (filteredProduct[index]
-                                                  .selectionNo >
-                                              0) {
+                                          if (filteredProduct[index].selectionNo > 0) {
                                             setState(() {
-                                              filteredProduct[index]
-                                                  .selectionNo -= 1;
+                                              filteredProduct[index].selectionNo -= 1;
                                               selectedList.removeWhere(
-                                                  (selectedList) =>
-                                                      selectedList
-                                                          .selectionNo ==
-                                                      0);
+                                                  (selectedList) => selectedList.selectionNo == 0);
                                             });
                                           }
                                         },
-                                        selectionNo:
-                                            filteredProduct[index].selectionNo,
-                                        statistics:
-                                            filteredProduct[index].selectionNo >
-                                                    0
-                                                ? filteredProduct[index]
-                                                    .selectionNo
-                                                    .toString()
-                                                : "",
+                                        selectionNo: filteredProduct[index].selectionNo,
+                                        statistics: filteredProduct[index].selectionNo > 0
+                                            ? filteredProduct[index].selectionNo.toString()
+                                            : "",
                                         topSpace: SizedBox(height: 50),
                                         betweenSpace: SizedBox(height: 20),
                                         title: filteredProduct[index].name,
@@ -471,13 +557,10 @@ class _AddBillState extends State<AddBill> {
                                         backGround: Colors.black,
                                         onPress: () {
                                           setState(() {
-                                            filteredProduct[index]
-                                                .selectionNo += 1;
+                                            filteredProduct[index].selectionNo += 1;
                                           });
-                                          if (!selectedList.contains(
-                                              filteredProduct[index])) {
-                                            selectedList
-                                                .add(filteredProduct[index]);
+                                          if (!selectedList.contains(filteredProduct[index])) {
+                                            selectedList.add(filteredProduct[index]);
                                           }
                                         },
                                       ),
