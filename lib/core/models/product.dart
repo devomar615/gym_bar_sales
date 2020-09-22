@@ -16,6 +16,7 @@ class Product {
       netTotalQuantity,
       photo;
   int selectionNo = 0;
+  int theTotalBillPerProduct = 0;
 
   Product({
     this.id,
@@ -35,6 +36,7 @@ class Product {
     this.quantityLimit,
     this.photo,
     this.selectionNo = 0,
+    this.theTotalBillPerProduct = 0,
   });
 
 

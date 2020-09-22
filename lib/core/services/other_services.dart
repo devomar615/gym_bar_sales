@@ -38,3 +38,7 @@ cashCalculations({cash, selectedType}) {
     return _finalCash = filterCash;
   }
 }
+
+calculateTheTotalBill({totalNo, wholesaleUnit}){
+
+}

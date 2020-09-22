@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
+import 'package:gym_bar_sales/core/models/client.dart';
 import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
@@ -19,17 +20,16 @@ class AddBill extends StatefulWidget {
 
 class _AddBillState extends State<AddBill> {
   String selectedBuyerName = "";
-
+  int totalBill = 0;
   final TextEditingController name = TextEditingController();
+  final TextEditingController payed = TextEditingController();
   String selectedCategory = "All";
-  String selectedBuyerType = "Employee";
+  String selectedBuyerType = "Client";
   List<Product> filteredProduct;
   List<Product> selectedList = List<Product>();
 
-  BorderRadiusGeometry radius = BorderRadius.only(
-    topLeft: Radius.circular(28.0),
-    topRight: Radius.circular(28.0),
-  );
+  BorderRadiusGeometry radius =
+      BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0));
   var branch = "بيفرلي";
 
   appBar() {
@@ -51,7 +51,7 @@ class _AddBillState extends State<AddBill> {
     );
   }
 
-  searchWidget(List<Employee> employees, context) {
+  searchWidget(List<Employee> employees, List<Client> clients, context) {
     if (selectedBuyerType == "Employee") {
       return Container(
         width: 400,
@@ -70,10 +70,7 @@ class _AddBillState extends State<AddBill> {
               children: <Widget>[
                 Container(
                     padding: const EdgeInsets.all(12),
-                    child: Text(
-                      employee.name,
-                      style: const TextStyle(fontSize: 16),
-                    )),
+                    child: Text(employee.name, style: const TextStyle(fontSize: 16))),
               ],
             );
           },
@@ -92,44 +89,46 @@ class _AddBillState extends State<AddBill> {
           },
         ),
       );
+    }
+    if (selectedBuyerType == "Client") {
+      return Container(
+        width: 400,
+        child: SearchWidget<Client>(
+          dataList: clients,
+          hideSearchBoxWhenItemSelected: false,
+          listContainerHeight: MediaQuery.of(context).size.height / 4,
+          queryBuilder: (String query, List<Client> client) {
+            return client
+                .where((Client client) => client.name.toLowerCase().contains(query.toLowerCase()))
+                .toList();
+          },
+          popupListItemBuilder: (Client client) {
+            return Column(
+              children: <Widget>[
+                Container(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(client.name, style: const TextStyle(fontSize: 16))),
+              ],
+            );
+          },
+          selectedItemBuilder:
+              // ignore: missing_return
+              (Client selectedItem, VoidCallback deleteSelectedItem) {},
+          onItemSelected: (Client client) {
+            setState(() {
+              selectedBuyerName = client.name;
+            });
+            print(selectedBuyerName);
+          },
+          noItemsFoundWidget: Center(child: Text("No item Found")),
+          textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
+            return searchTextField(controller, focusNode, context);
+          },
+        ),
+      );
     } else
       return Container();
   }
-
-//  searchWidget2(List<Employee> employees) {
-//    List<String> employeesNames = [];
-////    List<String> clientsNames;
-//
-//    for (int i = 0; i < employees.length; i++) {
-//      employeesNames.add(employees[i].name);
-//    }
-////    for (int i = 0; i < clients.length; i++) {
-////      clientsNames.add(clients[i].name);
-////    }
-////    print("first employee name is: ${employeesNames[1]}");
-////    print("first client name is: ${clientsNames[1]}");
-//    return Container(
-//      width: 400,
-//      child: AutoSearchInput(
-//          data: employeesNames,
-////        selectedBuyerName == "Employee" ?? employeesNames
-////            ? selectedBuyerName == "Client"
-////            : clientsNames,
-//          maxElementsToDisplay: 5,
-//          onItemTap: (int index) {
-////          if (selectedBuyerType == "Client") {
-////            setState(() {
-////              selectedBuyerName = clientsNames[index];
-////            });
-////          }
-//            if (selectedBuyerType == "Employee") {
-//              setState(() {
-//                selectedBuyerName = employeesNames[index];
-//              });
-//            }
-//          }),
-//    );
-//  }
 
   _buildCategoryList({List<Category> category, List<Product> products}) {
     List<Widget> choices = List();
@@ -192,6 +191,8 @@ class _AddBillState extends State<AddBill> {
           setState(() {
             selectedBuyerType = "Client";
           });
+          calculateTheTotalBillPerProduct();
+          calculateTheTotalBill();
         },
       ),
       SizedBox(width: 20),
@@ -208,6 +209,8 @@ class _AddBillState extends State<AddBill> {
           setState(() {
             selectedBuyerType = "House";
           });
+          calculateTheTotalBillPerProduct();
+          calculateTheTotalBill();
         },
       ),
       SizedBox(width: 20),
@@ -224,12 +227,14 @@ class _AddBillState extends State<AddBill> {
           setState(() {
             selectedBuyerType = "Employee";
           });
+          calculateTheTotalBillPerProduct();
+          calculateTheTotalBill();
         },
       )
     ];
   }
 
-  billHeader({List<Employee> employees, context}) {
+  billHeader({List<Employee> employees, List<Client> clients, context}) {
     return Column(
       children: [
         SizedBox(
@@ -246,11 +251,11 @@ class _AddBillState extends State<AddBill> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Flexible(child: searchWidget(employees, context)),
+            Flexible(child: searchWidget(employees, clients, context)),
             SizedBox(
               width: 15,
             ),
-            Text('اسم المشتري2'),
+            Text('اسم المشتري'),
           ],
         ),
         SizedBox(height: 10),
@@ -269,6 +274,14 @@ class _AddBillState extends State<AddBill> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
+          Center(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("الإجمالي", style: tableTitleStyle),
+              SizedBox(width: 10),
+            ],
+          )),
           Center(
               child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -298,6 +311,49 @@ class _AddBillState extends State<AddBill> {
     );
   }
 
+  calculateTheTotalBillPerProduct() {
+    for (int i = 0; i < selectedList.length; i++) {
+      selectedList[i].theTotalBillPerProduct = selectedList[i].selectionNo *
+          int.parse(
+            selectedBuyerType == "Client"
+                ? selectedList[i].customerPrice
+                : selectedBuyerType == "Employee"
+                    ? selectedList[i].employeePrice
+                    : selectedList[i].housePrice,
+          );
+    }
+  }
+
+  calculateTheTotalBill() {
+    var sum = 0;
+    selectedList.forEach((element) {
+      sum += element.theTotalBillPerProduct;
+    });
+    setState(() {
+      totalBill = sum;
+    });
+  }
+
+//  var priceWidget;
+
+//  priceManager(index) {
+//    if (selectedBuyerType == "Employee") {
+//      setState(() {
+//        priceWidget = Text(selectedList[index].employeePrice, style: tableContentStyle);
+//      });
+//    }
+//    if (selectedBuyerType == "Client") {
+//      setState(() {
+//        priceWidget = Text(selectedList[index].customerPrice, style: tableContentStyle);
+//      });
+//    }
+//    if (selectedBuyerType == "House") {
+//      setState(() {
+//        priceWidget = Text(selectedList[index].housePrice, style: tableContentStyle);
+//      });
+//    }
+//  }
+
   tableBuilder() {
     return ListView.builder(
         itemCount: selectedList.length,
@@ -312,15 +368,30 @@ class _AddBillState extends State<AddBill> {
                 child: Row(
 //                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    SizedBox(width: 200),
+                    SizedBox(width: 150),
                     Container(
-                      child: Text(selectedList[index].customerPrice, style: tableContentStyle),
+                      child: Text(selectedList[index].theTotalBillPerProduct.toString(),
+                          style: tableContentStyle),
                       constraints: BoxConstraints(
                         maxWidth: 100.0,
                         minWidth: 100,
                       ),
                     ),
-                    SizedBox(width: 200),
+                    SizedBox(width: 230),
+                    Container(
+                      child: Text(
+                          selectedBuyerType == "Client"
+                              ? selectedList[index].customerPrice
+                              : selectedBuyerType == "Employee"
+                                  ? selectedList[index].employeePrice
+                                  : selectedList[index].housePrice,
+                          style: tableContentStyle),
+                      constraints: BoxConstraints(
+                        maxWidth: 100.0,
+                        minWidth: 100,
+                      ),
+                    ),
+                    SizedBox(width: 70),
                     Row(
                       children: [
                         Container(
@@ -337,9 +408,12 @@ class _AddBillState extends State<AddBill> {
                                   (product) => product.name == selectedList[index].name);
                               setState(() {
                                 product.selectionNo -= 1;
+                                product.theTotalBillPerProduct =
+                                    product.selectionNo * int.parse(product.customerPrice);
                                 selectedList
                                     .removeWhere((selectedList) => selectedList.selectionNo == 0);
                               });
+                              calculateTheTotalBill();
                             },
                           ),
                         ),
@@ -367,10 +441,13 @@ class _AddBillState extends State<AddBill> {
                                     (product) => product.name == selectedList[index].name);
                                 setState(() {
                                   product.selectionNo += 1;
+                                  product.theTotalBillPerProduct =
+                                      product.selectionNo * int.parse(product.customerPrice);
                                 });
+                                calculateTheTotalBill();
                               }),
                         ),
-                        SizedBox(width: 180),
+                        SizedBox(width: 120),
                       ],
                     ),
 
@@ -401,7 +478,7 @@ class _AddBillState extends State<AddBill> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '500',
+              totalBill.toString(),
               style: formTitleStyle,
             ),
             SizedBox(
@@ -423,7 +500,11 @@ class _AddBillState extends State<AddBill> {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('500', style: formTitleStyle),
+            GestureDetector(
+                onDoubleTap: () {
+                  _dialog();
+                },
+                child: Text('500', style: formTitleStyle)),
             SizedBox(width: 80),
             Text('المدفوع', style: formTitleStyle),
             SizedBox(width: 20),
@@ -472,6 +553,28 @@ class _AddBillState extends State<AddBill> {
     );
   }
 
+  _dialog() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      // false = user must tap button, true = tap outside dialog
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('title'),
+          content: formTextFieldTemplate(),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('buttonText'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BaseView<CategoryModel>(
@@ -485,12 +588,15 @@ class _AddBillState extends State<AddBill> {
                   maxHeight: 800,
                   borderRadius: radius,
                   panel: BaseView<EmployeeClientModel>(
-                    onModelReady: (model) => model.fetchEmployees(branchName: branch),
+                    onModelReady: (model) => model.fetchClientsAndEmployees(branchName: branch),
                     builder: (context, model, child) => model.state == ViewState.Busy
                         ? Center(child: CircularProgressIndicator())
                         : Column(
                             children: [
-                              billHeader(employees: model.employees, context: context),
+                              billHeader(
+                                  employees: model.employees,
+                                  clients: model.clients,
+                                  context: context),
                               Expanded(
                                 child: Column(
                                   children: <Widget>[
@@ -545,6 +651,8 @@ class _AddBillState extends State<AddBill> {
                                                   (selectedList) => selectedList.selectionNo == 0);
                                             });
                                           }
+                                          calculateTheTotalBillPerProduct();
+                                          calculateTheTotalBill();
                                         },
                                         selectionNo: filteredProduct[index].selectionNo,
                                         statistics: filteredProduct[index].selectionNo > 0
@@ -562,6 +670,8 @@ class _AddBillState extends State<AddBill> {
                                           if (!selectedList.contains(filteredProduct[index])) {
                                             selectedList.add(filteredProduct[index]);
                                           }
+                                          calculateTheTotalBillPerProduct();
+                                          calculateTheTotalBill();
                                         },
                                       ),
                                     );
