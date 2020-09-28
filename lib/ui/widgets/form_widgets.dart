@@ -97,7 +97,7 @@ searchTextField(controller, focusNode, context) {
         decoration: InputDecoration(
             enabledBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(40.0)),
-              borderSide: BorderSide(color: Color(0x4437474F)),
+              borderSide: BorderSide(color: Colors.black54),
             ),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(40.0)),
@@ -105,6 +105,7 @@ searchTextField(controller, focusNode, context) {
             suffixIcon: Icon(Icons.search),
             border: InputBorder.none,
             hintText: "Search here...",
+            hintStyle: TextStyle(color: Colors.black54),
             contentPadding: const EdgeInsets.only(left: 16, right: 20, top: 14, bottom: 14)),
       ));
 }

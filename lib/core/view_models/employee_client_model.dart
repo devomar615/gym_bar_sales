@@ -10,6 +10,8 @@ class EmployeeClientModel extends BaseModel {
 
   List<Client> clients;
   List<Employee> employees;
+  Employee oneEmployee;
+  Client oneClient;
 
   Future addClient({Client client, String branchName}) async {
     setState(ViewState.Busy);
@@ -98,6 +100,32 @@ class EmployeeClientModel extends BaseModel {
       equalTo4: equalTo4,
     );
     employees = result.docs.map((doc) => Employee.fromMap(doc.data(), doc.id)).toList();
+    setState(ViewState.Idle);
+  }
+
+  Future fetchClientById({id, branchName}) async {
+    setState(ViewState.Busy);
+    var result = await _api.getDocumentById("clients/branches/$branchName/", id);
+    oneClient = Client.fromMap(result.data(), result.id);
+    setState(ViewState.Idle);
+  }
+
+  Future fetchEmployeeById({id, branchName}) async {
+    setState(ViewState.Busy);
+    var result = await _api.getDocumentById("clients/branches/$branchName/", id);
+    oneEmployee = Employee.fromMap(result.data(), result.id);
+    setState(ViewState.Idle);
+  }
+
+  updateClient({branchName, Map<String, dynamic> data, clientId}) async {
+    setState(ViewState.Busy);
+    await _api.updateDocument(clientId, data, "clients/branches/$branchName/");
+    setState(ViewState.Idle);
+  }
+
+  updateEmployee({branchName, Map<String, dynamic> data, employeeId}) async {
+    setState(ViewState.Busy);
+    await _api.updateDocument(employeeId, data, "employees/branches/$branchName/");
     setState(ViewState.Idle);
   }
 }

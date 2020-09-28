@@ -4,8 +4,10 @@ import 'package:gym_bar_sales/core/models/category.dart';
 import 'package:gym_bar_sales/core/models/client.dart';
 import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
-import 'package:gym_bar_sales/core/view_models/category_model.dart';
+import 'package:gym_bar_sales/core/models/transaction.dart';
+import 'package:gym_bar_sales/core/view_models/product_category_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_client_model.dart';
+import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/views/base_view.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
@@ -19,18 +21,171 @@ class AddBill extends StatefulWidget {
 }
 
 class _AddBillState extends State<AddBill> {
-  String selectedBuyerName = "";
-  int totalBill = 0;
+  double totalBill = 0;
+  double payedAmount = 0;
+  double billChange = 0;
+  bool isCredit = false;
   final TextEditingController name = TextEditingController();
   final TextEditingController payed = TextEditingController();
   String selectedCategory = "All";
   String selectedBuyerType = "Client";
-  List<Product> filteredProduct;
+  List<Product> filteredProducts = List<Product>();
+
   List<Product> selectedList = List<Product>();
+
+  Employee selectedEmployee;
+  Client selectedClient;
 
   BorderRadiusGeometry radius =
       BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0));
   var branch = "بيفرلي";
+  var transactorName = 'dsad';
+
+  calculateTheTotalBillPerProduct() {
+    for (int i = 0; i < selectedList.length; i++) {
+      selectedList[i].theTotalBillPerProduct = selectedList[i].selectionNo *
+          int.parse(
+            selectedBuyerType == "Client"
+                ? selectedList[i].customerPrice
+                : selectedBuyerType == "Employee"
+                    ? selectedList[i].employeePrice
+                    : selectedList[i].housePrice,
+          );
+    }
+  }
+
+  calculateChange() {
+    billChange = payedAmount - totalBill;
+  }
+
+  calculateTheTotalBill() {
+    double sum = 0;
+    selectedList.forEach((element) {
+      sum += element.theTotalBillPerProduct;
+    });
+    setState(() {
+      totalBill = sum;
+    });
+    calculateChange();
+  }
+
+  calculateNewTreasury({String oldCash, double cashToAdd}) {
+    print("printing old cash");
+    print(oldCash);
+    double newTotal = double.parse(oldCash) + cashToAdd;
+    print("printing new cash");
+    print(newTotal);
+    return newTotal.toString();
+  }
+
+  updateBuyerCash(oldCash, credit) {
+    double newCash;
+    newCash = double.parse(oldCash) + billChange;
+    return newCash.toString();
+  }
+
+  updateProductQuantity(index) {
+    //todo must not complete the transaction if the billQuantity > currentQuantity
+    //todo must not complete the transaction if the billQuantity > currentQuantity
+    //todo must not complete the transaction if the billQuantity > currentQuantity
+    //todo must not complete the transaction if the billQuantity > currentQuantity
+    //todo must not complete the transaction if the billQuantity > currentQuantity
+    //todo must not complete the transaction if the billQuantity > currentQuantity
+
+    //todo: try to limit selection in product and greyout the outstock products
+    //todo: try to limit selection in product and greyout the outstock products
+    //todo: try to limit selection in product and greyout the outstock products
+
+    double currentTotalAmount = double.parse(selectedList[index].netTotalQuantity);
+    print('printing current total amount...');
+    print(currentTotalAmount);
+
+    double billQuantity = selectedList[index].selectionNo *
+        double.parse(selectedList[index].theAmountOfSalesPerProduct);
+    print('printing bill quantity...');
+    print(billQuantity);
+
+    double newQuantity = currentTotalAmount - billQuantity;
+    print('printing new quantity to be added...');
+    print(newQuantity);
+
+    return newQuantity;
+  }
+
+  updateProductWholesaleQuantity(index) {
+    double currentWholesaleAmount = double.parse(selectedList[index].quantityOfWholesaleUnit);
+    print('printing currentWholesaleAmount...');
+    print(currentWholesaleAmount);
+
+    double newWholesaleQuantity = updateProductQuantity(index) / currentWholesaleAmount;
+    print('printing newWholesaleQuantity...');
+    print(newWholesaleQuantity);
+
+    return newWholesaleQuantity.toString();
+  }
+
+  sellingProducts() {
+    var map = {};
+    selectedList.forEach((products) => map[products.name] = products.selectionNo);
+    print(map);
+    return map;
+  }
+
+  updateClientCash(clientCash, clientId, credit) {
+    double updatedCash = double.parse(updateBuyerCash(clientCash, credit));
+    var updatedType;
+    if (updatedCash == 0) updatedType = "خالص";
+    if (updatedCash < 0) updatedType = "دائن";
+    if (updatedCash > 0) updatedType = "مدين";
+
+    EmployeeClientModel().updateClient(
+        branchName: branch,
+        clientId: clientId,
+        data: {'cash': updatedCash.toString(), 'type': updatedType});
+  }
+
+  updateEmployeeCash(employeeCash, employeeId, credit) {
+    double updatedCash = double.parse(updateBuyerCash(employeeCash, credit));
+    var updatedType;
+
+    if (updatedCash == 0) updatedType = "خالص";
+    if (updatedCash < 0) updatedType = "دائن";
+    if (updatedCash > 0) updatedType = "مدين";
+    EmployeeClientModel().updateEmployee(
+        branchName: branch,
+        employeeId: employeeId,
+        data: {'cash': updatedCash.toString(), 'type': updatedType});
+  }
+
+  transaction() {
+    print('beginning transaction...');
+    TransactionModel().addTransaction(
+        branchName: branch,
+        transaction: Transaction(
+          transactorName: transactorName,
+          transactionType: "selling",
+          transactionAmount: totalBill.toString(),
+          date: DateTime.now().toString(),
+          branch: branch,
+          customerName: selectedBuyerType == 'Employee'
+              ? selectedEmployee.name
+              : selectedBuyerType == 'Client' ? selectedClient.name : 'المشتري عامل',
+          customerType: selectedBuyerType,
+          sellingProducts: sellingProducts(),
+          paid: payedAmount.toString(),
+          change: billChange.toString(),
+        ));
+    print('Transaction Added');
+    for (int i = 0; i < selectedList.length; i++) {
+      print('netTotalQuantity of prodduct number $i =' + selectedList[i].netTotalQuantity);
+      print('id of prodduct number $i is=' + selectedList[i].id);
+      TransactionModel().updateProducts(branchName: branch, productId: selectedList[i].id, data: {
+        "netTotalQuantity": updateProductQuantity(i).toString(),
+        "wholesaleQuantity": updateProductWholesaleQuantity(i)
+      });
+    }
+    print('Products Updated');
+  }
 
   appBar() {
     return Row(
@@ -44,96 +199,17 @@ class _AddBillState extends State<AddBill> {
           onPressed: () {},
         ),
         RaisedButton(
-          child: Text(selectedBuyerName),
+          child: Text('selectedBuyerName'),
           onPressed: () {},
         )
       ],
     );
   }
 
-  searchWidget(List<Employee> employees, List<Client> clients, context) {
-    if (selectedBuyerType == "Employee") {
-      return Container(
-        width: 400,
-        child: SearchWidget<Employee>(
-          dataList: employees,
-          hideSearchBoxWhenItemSelected: false,
-          listContainerHeight: MediaQuery.of(context).size.height / 4,
-          queryBuilder: (String query, List<Employee> employee) {
-            return employee
-                .where((Employee employee) =>
-                    employee.name.toLowerCase().contains(query.toLowerCase()))
-                .toList();
-          },
-          popupListItemBuilder: (Employee employee) {
-            return Column(
-              children: <Widget>[
-                Container(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(employee.name, style: const TextStyle(fontSize: 16))),
-              ],
-            );
-          },
-          selectedItemBuilder:
-              // ignore: missing_return
-              (Employee selectedItem, VoidCallback deleteSelectedItem) {},
-          onItemSelected: (Employee employee) {
-            setState(() {
-              selectedBuyerName = employee.name;
-            });
-            print(selectedBuyerName);
-          },
-          noItemsFoundWidget: Center(child: Text("No item Found")),
-          textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
-            return searchTextField(controller, focusNode, context);
-          },
-        ),
-      );
-    }
-    if (selectedBuyerType == "Client") {
-      return Container(
-        width: 400,
-        child: SearchWidget<Client>(
-          dataList: clients,
-          hideSearchBoxWhenItemSelected: false,
-          listContainerHeight: MediaQuery.of(context).size.height / 4,
-          queryBuilder: (String query, List<Client> client) {
-            return client
-                .where((Client client) => client.name.toLowerCase().contains(query.toLowerCase()))
-                .toList();
-          },
-          popupListItemBuilder: (Client client) {
-            return Column(
-              children: <Widget>[
-                Container(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(client.name, style: const TextStyle(fontSize: 16))),
-              ],
-            );
-          },
-          selectedItemBuilder:
-              // ignore: missing_return
-              (Client selectedItem, VoidCallback deleteSelectedItem) {},
-          onItemSelected: (Client client) {
-            setState(() {
-              selectedBuyerName = client.name;
-            });
-            print(selectedBuyerName);
-          },
-          noItemsFoundWidget: Center(child: Text("No item Found")),
-          textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
-            return searchTextField(controller, focusNode, context);
-          },
-        ),
-      );
-    } else
-      return Container();
-  }
-
   _buildCategoryList({List<Category> category, List<Product> products}) {
     List<Widget> choices = List();
     if (selectedCategory == "All") {
-      filteredProduct = products;
+      filteredProducts = products;
     }
     choices.add(Container(
         padding: const EdgeInsets.only(left: 10.0),
@@ -149,7 +225,7 @@ class _AddBillState extends State<AddBill> {
           onSelected: (selected) {
             setState(() {
               selectedCategory = "All";
-              filteredProduct = products;
+              filteredProducts = products;
             });
           },
         )));
@@ -166,7 +242,7 @@ class _AddBillState extends State<AddBill> {
           onSelected: (selected) {
             setState(() {
               selectedCategory = category[i].name;
-              filteredProduct =
+              filteredProducts =
                   products.where((product) => product.category == selectedCategory).toList();
             });
           },
@@ -175,184 +251,6 @@ class _AddBillState extends State<AddBill> {
     }
     return choices;
   }
-
-  List<Widget> buyerTypeChoices() {
-    return [
-      ChoiceChip(
-        labelStyle: chipLabelStyleLight,
-        selectedColor: Colors.blue,
-        backgroundColor: Colors.white,
-        shape: StadiumBorder(
-          side: BorderSide(color: Colors.blue),
-        ),
-        label: Text("عميل"),
-        selected: selectedBuyerType == "Client",
-        onSelected: (selected) {
-          setState(() {
-            selectedBuyerType = "Client";
-          });
-          calculateTheTotalBillPerProduct();
-          calculateTheTotalBill();
-        },
-      ),
-      SizedBox(width: 20),
-      ChoiceChip(
-        labelStyle: chipLabelStyleLight,
-        backgroundColor: Colors.white,
-        selectedColor: Colors.blue,
-        shape: StadiumBorder(
-          side: BorderSide(color: Colors.blue),
-        ),
-        label: Text("عامل"),
-        selected: selectedBuyerType == "House",
-        onSelected: (selected) {
-          setState(() {
-            selectedBuyerType = "House";
-          });
-          calculateTheTotalBillPerProduct();
-          calculateTheTotalBill();
-        },
-      ),
-      SizedBox(width: 20),
-      ChoiceChip(
-        labelStyle: chipLabelStyleLight,
-        backgroundColor: Colors.white,
-        selectedColor: Colors.blue,
-        shape: StadiumBorder(
-          side: BorderSide(color: Colors.blue),
-        ),
-        label: Text("موظف"),
-        selected: selectedBuyerType == "Employee",
-        onSelected: (selected) {
-          setState(() {
-            selectedBuyerType = "Employee";
-          });
-          calculateTheTotalBillPerProduct();
-          calculateTheTotalBill();
-        },
-      )
-    ];
-  }
-
-  billHeader({List<Employee> employees, List<Client> clients, context}) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 15,
-        ),
-        Text(
-          "الفاتوره",
-          style: headerStyle,
-        ),
-        SizedBox(
-          height: 10,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Flexible(child: searchWidget(employees, clients, context)),
-            SizedBox(
-              width: 15,
-            ),
-            Text('اسم المشتري'),
-          ],
-        ),
-        SizedBox(height: 10),
-        Wrap(
-          children: buyerTypeChoices(),
-        ),
-        SizedBox(height: 10),
-      ],
-    );
-  }
-
-  tableHead() {
-    return Container(
-      height: 60,
-      color: Colors.blue,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Center(
-              child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("الإجمالي", style: tableTitleStyle),
-              SizedBox(width: 10),
-            ],
-          )),
-          Center(
-              child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("سعر القطعه", style: tableTitleStyle),
-              SizedBox(width: 10),
-            ],
-          )),
-          Center(
-              child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("العدد", style: tableTitleStyle),
-              SizedBox(width: 10),
-            ],
-          )),
-          Center(
-              child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text("اسم المنتج", style: tableTitleStyle),
-              SizedBox(width: 10),
-            ],
-          )),
-        ],
-      ),
-    );
-  }
-
-  calculateTheTotalBillPerProduct() {
-    for (int i = 0; i < selectedList.length; i++) {
-      selectedList[i].theTotalBillPerProduct = selectedList[i].selectionNo *
-          int.parse(
-            selectedBuyerType == "Client"
-                ? selectedList[i].customerPrice
-                : selectedBuyerType == "Employee"
-                    ? selectedList[i].employeePrice
-                    : selectedList[i].housePrice,
-          );
-    }
-  }
-
-  calculateTheTotalBill() {
-    var sum = 0;
-    selectedList.forEach((element) {
-      sum += element.theTotalBillPerProduct;
-    });
-    setState(() {
-      totalBill = sum;
-    });
-  }
-
-//  var priceWidget;
-
-//  priceManager(index) {
-//    if (selectedBuyerType == "Employee") {
-//      setState(() {
-//        priceWidget = Text(selectedList[index].employeePrice, style: tableContentStyle);
-//      });
-//    }
-//    if (selectedBuyerType == "Client") {
-//      setState(() {
-//        priceWidget = Text(selectedList[index].customerPrice, style: tableContentStyle);
-//      });
-//    }
-//    if (selectedBuyerType == "House") {
-//      setState(() {
-//        priceWidget = Text(selectedList[index].housePrice, style: tableContentStyle);
-//      });
-//    }
-//  }
 
   tableBuilder() {
     return ListView.builder(
@@ -404,7 +302,7 @@ class _AddBillState extends State<AddBill> {
                             iconSize: 50,
                             icon: Icon(Icons.remove_circle),
                             onPressed: () {
-                              final product = filteredProduct.firstWhere(
+                              final product = filteredProducts.firstWhere(
                                   (product) => product.name == selectedList[index].name);
                               setState(() {
                                 product.selectionNo -= 1;
@@ -413,6 +311,7 @@ class _AddBillState extends State<AddBill> {
                                 selectedList
                                     .removeWhere((selectedList) => selectedList.selectionNo == 0);
                               });
+                              calculateTheTotalBillPerProduct();
                               calculateTheTotalBill();
                             },
                           ),
@@ -437,13 +336,14 @@ class _AddBillState extends State<AddBill> {
                               iconSize: 50,
                               icon: Icon(Icons.add_circle),
                               onPressed: () {
-                                final product = filteredProduct.firstWhere(
+                                final product = filteredProducts.firstWhere(
                                     (product) => product.name == selectedList[index].name);
                                 setState(() {
                                   product.selectionNo += 1;
                                   product.theTotalBillPerProduct =
                                       product.selectionNo * int.parse(product.customerPrice);
                                 });
+                                calculateTheTotalBillPerProduct();
                                 calculateTheTotalBill();
                               }),
                         ),
@@ -468,220 +368,579 @@ class _AddBillState extends State<AddBill> {
         });
   }
 
-  billFooter(context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              totalBill.toString(),
-              style: formTitleStyle,
-            ),
-            SizedBox(
-              width: 80,
-            ),
-            Text(
-              'الاجمالي',
-              style: formTitleStyle,
-            ),
-            SizedBox(
-              width: 30,
-            ),
-          ],
+  List<Widget> buyerTypeChoices() {
+    return [
+      ChoiceChip(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        labelStyle: chipLabelStyleLight,
+        backgroundColor: Colors.white,
+        selectedColor: Colors.blue,
+        shape: StadiumBorder(
+          side: BorderSide(color: Colors.blue),
         ),
-        SizedBox(height: 20),
-        Divider(height: 1, color: Colors.black),
-        SizedBox(height: 15),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            GestureDetector(
-                onDoubleTap: () {
-                  _dialog();
-                },
-                child: Text('500', style: formTitleStyle)),
-            SizedBox(width: 80),
-            Text('المدفوع', style: formTitleStyle),
-            SizedBox(width: 20),
-          ],
+        label: Text("عامل"),
+        selected: selectedBuyerType == "House",
+        onSelected: (selected) {
+          setState(() {
+            selectedBuyerType = "House";
+          });
+          calculateTheTotalBillPerProduct();
+          calculateTheTotalBill();
+        },
+      ),
+      SizedBox(width: 20),
+      ChoiceChip(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        labelStyle: chipLabelStyleLight,
+        backgroundColor: Colors.white,
+        selectedColor: Colors.blue,
+        shape: StadiumBorder(
+          side: BorderSide(color: Colors.blue),
         ),
-        SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Container(
-                constraints: BoxConstraints(
-                  minWidth: 110,
-                  minHeight: 50,
-                  maxWidth: 500,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text('الباقي: 12', style: formTitleStyle),
-                  ],
-                )),
-            SizedBox(width: 15),
-          ],
+        label: Text("موظف"),
+        selected: selectedBuyerType == "Employee",
+        onSelected: (selected) {
+          setState(() {
+            selectedBuyerType = "Employee";
+          });
+          calculateTheTotalBillPerProduct();
+          calculateTheTotalBill();
+        },
+      ),
+      SizedBox(width: 20),
+      ChoiceChip(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        labelStyle: chipLabelStyleLight,
+        selectedColor: Colors.blue,
+        backgroundColor: Colors.white,
+        shape: StadiumBorder(
+          side: BorderSide(color: Colors.blue),
         ),
-        SizedBox(height: 15),
-        Center(
-            child: ButtonTheme(
-          minWidth: 200.0,
-          height: 40,
-          child: RaisedButton(
-            color: Colors.blueAccent,
-            child: Text("إتمام العمليه", style: formButtonStyle),
-            onPressed: () {},
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          ),
-        )),
-        SizedBox(height: 20),
-      ],
-    );
+        label: Text("عميل"),
+        selected: selectedBuyerType == "Client",
+        onSelected: (selected) {
+          setState(() {
+            selectedBuyerType = "Client";
+          });
+          calculateTheTotalBillPerProduct();
+          calculateTheTotalBill();
+        },
+      ),
+    ];
   }
 
-  _dialog() {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      // false = user must tap button, true = tap outside dialog
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text('title'),
-          content: formTextFieldTemplate(),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('buttonText'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-              },
-            ),
-          ],
-        );
-      },
+  tableHead() {
+    return Container(
+      height: 60,
+      color: Colors.blue,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Center(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("الإجمالي", style: tableTitleStyle),
+              SizedBox(width: 10),
+            ],
+          )),
+          Center(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("سعر القطعه", style: tableTitleStyle),
+              SizedBox(width: 10),
+            ],
+          )),
+          Center(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("العدد", style: tableTitleStyle),
+              SizedBox(width: 10),
+            ],
+          )),
+          Center(
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("اسم المنتج", style: tableTitleStyle),
+              SizedBox(width: 10),
+            ],
+          )),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BaseView<CategoryModel>(
+    searchWidget(List<Employee> employees, List<Client> clients) {
+      if (selectedBuyerType == "Employee") {
+        return Container(
+          width: 400,
+          child: SearchWidget<Employee>(
+            dataList: employees,
+            hideSearchBoxWhenItemSelected: false,
+            listContainerHeight: MediaQuery.of(context).size.height / 4,
+            queryBuilder: (String query, List<Employee> employee) {
+              return employee
+                  .where((Employee employee) =>
+                      employee.name.toLowerCase().contains(query.toLowerCase()))
+                  .toList();
+            },
+            popupListItemBuilder: (Employee employee) {
+              return Column(
+                children: <Widget>[
+                  Container(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(employee.name, style: const TextStyle(fontSize: 16))),
+                ],
+              );
+            },
+            selectedItemBuilder:
+                // ignore: missing_return
+                (Employee selectedItem, VoidCallback deleteSelectedItem) {},
+            onItemSelected: (Employee employee) {
+              setState(() {
+                selectedEmployee = employee;
+              });
+              print(selectedEmployee.name);
+            },
+            noItemsFoundWidget: Center(child: Text("No item Found")),
+            textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
+              return searchTextField(controller, focusNode, context);
+            },
+          ),
+        );
+      }
+      if (selectedBuyerType == "Client") {
+        return Container(
+          width: 400,
+          child: SearchWidget<Client>(
+            dataList: clients,
+            hideSearchBoxWhenItemSelected: false,
+            listContainerHeight: MediaQuery.of(context).size.height / 4,
+            queryBuilder: (String query, List<Client> client) {
+              return client
+                  .where((Client client) => client.name.toLowerCase().contains(query.toLowerCase()))
+                  .toList();
+            },
+            popupListItemBuilder: (Client client) {
+              return Column(
+                children: <Widget>[
+                  Container(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(client.name, style: const TextStyle(fontSize: 16))),
+                ],
+              );
+            },
+            selectedItemBuilder:
+                // ignore: missing_return
+                (Client selectedItem, VoidCallback deleteSelectedItem) {},
+            onItemSelected: (Client client) {
+              setState(() {
+                selectedClient = client;
+              });
+              print(selectedClient.name);
+            },
+            noItemsFoundWidget: Center(child: Text("No item Found")),
+            textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
+              return searchTextField(controller, focusNode, context);
+            },
+          ),
+        );
+      } else
+        return Container();
+    }
+
+    billHeader({List<Employee> employees, List<Client> clients, context}) {
+      return Column(
+        children: [
+          SizedBox(
+            height: 15,
+          ),
+          Text(
+            "الفاتوره",
+            style: headerStyle,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          selectedBuyerType == "House"
+              ? Container()
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(child: searchWidget(employees, clients)),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text(
+                      'اسم المشتري',
+                      style: formTitleStyle,
+                    ),
+                  ],
+                ),
+          SizedBox(height: 10),
+          Wrap(
+            children: buyerTypeChoices(),
+          ),
+          SizedBox(height: 10),
+        ],
+      );
+    }
+
+    _changePayAmountDialog() {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        // false = user must tap button, true = tap outside dialog
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: Text('اختيار المبلغ المدفوع'),
+            content: TextField(
+              onChanged: (value) {
+                setState(() {
+                  payedAmount = double.parse(value);
+                });
+                calculateChange();
+              },
+              decoration: InputDecoration(labelText: 'اكتب المبلغ هنا'),
+              keyboardType: TextInputType.number,
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('اتمام'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    _confirmTransactionDialog(String cash) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        // false = user must tap button, true = tap outside dialog
+        builder: (BuildContext dialogContext) {
+          return BaseView<EmployeeClientModel>(
+              onModelReady: (model) => selectedBuyerType == "Client"
+                  ? model.fetchClientById(branchName: branch, id: selectedClient.id)
+                  : selectedBuyerType == "Employee"
+                      ? model.fetchEmployeeById(branchName: branch, id: selectedEmployee.id)
+                      : null,
+              builder: (context, model, child) => StatefulBuilder(builder: (context, setState) {
+                    return AlertDialog(
+                      title: Text('تاكيد العمليه'),
+                      content: billChange < 0
+                          ? Text(
+                              'تحذير سيتم اضافه باقي الفاتوره علي حساب العميل هل تريد المتابعه ؟')
+                          : billChange > 0
+                              ? CheckboxListTile(
+                                  title: Text("هل تريد وضع الباقي في حساب العميل"),
+                                  value: isCredit,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      isCredit = value;
+                                    });
+                                  },
+                                )
+                              : Text("هل تريد اتمام العمليه ؟"),
+                      actions: <Widget>[
+                        FlatButton(
+                          child: Text('الغاء'),
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                          },
+                        ),
+                        FlatButton(
+                          child: Text('اتمام'),
+                          onPressed: () {
+                            if (billChange < 0) {
+                              transaction(); //todo: make buyer creditor
+                              if (selectedBuyerType == 'Client') {
+                                updateClientCash(model.oneClient.cash, model.oneClient.id, true);
+                              }
+                              if (selectedBuyerType == 'Employee') {
+                                updateEmployeeCash(
+                                    model.oneEmployee.cash, model.oneEmployee.id, true);
+                              }
+                              TransactionModel().updateTotal(data: {
+                                'cash': calculateNewTreasury(oldCash: cash, cashToAdd: payedAmount)
+                              }, docId: branch);
+                              print('الباقي اقل');
+                              //المدفوع يروح للخزنه
+
+                            }
+
+                            if (isCredit) {
+                              transaction(); //todo: make buyer debtor
+                              if (selectedBuyerType == 'Client') {
+                                updateClientCash(model.oneClient.cash, model.oneClient.id, false);
+                              }
+                              if (selectedBuyerType == 'Employee') {
+                                updateEmployeeCash(
+                                    model.oneEmployee.cash, model.oneEmployee.id, false);
+                              }
+                              TransactionModel().updateTotal(data: {
+                                'cash': calculateNewTreasury(oldCash: cash, cashToAdd: payedAmount)
+                              }, docId: branch);
+                              print('الباقي اكتر');
+
+                              //المدفوع يروح للخزنه
+
+                            }
+
+                            if (!isCredit && billChange > 0) {
+                              transaction();
+                              TransactionModel().updateTotal(data: {
+                                'cash': calculateNewTreasury(oldCash: cash, cashToAdd: totalBill)
+                              }, docId: branch);
+                              //الاجمالي يروح للخزنه
+                            }
+
+                            if (billChange == 0) {
+                              transaction();
+                              TransactionModel().updateTotal(data: {
+                                'cash': calculateNewTreasury(oldCash: cash, cashToAdd: totalBill)
+                              }, docId: branch);
+                              //الاجمالي يروح للخزنه
+
+                            }
+                            Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                          },
+                        ),
+                      ],
+                    );
+                  }));
+        },
+      );
+    }
+
+    billFooter() {
+      return BaseView<TransactionModel>(
+          onModelReady: (model) => model.fetchTotal(),
+          builder: (context, model, child) => Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        totalBill.toString(),
+                        style: formTitleStyle,
+                      ),
+                      SizedBox(
+                        width: 80,
+                      ),
+                      Text(
+                        'الاجمالي',
+                        style: formTitleStyle,
+                      ),
+                      SizedBox(
+                        width: 30,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Divider(height: 1, color: Colors.black),
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                          onTap: () {
+                            _changePayAmountDialog();
+                          },
+                          child: Text(payedAmount.toString(), style: formTitleStyle)),
+                      SizedBox(width: 80),
+                      Text('المدفوع', style: formTitleStyle),
+                      SizedBox(width: 20),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                          constraints: BoxConstraints(
+                            minWidth: 110,
+                            minHeight: 50,
+                            maxWidth: 500,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10),
+                              Text('الباقي: ' + billChange.toString(),
+                                  style: TextStyle(
+                                      color: billChange > 0 ? Colors.black : Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25,
+                                      fontFamily: 'Tajawal')),
+                            ],
+                          )),
+                      SizedBox(width: 15),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  Center(
+                      child: ButtonTheme(
+                    minWidth: 200.0,
+                    height: 50,
+                    child: RaisedButton(
+                      color: Colors.blue,
+                      child: Text("إتمام العمليه", style: formButtonStyle),
+                      onPressed: () {
+                        _confirmTransactionDialog(model.total[0].cash);
+                      },
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  )),
+                  SizedBox(height: 20),
+                ],
+              ));
+    }
+
+    return BaseView<ProductCategoryModel>(
         onModelReady: (model) => model.fetchCategoriesAndProducts(branchName: branch),
         builder: (context, model, child) => SafeArea(
               child: Scaffold(
-                body: SlidingUpPanel(
-                  parallaxEnabled: true,
-                  backdropEnabled: true,
-                  backdropOpacity: 0.3,
-                  maxHeight: 800,
-                  borderRadius: radius,
-                  panel: BaseView<EmployeeClientModel>(
-                    onModelReady: (model) => model.fetchClientsAndEmployees(branchName: branch),
-                    builder: (context, model, child) => model.state == ViewState.Busy
-                        ? Center(child: CircularProgressIndicator())
-                        : Column(
-                            children: [
-                              billHeader(
-                                  employees: model.employees,
-                                  clients: model.clients,
-                                  context: context),
-                              Expanded(
-                                child: Column(
-                                  children: <Widget>[
-                                    tableHead(),
-                                    Expanded(child: tableBuilder()),
-                                  ],
-                                ),
-                              ),
-                              billFooter(context),
-                            ],
-                          ),
-                  ),
-                  collapsed: Container(
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: radius),
-                    child: Center(
-                      child: Text("الفاتوره", style: headerStyle),
-                    ),
-                  ),
-                  body: model.state == ViewState.Busy
-                      ? Center(child: CircularProgressIndicator())
-                      : Container(
-                          child: CustomScrollView(
-                            slivers: <Widget>[
-                              SliverList(
-                                  delegate: SliverChildListDelegate(
-                                [appBar()],
-                              )),
-                              SliverToBoxAdapter(
-                                child: Container(
-                                  height: 50.0,
-                                  child: ListView(
-                                    scrollDirection: Axis.horizontal,
-                                    children: _buildCategoryList(
-                                        category: model.categories, products: model.products),
+                body: GestureDetector(
+                  onTap: () {
+                    // call this method here to hide soft keyboard
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  },
+                  child: SlidingUpPanel(
+                    onPanelOpened: () => filteredProducts = selectedList,
+                    onPanelClosed: () {
+                      TransactionModel().fetchTotal();
+                      setState(() {
+                        selectedCategory == 'All'
+                            ? filteredProducts = model.products
+                            : filteredProducts = model.products
+                                .where((product) => product.category == selectedCategory)
+                                .toList();
+                      });
+                    },
+                    parallaxEnabled: true,
+                    backdropEnabled: true,
+                    backdropOpacity: 0.3,
+                    maxHeight: 800,
+                    borderRadius: radius,
+                    panel: BaseView<EmployeeClientModel>(
+                      onModelReady: (model) => model.fetchClientsAndEmployees(branchName: branch),
+                      builder: (context, model, child) => model.state == ViewState.Busy
+                          ? Center(child: CircularProgressIndicator())
+                          : Column(
+                              children: [
+                                billHeader(
+                                    employees: model.employees,
+                                    clients: model.clients,
+                                    context: context),
+                                Expanded(
+                                  child: Column(
+                                    children: <Widget>[
+                                      tableHead(),
+                                      Expanded(child: tableBuilder()),
+                                    ],
                                   ),
                                 ),
-                              ),
-                              SliverGrid(
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 4,
+                                billFooter(),
+                              ],
+                            ),
+                    ),
+                    collapsed: Container(
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: radius),
+                      child: Center(
+                        child: Text("الفاتوره", style: headerStyle),
+                      ),
+                    ),
+                    body: model.state == ViewState.Busy
+                        ? Center(child: CircularProgressIndicator())
+                        : Container(
+                            child: CustomScrollView(
+                              slivers: <Widget>[
+                                SliverList(
+                                    delegate: SliverChildListDelegate(
+                                  [appBar()],
+                                )),
+                                SliverToBoxAdapter(
+                                  child: Container(
+                                    height: 50.0,
+                                    child: ListView(
+                                      scrollDirection: Axis.horizontal,
+                                      children: _buildCategoryList(
+                                          category: model.categories, products: model.products),
+                                    ),
+                                  ),
                                 ),
-                                delegate: SliverChildBuilderDelegate(
-                                  (BuildContext context, int index) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(left: 20.0, top: 20.0, right: 20),
-                                      child: item(
-                                        onPressIcon: () {
-                                          if (filteredProduct[index].selectionNo > 0) {
-                                            setState(() {
-                                              filteredProduct[index].selectionNo -= 1;
-                                              selectedList.removeWhere(
-                                                  (selectedList) => selectedList.selectionNo == 0);
-                                            });
-                                          }
-                                          calculateTheTotalBillPerProduct();
-                                          calculateTheTotalBill();
-                                        },
-                                        selectionNo: filteredProduct[index].selectionNo,
-                                        statistics: filteredProduct[index].selectionNo > 0
-                                            ? filteredProduct[index].selectionNo.toString()
-                                            : "",
-                                        topSpace: SizedBox(height: 50),
-                                        betweenSpace: SizedBox(height: 20),
-                                        title: filteredProduct[index].name,
-                                        assetImage: "",
-                                        backGround: Colors.black,
-                                        onPress: () {
-                                          setState(() {
-                                            filteredProduct[index].selectionNo += 1;
-                                          });
-                                          if (!selectedList.contains(filteredProduct[index])) {
-                                            selectedList.add(filteredProduct[index]);
-                                          }
-                                          calculateTheTotalBillPerProduct();
-                                          calculateTheTotalBill();
-                                        },
-                                      ),
-                                    );
-                                  },
-                                  childCount: filteredProduct.length,
-                                ),
-                              )
-                            ],
+                                SliverGrid(
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (BuildContext context, int index) {
+                                      return filteredProducts.isEmpty
+                                          ? Center(child: Text('لا يوجد منتجات هنا'))
+                                          : Padding(
+                                              padding:
+                                                  EdgeInsets.only(left: 20.0, top: 20.0, right: 20),
+                                              child: item(
+                                                onPressIcon: () {
+                                                  if (filteredProducts[index].selectionNo > 0) {
+                                                    setState(() {
+                                                      filteredProducts[index].selectionNo -= 1;
+                                                      selectedList.removeWhere((selectedList) =>
+                                                          selectedList.selectionNo == 0);
+                                                    });
+                                                  }
+                                                  calculateTheTotalBillPerProduct();
+                                                  calculateTheTotalBill();
+                                                },
+                                                selectionNo: filteredProducts[index].selectionNo,
+                                                statistics: filteredProducts[index].selectionNo > 0
+                                                    ? filteredProducts[index].selectionNo.toString()
+                                                    : "",
+                                                topSpace: SizedBox(height: 50),
+                                                betweenSpace: SizedBox(height: 20),
+                                                title: filteredProducts[index].name,
+                                                assetImage: "",
+                                                backGround: Colors.black,
+                                                onPress: () {
+                                                  setState(() {
+                                                    filteredProducts[index].selectionNo += 1;
+                                                  });
+                                                  if (!selectedList
+                                                      .contains(filteredProducts[index])) {
+                                                    selectedList.add(filteredProducts[index]);
+                                                  }
+                                                  calculateTheTotalBillPerProduct();
+                                                  calculateTheTotalBill();
+                                                },
+                                              ),
+                                            );
+                                    },
+                                    childCount: filteredProducts.length,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
+                  ),
                 ),
               ),
             ));

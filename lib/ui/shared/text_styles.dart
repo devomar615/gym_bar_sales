@@ -46,7 +46,7 @@ const formLabelsStyle = TextStyle(
 const dropDownLabelsStyle =
     TextStyle(fontSize: 16, fontFamily: 'Tajawal', color: Colors.black);
 const formButtonStyle =
-    TextStyle(fontSize: 15, fontFamily: 'Tajawal', color: Colors.white);
+    TextStyle(fontSize: 25, fontFamily: 'Tajawal', color: Colors.black);
 
 const imageTitle = TextStyle(
     fontSize: 30.0,

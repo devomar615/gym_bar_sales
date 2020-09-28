@@ -1,13 +1,12 @@
 import 'package:get_it/get_it.dart';
 import 'package:gym_bar_sales/core/view_models/attendance_model.dart';
 import 'package:gym_bar_sales/core/view_models/branch_model.dart';
-import 'package:gym_bar_sales/core/view_models/category_model.dart';
+import 'package:gym_bar_sales/core/view_models/product_category_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_client_model.dart';
 import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:gym_bar_sales/core/view_models/user_model.dart';
 import 'services/api.dart';
 import 'services/authentication_service.dart';
-import 'view_models/product_model.dart';
 
 GetIt locator = GetIt.I;
 
@@ -18,10 +17,9 @@ void setupLocator() {
   locator.registerLazySingleton(() => Api());
   locator.registerLazySingleton(() => AuthenticationService());
 
-  locator.registerFactory(() => ProductModel());
   locator.registerFactory(() => AttendanceModel());
   locator.registerFactory(() => BranchModel());
-  locator.registerFactory(() => CategoryModel());
+  locator.registerFactory(() => ProductCategoryModel());
   locator.registerFactory(() => EmployeeClientModel());
   locator.registerFactory(() => TransactionModel());
   locator.registerFactory(() => UserModel());

@@ -9,22 +9,18 @@ import 'package:gym_bar_sales/core/locator.dart';
 class TransactionModel extends BaseModel {
   Api _api = locator<Api>();
   List<Transaction> transaction;
-  Total total;
+  List<Total> total;
   Product product;
 
   Future addTransaction({Transaction transaction, branchName}) async {
     setState(ViewState.Busy);
-    await _api.addDocument(
-        transaction.toJson(), "transactions/branches/$branchName");
+    await _api.addDocument(transaction.toJson(), "transactions/branches/$branchName");
     setState(ViewState.Idle);
   }
 
   Future<List<Transaction>> fetchTransaction({branchName}) async {
-    var result =
-        await _api.getDataCollection("transactions/branches/$branchName/");
-    transaction = result.docs
-        .map((doc) => Transaction.fromMap(doc.data(), doc.id))
-        .toList();
+    var result = await _api.getDataCollection("transactions/branches/$branchName/");
+    transaction = result.docs.map((doc) => Transaction.fromMap(doc.data(), doc.id)).toList();
     return transaction;
   }
 
@@ -51,57 +47,46 @@ class TransactionModel extends BaseModel {
       field4: field4,
       equalTo4: equalTo4,
     );
-    transaction = result.docs
-        .map((doc) => Transaction.fromMap(doc.data(), doc.id))
-        .toList();
+    transaction = result.docs.map((doc) => Transaction.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
   }
 
-  Future fetchTotal({docId}) async {
+//  Future fetchTotal({docId}) async {
+//    setState(ViewState.Busy);
+//    await _api.getDocumentById('total', docId).then((ds) {
+//      total = Total.fromMap(ds.data(), ds.id);
+//    });
+//
+//    print("total cash is: ");
+//    print(total.cash);
+//
+//    setState(ViewState.Idle);
+//  }
+
+  Future fetchTotal() async {
     setState(ViewState.Busy);
-    await _api.getDocumentById('total', docId).then((ds) {
-      total = Total.fromMap(ds.data(), ds.id);
-    });
+    var result = await _api.getDataCollection("total");
+    total = result.docs.map((doc) => Total.fromMap(doc.data(), doc.id)).toList();
     setState(ViewState.Idle);
-  }
-
-  Future fetchTotalAndProduct(
-      {docId, categoryName, branchName, productId}) async {
-    setState(ViewState.Busy);
-    await _api.getDocumentById('total', docId).then((ds) {
-      total = Total.fromMap(ds.data(), ds.id);
-    });
-
-    await _api
-        .getDocumentById(
-            "products/branches/$branchName/categories/$categoryName", productId)
-        .then((ds) {
-      product = Product.fromMap(ds.data(), ds.id);
-    });
-
-    setState(ViewState.Idle);
+    return total;
   }
 
   updateTotal({docId, Map<String, dynamic> data}) async {
-    Api.checkDocExist("total", docId).then((value) async {
-      if (!value) {
-        setState(ViewState.Busy);
-        await _api.addDocumentCustomId(docId, data, "total");
-        setState(ViewState.Idle);
-      }
-      if (value) {
-        setState(ViewState.Busy);
-        await _api.updateDocument(docId, data, "total");
-        setState(ViewState.Idle);
-      }
-    });
+    await _api.updateDocument(docId, data, "total");
   }
 
-  updateProducts(
-      {categoryName, branchName, Map<String, dynamic> data, productId}) async {
+  updateProducts({branchName, Map<String, dynamic> data, productId}) async {
     setState(ViewState.Busy);
-    await _api.updateDocument(productId, data,
-        "products/branches/$branchName/categories/$categoryName");
+    print('printing from method........');
+    print(branchName);
+    print(productId);
+    print(data);
+    print('Done Printingggggggg.............:D');
+    await _api.updateDocument(productId, data, "products/branches/$branchName/");
     setState(ViewState.Idle);
   }
+
+  addWithdraw() {}
+
+  addDeposit() {}
 }
