@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
@@ -5,13 +6,15 @@ import 'package:gym_bar_sales/core/models/client.dart';
 import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/models/transaction.dart';
-import 'package:gym_bar_sales/core/view_models/product_category_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_client_model.dart';
+import 'package:gym_bar_sales/core/view_models/product_category_model.dart';
 import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
+import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/views/base_view.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
 import 'package:gym_bar_sales/ui/widgets/home_item.dart';
+import 'package:intl/intl.dart';
 import 'package:search_widget/search_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -25,8 +28,11 @@ class _AddBillState extends State<AddBill> {
   double payedAmount = 0;
   double billChange = 0;
   bool isCredit = false;
+
   final TextEditingController name = TextEditingController();
   final TextEditingController payed = TextEditingController();
+  final PanelController _pc = PanelController();
+
   String selectedCategory = "All";
   String selectedBuyerType = "Client";
   List<Product> filteredProducts = List<Product>();
@@ -40,6 +46,16 @@ class _AddBillState extends State<AddBill> {
       BorderRadius.only(topLeft: Radius.circular(28.0), topRight: Radius.circular(28.0));
   var branch = "بيفرلي";
   var transactorName = 'dsad';
+
+  changePanelState() {
+    if (selectedList.isEmpty) {
+      print("why the hell would you open the bill before selecting a fucking single product");
+    }
+    if (selectedList.length > 0) {
+      if (_pc.isPanelOpen) _pc.close();
+      if (_pc.isPanelClosed) _pc.open();
+    }
+  }
 
   calculateTheTotalBillPerProduct() {
     for (int i = 0; i < selectedList.length; i++) {
@@ -85,16 +101,11 @@ class _AddBillState extends State<AddBill> {
   }
 
   updateProductQuantity(index) {
-    //todo must not complete the transaction if the billQuantity > currentQuantity
-    //todo must not complete the transaction if the billQuantity > currentQuantity
-    //todo must not complete the transaction if the billQuantity > currentQuantity
-    //todo must not complete the transaction if the billQuantity > currentQuantity
-    //todo must not complete the transaction if the billQuantity > currentQuantity
-    //todo must not complete the transaction if the billQuantity > currentQuantity
-
-    //todo: try to limit selection in product and greyout the outstock products
-    //todo: try to limit selection in product and greyout the outstock products
-    //todo: try to limit selection in product and greyout the outstock products
+    //todo: greyout the outstock products
+    //todo: greyout the outstock products
+    //todo: greyout the outstock products
+    //todo: greyout the outstock products
+    //todo: greyout the outstock products
 
     double currentTotalAmount = double.parse(selectedList[index].netTotalQuantity);
     print('printing current total amount...');
@@ -165,11 +176,14 @@ class _AddBillState extends State<AddBill> {
           transactorName: transactorName,
           transactionType: "selling",
           transactionAmount: totalBill.toString(),
-          date: DateTime.now().toString(),
+          date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          hour: DateFormat('h:mm a').format(DateTime.now()),
           branch: branch,
           customerName: selectedBuyerType == 'Employee'
               ? selectedEmployee.name
-              : selectedBuyerType == 'Client' ? selectedClient.name : 'المشتري عامل',
+              : selectedBuyerType == 'Client'
+                  ? selectedClient.name
+                  : 'المشتري عامل',
           customerType: selectedBuyerType,
           sellingProducts: sellingProducts(),
           paid: payedAmount.toString(),
@@ -187,21 +201,51 @@ class _AddBillState extends State<AddBill> {
     print('Products Updated');
   }
 
+  File file;
+
+  Widget addPhoto() => file == null
+      ? logo(
+          imageContent: Image.asset("assets/images/myprofile.jpg"), backgroundColor: Colors.white)
+      : logo(imageContent: Image.file(file));
+
   appBar() {
-    return Row(
-      children: <Widget>[
-        RaisedButton(
-          child: Text("profile"),
-          onPressed: () {},
+    return Column(
+      children: [
+        SizedBox(height: _dimensions.heightPercent(3, context)),
+        Row(
+          children: <Widget>[
+            SizedBox(width: _dimensions.widthPercent(.5, context)),
+            Container(
+                height: _dimensions.heightPercent(15, context),
+                width: _dimensions.widthPercent(15, context),
+                child: addPhoto()),
+            SizedBox(width: _dimensions.widthPercent(1, context)),
+            Text(
+              "عمر خالد",
+              style: tableTitleStyle,
+            ),
+            SizedBox(
+              width: _dimensions.widthPercent(53, context),
+            ),
+            Text(
+              '1000',
+              style: appbarCalculations,
+            ),
+            SizedBox(width: _dimensions.widthPercent(2, context)),
+            Text(
+              ':الخزينه',
+              style: appbarCalculations,
+            ),
+            SizedBox(width: _dimensions.widthPercent(2, context)),
+            IconButton(
+              iconSize: 50,
+              onPressed: () {},
+              icon: Icon(Icons.menu),
+            ),
+            SizedBox(width: _dimensions.widthPercent(2, context)),
+          ],
         ),
-        RaisedButton(
-          child: Text("treasury"),
-          onPressed: () {},
-        ),
-        RaisedButton(
-          child: Text('selectedBuyerName'),
-          onPressed: () {},
-        )
+        SizedBox(height: _dimensions.heightPercent(1, context)),
       ],
     );
   }
@@ -254,19 +298,20 @@ class _AddBillState extends State<AddBill> {
 
   tableBuilder() {
     return ListView.builder(
+        shrinkWrap: true,
         itemCount: selectedList.length,
         itemBuilder: (BuildContext context, int index) {
           return Column(
             children: <Widget>[
               Container(
                 constraints: BoxConstraints(
-                  minHeight: 15.0,
-                  maxHeight: 200,
+                  minHeight: _dimensions.heightPercent(5, context),
+                  maxHeight: _dimensions.heightPercent(15, context),
                 ),
                 child: Row(
 //                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    SizedBox(width: 150),
+                    SizedBox(width: _dimensions.widthPercent(9, context)),
                     Container(
                       child: Text(selectedList[index].theTotalBillPerProduct.toString(),
                           style: tableContentStyle),
@@ -275,7 +320,7 @@ class _AddBillState extends State<AddBill> {
                         minWidth: 100,
                       ),
                     ),
-                    SizedBox(width: 230),
+                    SizedBox(width: _dimensions.widthPercent(20, context)),
                     Container(
                       child: Text(
                           selectedBuyerType == "Client"
@@ -289,7 +334,7 @@ class _AddBillState extends State<AddBill> {
                         minWidth: 100,
                       ),
                     ),
-                    SizedBox(width: 70),
+                    SizedBox(width: _dimensions.widthPercent(7, context)),
                     Row(
                       children: [
                         Container(
@@ -313,19 +358,22 @@ class _AddBillState extends State<AddBill> {
                               });
                               calculateTheTotalBillPerProduct();
                               calculateTheTotalBill();
+                              if (selectedList.length < 0 || selectedList.isEmpty) {
+                                _pc.close();
+                              }
                             },
                           ),
                         ),
-                        SizedBox(width: 50),
+                        SizedBox(width: _dimensions.widthPercent(3, context)),
                         Container(
                           constraints: BoxConstraints(
-                            maxWidth: 100.0,
+                            maxWidth: 50.0,
                             minWidth: 50,
                           ),
-                          child: Text(selectedList[index].selectionNo.toString(),
+                          child: Text(selectedList[index].selectionNo.toInt().toString(),
                               style: tableContentStyle),
                         ),
-                        SizedBox(width: 10),
+                        SizedBox(width: _dimensions.widthPercent(2, context)),
                         Container(
                           constraints: BoxConstraints(
                             maxWidth: 100.0,
@@ -336,25 +384,32 @@ class _AddBillState extends State<AddBill> {
                               iconSize: 50,
                               icon: Icon(Icons.add_circle),
                               onPressed: () {
-                                final product = filteredProducts.firstWhere(
-                                    (product) => product.name == selectedList[index].name);
-                                setState(() {
-                                  product.selectionNo += 1;
-                                  product.theTotalBillPerProduct =
-                                      product.selectionNo * int.parse(product.customerPrice);
-                                });
-                                calculateTheTotalBillPerProduct();
-                                calculateTheTotalBill();
+                                if (selectedList[index].selectionNo >=
+                                    double.parse(selectedList[index].netTotalQuantity)) {
+                                  print("product needed");
+                                }
+
+                                if (double.parse(selectedList[index].netTotalQuantity) > 0 &&
+                                    selectedList[index].selectionNo <
+                                        double.parse(selectedList[index].netTotalQuantity)) {
+                                  final product = filteredProducts.firstWhere(
+                                      (product) => product.name == selectedList[index].name);
+                                  setState(() {
+                                    product.selectionNo += 1;
+                                    product.theTotalBillPerProduct =
+                                        product.selectionNo * int.parse(product.customerPrice);
+                                  });
+                                  calculateTheTotalBillPerProduct();
+                                  calculateTheTotalBill();
+                                }
                               }),
                         ),
-                        SizedBox(width: 120),
+                        SizedBox(width: _dimensions.widthPercent(8, context)),
                       ],
                     ),
-
-                    //todo: change customerPrice to the selected one in the slidingUpPanel.
                     Container(
                         constraints: BoxConstraints(
-                          maxWidth: 100.0,
+                          maxWidth: 200.0,
                           minWidth: 100,
                         ),
                         child: Text(selectedList[index].name, style: tableContentStyle))
@@ -429,9 +484,11 @@ class _AddBillState extends State<AddBill> {
     ];
   }
 
+  Dimensions _dimensions = Dimensions();
+
   tableHead() {
     return Container(
-      height: 60,
+      height: _dimensions.heightPercent(6, context),
       color: Colors.blue,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -441,7 +498,7 @@ class _AddBillState extends State<AddBill> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text("الإجمالي", style: tableTitleStyle),
-              SizedBox(width: 10),
+              SizedBox(width: _dimensions.widthPercent(2, context)),
             ],
           )),
           Center(
@@ -449,7 +506,7 @@ class _AddBillState extends State<AddBill> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text("سعر القطعه", style: tableTitleStyle),
-              SizedBox(width: 10),
+              SizedBox(width: _dimensions.widthPercent(2, context)),
             ],
           )),
           Center(
@@ -457,7 +514,7 @@ class _AddBillState extends State<AddBill> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text("العدد", style: tableTitleStyle),
-              SizedBox(width: 10),
+              SizedBox(width: _dimensions.widthPercent(2, context)),
             ],
           )),
           Center(
@@ -465,7 +522,7 @@ class _AddBillState extends State<AddBill> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text("اسم المنتج", style: tableTitleStyle),
-              SizedBox(width: 10),
+              SizedBox(width: _dimensions.widthPercent(2, context)),
             ],
           )),
         ],
@@ -475,6 +532,8 @@ class _AddBillState extends State<AddBill> {
 
   @override
   Widget build(BuildContext context) {
+    var slidingMaxHeight = Dimensions().heightPercent(90, context);
+
     searchWidget(List<Employee> employees, List<Client> clients) {
       if (selectedBuyerType == "Employee") {
         return Container(
@@ -557,37 +616,49 @@ class _AddBillState extends State<AddBill> {
     billHeader({List<Employee> employees, List<Client> clients, context}) {
       return Column(
         children: [
-          SizedBox(
-            height: 15,
-          ),
-          Text(
-            "الفاتوره",
-            style: headerStyle,
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          selectedBuyerType == "House"
-              ? Container()
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Flexible(child: searchWidget(employees, clients)),
-                    SizedBox(
-                      width: 15,
-                    ),
-                    Text(
-                      'اسم المشتري',
-                      style: formTitleStyle,
-                    ),
-                  ],
+          GestureDetector(
+            onTap: () => changePanelState(),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 15,
                 ),
-          SizedBox(height: 10),
-          Wrap(
-            children: buyerTypeChoices(),
+                Text(
+                  "الفاتوره",
+                  style: headerStyle,
+                ),
+              ],
+            ),
           ),
-          SizedBox(height: 10),
+          GestureDetector(
+            onTap: () {},
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 15,
+                ),
+                selectedBuyerType == "House"
+                    ? Container()
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Flexible(child: searchWidget(employees, clients)),
+                          SizedBox(width: 15),
+                          Text(
+                            'اسم المشتري',
+                            style: formTitleStyle,
+                          ),
+                        ],
+                      ),
+                SizedBox(height: 10),
+                Wrap(
+                  children: buyerTypeChoices(),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
         ],
       );
     }
@@ -663,7 +734,7 @@ class _AddBillState extends State<AddBill> {
                           child: Text('اتمام'),
                           onPressed: () {
                             if (billChange < 0) {
-                              transaction(); //todo: make buyer creditor
+                              transaction();
                               if (selectedBuyerType == 'Client') {
                                 updateClientCash(model.oneClient.cash, model.oneClient.id, true);
                               }
@@ -680,7 +751,7 @@ class _AddBillState extends State<AddBill> {
                             }
 
                             if (isCredit) {
-                              transaction(); //todo: make buyer debtor
+                              transaction();
                               if (selectedBuyerType == 'Client') {
                                 updateClientCash(model.oneClient.cash, model.oneClient.id, false);
                               }
@@ -730,6 +801,9 @@ class _AddBillState extends State<AddBill> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  SizedBox(
+                    height: _dimensions.heightPercent(2, context),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -815,132 +889,165 @@ class _AddBillState extends State<AddBill> {
               ));
     }
 
+    Widget _panel(ScrollController sc) {
+      return BaseView<EmployeeClientModel>(
+        onModelReady: (model) => model.fetchClientsAndEmployees(branchName: branch),
+        builder: (context, model, child) => model.state == ViewState.Busy
+            ? Center(child: CircularProgressIndicator())
+            : MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: ListView(
+                  controller: sc,
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min, // Use children total size
+                      children: [
+                        billHeader(
+                            employees: model.employees, clients: model.clients, context: context),
+                        Column(
+                          children: <Widget>[
+                            tableHead(),
+                            tableBuilder(),
+                          ],
+                        ),
+                        billFooter(),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+      );
+    }
+
+    onPanelClosed(List<Product> products) {
+      TransactionModel().fetchTotal();
+      setState(() {
+        selectedCategory == 'All'
+            ? filteredProducts = products
+            : filteredProducts =
+                products.where((product) => product.category == selectedCategory).toList();
+      });
+    }
+
     return BaseView<ProductCategoryModel>(
         onModelReady: (model) => model.fetchCategoriesAndProducts(branchName: branch),
-        builder: (context, model, child) => SafeArea(
-              child: Scaffold(
-                body: GestureDetector(
-                  onTap: () {
-                    // call this method here to hide soft keyboard
-                    FocusScope.of(context).requestFocus(FocusNode());
-                  },
-                  child: SlidingUpPanel(
-                    onPanelOpened: () => filteredProducts = selectedList,
-                    onPanelClosed: () {
-                      TransactionModel().fetchTotal();
-                      setState(() {
-                        selectedCategory == 'All'
-                            ? filteredProducts = model.products
-                            : filteredProducts = model.products
-                                .where((product) => product.category == selectedCategory)
-                                .toList();
-                      });
-                    },
-                    parallaxEnabled: true,
-                    backdropEnabled: true,
-                    backdropOpacity: 0.3,
-                    maxHeight: 800,
-                    borderRadius: radius,
-                    panel: BaseView<EmployeeClientModel>(
-                      onModelReady: (model) => model.fetchClientsAndEmployees(branchName: branch),
-                      builder: (context, model, child) => model.state == ViewState.Busy
-                          ? Center(child: CircularProgressIndicator())
-                          : Column(
-                              children: [
-                                billHeader(
-                                    employees: model.employees,
-                                    clients: model.clients,
-                                    context: context),
-                                Expanded(
-                                  child: Column(
-                                    children: <Widget>[
-                                      tableHead(),
-                                      Expanded(child: tableBuilder()),
-                                    ],
-                                  ),
-                                ),
-                                billFooter(),
-                              ],
-                            ),
-                    ),
-                    collapsed: Container(
+        builder: (context, model, child) => Scaffold(
+              body: GestureDetector(
+                onTap: () {
+                  // call this method here to hide soft keyboard
+                  FocusScope.of(context).requestFocus(FocusNode());
+                },
+                child: SlidingUpPanel(
+                  maxHeight: slidingMaxHeight,
+                  // panelSnapping: false,
+                  onPanelOpened: () => filteredProducts = selectedList,
+                  onPanelClosed: () => onPanelClosed(model.products),
+                  // parallaxEnabled: true,
+                  isDraggable: false,
+                  // backdropEnabled: true,
+                  backdropOpacity: 0.3,
+                  borderRadius: radius,
+                  panelBuilder: (sc) => _panel(sc),
+                  controller: _pc,
+                  collapsed: GestureDetector(
+                    onTap: () => changePanelState(),
+                    child: Container(
                       decoration: BoxDecoration(color: Colors.white, borderRadius: radius),
                       child: Center(
                         child: Text("الفاتوره", style: headerStyle),
                       ),
                     ),
-                    body: model.state == ViewState.Busy
-                        ? Center(child: CircularProgressIndicator())
-                        : Container(
-                            child: CustomScrollView(
-                              slivers: <Widget>[
-                                SliverList(
-                                    delegate: SliverChildListDelegate(
-                                  [appBar()],
-                                )),
-                                SliverToBoxAdapter(
-                                  child: Container(
-                                    height: 50.0,
-                                    child: ListView(
-                                      scrollDirection: Axis.horizontal,
-                                      children: _buildCategoryList(
-                                          category: model.categories, products: model.products),
-                                    ),
+                  ),
+                  body: model.state == ViewState.Busy
+                      ? Center(child: CircularProgressIndicator())
+                      : Container(
+                          child: CustomScrollView(
+                            slivers: <Widget>[
+                              SliverList(
+                                  delegate: SliverChildListDelegate(
+                                [appBar()],
+                              )),
+                              SliverToBoxAdapter(
+                                child: Container(
+                                  height: 50.0,
+                                  child: ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children: _buildCategoryList(
+                                        category: model.categories, products: model.products),
                                   ),
                                 ),
-                                SliverGrid(
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 4,
-                                  ),
-                                  delegate: SliverChildBuilderDelegate(
-                                    (BuildContext context, int index) {
-                                      return filteredProducts.isEmpty
-                                          ? Center(child: Text('لا يوجد منتجات هنا'))
-                                          : Padding(
-                                              padding:
-                                                  EdgeInsets.only(left: 20.0, top: 20.0, right: 20),
-                                              child: item(
-                                                onPressIcon: () {
-                                                  if (filteredProducts[index].selectionNo > 0) {
-                                                    setState(() {
-                                                      filteredProducts[index].selectionNo -= 1;
-                                                      selectedList.removeWhere((selectedList) =>
-                                                          selectedList.selectionNo == 0);
-                                                    });
-                                                  }
-                                                  calculateTheTotalBillPerProduct();
-                                                  calculateTheTotalBill();
-                                                },
-                                                selectionNo: filteredProducts[index].selectionNo,
-                                                statistics: filteredProducts[index].selectionNo > 0
-                                                    ? filteredProducts[index].selectionNo.toString()
-                                                    : "",
-                                                topSpace: SizedBox(height: 50),
-                                                betweenSpace: SizedBox(height: 20),
-                                                title: filteredProducts[index].name,
-                                                assetImage: "",
-                                                backGround: Colors.black,
-                                                onPress: () {
+                              ),
+                              SliverGrid(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                ),
+                                delegate: SliverChildBuilderDelegate(
+                                  (BuildContext context, int index) {
+                                    return filteredProducts.isEmpty
+                                        ? Center(child: Text('لا يوجد منتجات هنا'))
+                                        : Padding(
+                                            padding:
+                                                EdgeInsets.only(left: 20.0, top: 20.0, right: 20),
+                                            child: item(
+                                              onPressIcon: () {
+                                                if (filteredProducts[index].selectionNo > 0) {
+                                                  setState(() {
+                                                    filteredProducts[index].selectionNo -= 1;
+                                                    selectedList.removeWhere((selectedList) =>
+                                                        selectedList.selectionNo == 0);
+                                                  });
+                                                }
+                                                calculateTheTotalBillPerProduct();
+                                                calculateTheTotalBill();
+                                              },
+                                              selectionNo: filteredProducts[index].selectionNo,
+                                              statistics: filteredProducts[index].selectionNo > 0
+                                                  ? filteredProducts[index].selectionNo.toString()
+                                                  : "",
+                                              topSpace: SizedBox(height: 50),
+                                              betweenSpace: SizedBox(height: 20),
+                                              title: filteredProducts[index].name,
+                                              assetImage: "",
+                                              backGround: Colors.black,
+                                              onPress: () {
+                                                if (double.parse(filteredProducts[index]
+                                                            .netTotalQuantity) <
+                                                        0 ||
+                                                    filteredProducts[index].selectionNo >=
+                                                        double.parse(filteredProducts[index]
+                                                            .netTotalQuantity)) {
+                                                  print('product needed');
+                                                }
+
+                                                if (double.parse(filteredProducts[index]
+                                                            .netTotalQuantity) >
+                                                        0 &&
+                                                    filteredProducts[index].selectionNo <
+                                                        double.parse(filteredProducts[index]
+                                                            .netTotalQuantity)) {
                                                   setState(() {
                                                     filteredProducts[index].selectionNo += 1;
                                                   });
+
                                                   if (!selectedList
                                                       .contains(filteredProducts[index])) {
                                                     selectedList.add(filteredProducts[index]);
                                                   }
+
                                                   calculateTheTotalBillPerProduct();
                                                   calculateTheTotalBill();
-                                                },
-                                              ),
-                                            );
-                                    },
-                                    childCount: filteredProducts.length,
-                                  ),
-                                )
-                              ],
-                            ),
+                                                }
+                                              },
+                                            ),
+                                          );
+                                  },
+                                  childCount: filteredProducts.length,
+                                ),
+                              )
+                            ],
                           ),
-                  ),
+                        ),
                 ),
               ),
             ));

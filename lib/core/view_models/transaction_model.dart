@@ -37,7 +37,7 @@ class TransactionModel extends BaseModel {
   }) async {
     setState(ViewState.Busy);
     var result = await _api.getCustomDataCollection(
-      path: "transaction/branches/$branchName/",
+      path: "transactions/branches/$branchName/",
       field: field,
       equalTo: equalTo,
       field2: field2,

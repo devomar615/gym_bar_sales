@@ -17,7 +17,7 @@ Widget item({
   return GestureDetector(
     onTap: onPressIcon,
     child: Badge(
-      position: BadgePosition.topRight(right: -1, top: -15),
+      position: BadgePosition.topEnd(end: -1, top: -15),
       padding: EdgeInsets.all(12),
       badgeColor: Colors.red,
       badgeContent: Column(
