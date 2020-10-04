@@ -4,18 +4,24 @@ import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 
 Widget item({
   String statistics,
-  String title,
+  @required String title,
   String assetImage,
-  String networkImage,
+  @required String networkImage,
   backGround = Colors.black,
   Function onPress,
   Function onPressIcon,
+  Function onTapDownIcon,
+  Function onTapUpIcon,
+  Function onTapCancelIcon,
   topSpace,
   betweenSpace,
-  selectionNo,
+  @required selectionNo,
 }) {
   return GestureDetector(
     onTap: onPressIcon,
+    onTapDown: onTapDownIcon,
+    onTapUp: onTapUpIcon,
+    onTapCancel: onTapCancelIcon,
     child: Badge(
       position: BadgePosition.topEnd(end: -1, top: -15),
       padding: EdgeInsets.all(12),
@@ -27,8 +33,7 @@ Widget item({
           ),
           Text(
             '-',
-            style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 25),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 25),
           ),
         ],
       ),
@@ -51,10 +56,8 @@ Widget item({
                 child: Opacity(
                   opacity: 0.4,
                   child: assetImage == null
-                      ? Image.network(networkImage,
-                          width: 400, height: 300, fit: BoxFit.fill)
-                      : Image.asset(assetImage,
-                          width: 400, height: 300, fit: BoxFit.fill),
+                      ? Image.network(networkImage, width: 400, height: 300, fit: BoxFit.fill)
+                      : Image.asset(assetImage, width: 400, height: 300, fit: BoxFit.fill),
                 ),
               ),
               statistics == null

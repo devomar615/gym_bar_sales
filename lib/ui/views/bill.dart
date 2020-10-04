@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
@@ -18,16 +20,17 @@ import 'package:intl/intl.dart';
 import 'package:search_widget/search_widget.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-class AddBill extends StatefulWidget {
+class Bill extends StatefulWidget {
   @override
-  _AddBillState createState() => _AddBillState();
+  _BillState createState() => _BillState();
 }
 
-class _AddBillState extends State<AddBill> {
+class _BillState extends State<Bill> {
   double totalBill = 0;
   double payedAmount = 0;
   double billChange = 0;
   bool isCredit = false;
+  Timer timer;
 
   final TextEditingController name = TextEditingController();
   final TextEditingController payed = TextEditingController();
@@ -35,8 +38,8 @@ class _AddBillState extends State<AddBill> {
 
   String selectedCategory = "All";
   String selectedBuyerType = "Client";
-  List<Product> filteredProducts = List<Product>();
 
+  List<Product> filteredProducts = List<Product>();
   List<Product> selectedList = List<Product>();
 
   Employee selectedEmployee;
@@ -48,7 +51,7 @@ class _AddBillState extends State<AddBill> {
   var transactorName = 'dsad';
 
   changePanelState() {
-    if (selectedList.isEmpty) {
+    if (selectedList.isEmpty || selectedList.length <= 0) {
       print("why the hell would you open the bill before selecting a fucking single product");
     }
     if (selectedList.length > 0) {
@@ -208,48 +211,6 @@ class _AddBillState extends State<AddBill> {
           imageContent: Image.asset("assets/images/myprofile.jpg"), backgroundColor: Colors.white)
       : logo(imageContent: Image.file(file));
 
-  appBar() {
-    return Column(
-      children: [
-        SizedBox(height: _dimensions.heightPercent(3, context)),
-        Row(
-          children: <Widget>[
-            SizedBox(width: _dimensions.widthPercent(.5, context)),
-            Container(
-                height: _dimensions.heightPercent(15, context),
-                width: _dimensions.widthPercent(15, context),
-                child: addPhoto()),
-            SizedBox(width: _dimensions.widthPercent(1, context)),
-            Text(
-              "عمر خالد",
-              style: tableTitleStyle,
-            ),
-            SizedBox(
-              width: _dimensions.widthPercent(53, context),
-            ),
-            Text(
-              '1000',
-              style: appbarCalculations,
-            ),
-            SizedBox(width: _dimensions.widthPercent(2, context)),
-            Text(
-              ':الخزينه',
-              style: appbarCalculations,
-            ),
-            SizedBox(width: _dimensions.widthPercent(2, context)),
-            IconButton(
-              iconSize: 50,
-              onPressed: () {},
-              icon: Icon(Icons.menu),
-            ),
-            SizedBox(width: _dimensions.widthPercent(2, context)),
-          ],
-        ),
-        SizedBox(height: _dimensions.heightPercent(1, context)),
-      ],
-    );
-  }
-
   _buildCategoryList({List<Category> category, List<Product> products}) {
     List<Widget> choices = List();
     if (selectedCategory == "All") {
@@ -342,26 +303,55 @@ class _AddBillState extends State<AddBill> {
                             maxWidth: 100.0,
                             minWidth: 100,
                           ),
-                          child: IconButton(
-                            color: Colors.red,
-                            iconSize: 50,
-                            icon: Icon(Icons.remove_circle),
-                            onPressed: () {
-                              final product = filteredProducts.firstWhere(
-                                  (product) => product.name == selectedList[index].name);
-                              setState(() {
-                                product.selectionNo -= 1;
-                                product.theTotalBillPerProduct =
-                                    product.selectionNo * int.parse(product.customerPrice);
-                                selectedList
-                                    .removeWhere((selectedList) => selectedList.selectionNo == 0);
+                          child: GestureDetector(
+                            onTapDown: (TapDownDetails details) {
+                              print('down');
+                              timer = Timer.periodic(Duration(milliseconds: 200), (t) {
+                                final product = filteredProducts.firstWhere(
+                                    (product) => product.name == selectedList[index].name);
+                                setState(() {
+                                  product.selectionNo -= 1;
+                                  product.theTotalBillPerProduct =
+                                      product.selectionNo * int.parse(product.customerPrice);
+                                  selectedList
+                                      .removeWhere((selectedList) => selectedList.selectionNo == 0);
+                                });
+                                calculateTheTotalBillPerProduct();
+                                calculateTheTotalBill();
+                                if (selectedList.length < 0 || selectedList.isEmpty) {
+                                  _pc.close();
+                                }
                               });
-                              calculateTheTotalBillPerProduct();
-                              calculateTheTotalBill();
-                              if (selectedList.length < 0 || selectedList.isEmpty) {
-                                _pc.close();
-                              }
                             },
+                            onTapUp: (TapUpDetails details) {
+                              print('up');
+                              timer.cancel();
+                            },
+                            onTapCancel: () {
+                              print('cancel');
+                              timer.cancel();
+                            },
+                            child: IconButton(
+                              color: Colors.red,
+                              iconSize: 50,
+                              icon: Icon(Icons.remove_circle),
+                              onPressed: () {
+                                final product = filteredProducts.firstWhere(
+                                    (product) => product.name == selectedList[index].name);
+                                setState(() {
+                                  product.selectionNo -= 1;
+                                  product.theTotalBillPerProduct =
+                                      product.selectionNo * int.parse(product.customerPrice);
+                                  selectedList
+                                      .removeWhere((selectedList) => selectedList.selectionNo == 0);
+                                });
+                                calculateTheTotalBillPerProduct();
+                                calculateTheTotalBill();
+                                if (selectedList.length < 0 || selectedList.isEmpty) {
+                                  _pc.close();
+                                }
+                              },
+                            ),
                           ),
                         ),
                         SizedBox(width: _dimensions.widthPercent(3, context)),
@@ -645,10 +635,7 @@ class _AddBillState extends State<AddBill> {
                         children: [
                           Flexible(child: searchWidget(employees, clients)),
                           SizedBox(width: 15),
-                          Text(
-                            'اسم المشتري',
-                            style: formTitleStyle,
-                          ),
+                          Text('اسم المشتري', style: formTitleStyle),
                         ],
                       ),
                 SizedBox(height: 10),
@@ -930,6 +917,50 @@ class _AddBillState extends State<AddBill> {
       });
     }
 
+    appBar() {
+      return Column(
+        children: [
+          SizedBox(height: _dimensions.heightPercent(3, context)),
+          Row(
+            children: <Widget>[
+              SizedBox(width: _dimensions.widthPercent(.5, context)),
+              Container(
+                  height: _dimensions.heightPercent(15, context),
+                  width: _dimensions.widthPercent(15, context),
+                  child: addPhoto()),
+              SizedBox(width: _dimensions.widthPercent(1, context)),
+              Text(
+                "عمر خالد",
+                style: tableTitleStyle,
+              ),
+              SizedBox(
+                width: _dimensions.widthPercent(53, context),
+              ),
+              Text(
+                '1000',
+                style: appbarCalculations,
+              ),
+              SizedBox(width: _dimensions.widthPercent(2, context)),
+              Text(
+                ':الخزينه',
+                style: appbarCalculations,
+              ),
+              SizedBox(width: _dimensions.widthPercent(2, context)),
+              IconButton(
+                icon: Icon(Icons.menu),
+                iconSize: 50,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/more');
+                },
+              ),
+              SizedBox(width: _dimensions.widthPercent(2, context)),
+            ],
+          ),
+          SizedBox(height: _dimensions.heightPercent(1, context)),
+        ],
+      );
+    }
+
     return BaseView<ProductCategoryModel>(
         onModelReady: (model) => model.fetchCategoriesAndProducts(branchName: branch),
         builder: (context, model, child) => Scaffold(
@@ -990,6 +1021,30 @@ class _AddBillState extends State<AddBill> {
                                             padding:
                                                 EdgeInsets.only(left: 20.0, top: 20.0, right: 20),
                                             child: item(
+                                              backGround: Colors.blue,
+                                              onTapDownIcon: (TapDownDetails details) {
+                                                print('down');
+                                                timer = Timer.periodic(Duration(milliseconds: 200),
+                                                    (t) {
+                                                  if (filteredProducts[index].selectionNo > 0) {
+                                                    setState(() {
+                                                      filteredProducts[index].selectionNo -= 1;
+                                                      selectedList.removeWhere((selectedList) =>
+                                                          selectedList.selectionNo == 0);
+                                                    });
+                                                  }
+                                                  calculateTheTotalBillPerProduct();
+                                                  calculateTheTotalBill();
+                                                });
+                                              },
+                                              onTapUpIcon: (TapUpDetails details) {
+                                                print('up');
+                                                timer.cancel();
+                                              },
+                                              onTapCancelIcon: () {
+                                                print('cancel');
+                                                timer.cancel();
+                                              },
                                               onPressIcon: () {
                                                 if (filteredProducts[index].selectionNo > 0) {
                                                   setState(() {
@@ -1009,7 +1064,6 @@ class _AddBillState extends State<AddBill> {
                                               betweenSpace: SizedBox(height: 20),
                                               title: filteredProducts[index].name,
                                               assetImage: "",
-                                              backGround: Colors.black,
                                               onPress: () {
                                                 if (double.parse(filteredProducts[index]
                                                             .netTotalQuantity) <
@@ -1039,6 +1093,7 @@ class _AddBillState extends State<AddBill> {
                                                   calculateTheTotalBill();
                                                 }
                                               },
+                                              networkImage: null,
                                             ),
                                           );
                                   },
