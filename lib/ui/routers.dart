@@ -16,8 +16,8 @@ class Routers {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => Bill());
-      case '/more':
-        return MaterialPageRoute(builder: (_) => More());
+      // case '/more':
+      //   return MaterialPageRoute(builder: (_) => More());
       case '/logout':
         return MaterialPageRoute(builder: (_) => Logout());
       case '/add_product':
@@ -25,21 +25,21 @@ class Routers {
       case '/report':
         return MaterialPageRoute(builder: (_) => Report());
 
-      case '/clients':
-        var branch = settings.arguments;
-        return MaterialPageRoute(builder: (_) => Clients());
+      // case '/clients':
+      //   var branch = settings.arguments;
+      //   return MaterialPageRoute(builder: (_) => Clients());
 
-      case '/all_clients':
-        var branch = settings.arguments;
-        return MaterialPageRoute(builder: (_) => AllClients(branchName: branch));
+      // case '/all_clients':
+      //   var branch = settings.arguments;
+      //   return MaterialPageRoute(builder: (_) => AllClients(branchName: branch));
 
-      case '/filtered_clients':
-        List<String> args = settings.arguments;
-        return MaterialPageRoute(builder: (_) => FilteredClients(args: args));
+      // case '/filtered_clients':
+      //   List<String> args = settings.arguments;
+      //   return MaterialPageRoute(builder: (_) => FilteredClients(args: args));
 
-      case '/client_profile':
-        Client clients = settings.arguments;
-        return MaterialPageRoute(builder: (_) => ClientProfile(client: clients));
+      // case '/client_profile':
+      //   Client clients = settings.arguments;
+      //   return MaterialPageRoute(builder: (_) => ClientProfile(client: clients));
 
       default:
         return MaterialPageRoute(

@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 
 class Dimensions {
-  double height(context) => MediaQuery.of(context).size.height;
+  final context;
 
-  double width(context) => MediaQuery.of(context).size.width;
+  Dimensions(this.context);
 
-  heightPercent(percent, context) {
-    return (percent / 100) * height(context);
+  double height() => MediaQuery.of(context).size.height;
+
+  double width() => MediaQuery.of(context).size.width;
+
+  heightPercent(percent) {
+    return (percent / 100) * height();
   }
 
-  widthPercent(percent, context) {
-    return (percent / 100) * width(context);
+  widthPercent(percent) {
+    return (percent / 100) * width();
   }
 }
