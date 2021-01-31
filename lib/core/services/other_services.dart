@@ -23,22 +23,3 @@ String convertToEnglishDigits(String value) {
   return newValue;
 }
 
-cashCalculations({cash, selectedType}) {
-  String filterCash = convertToEnglishDigits(cash.text);
-  String _finalCash; // ignore: unused_local_variable
-  print(filterCash);
-  int cashInt = int.parse(filterCash);
-  if (selectedType == "دائن") {
-    return _finalCash = "-${cashInt.toString()}";
-  }
-  if (selectedType == "خالص") {
-    return _finalCash = "0";
-  }
-  if (selectedType == "مدين") {
-    return _finalCash = filterCash;
-  }
-}
-
-calculateTheTotalBill({totalNo, wholesaleUnit}){
-
-}

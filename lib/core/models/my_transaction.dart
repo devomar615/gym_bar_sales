@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-class Transaction {
+class MyTransaction {
   //information about transaction in general
   String id,
       transactorName, //الشخص اللي عمل العملية
@@ -33,7 +33,7 @@ class Transaction {
 
       //info about deposit
       depositCashAmount; //increase [$outcomeCash]
-  Transaction(
+  MyTransaction(
       {this.id,
       @required this.transactorName,
       this.transactorId,
@@ -62,7 +62,7 @@ class Transaction {
       //
       this.depositCashAmount});
 
-  Transaction.fromMap(Map snapshot, String id)
+  MyTransaction.fromMap(Map snapshot, String id)
       : id = id ?? "",
         transactorName = snapshot['transactorName'] ?? '',
         transactorId = snapshot['transactorId'] ?? '',

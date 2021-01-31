@@ -1,13 +1,12 @@
-import 'package:flutter/widgets.dart';
-import 'package:gym_bar_sales/core/enums.dart';
-
-class BaseModel extends ChangeNotifier {
-  ViewState _state = ViewState.Idle;
-
-  ViewState get state => _state;
-
-  void setState(ViewState viewState) {
-    _state = viewState;
-    notifyListeners();
-  }
-}
+// import 'package:flutter/material.dart';
+//
+// class BaseModel extends ChangeNotifier {
+//   bool _busy = false;
+//
+//   bool get busy => _busy;
+//
+//   void setBusy(bool value) {
+//     _busy = value;
+//     notifyListeners();
+//   }
+// }

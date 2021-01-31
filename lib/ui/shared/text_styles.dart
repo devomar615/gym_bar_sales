@@ -86,6 +86,7 @@ class TextStyles {
 
 // home_item styles
   itemImageTitle() => TextStyle(
+
       fontSize: Dimensions(context).widthPercent(2),
       fontWeight: FontWeight.bold,
       fontFamily: 'Tajawal',
@@ -117,4 +118,16 @@ class TextStyles {
       fontWeight: FontWeight.bold,
       fontSize: Dimensions(context).widthPercent(1.9),
       fontFamily: 'Tajawal');
+
+  // clients_tables styles
+  clientTableTitleStyle() => TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: Dimensions(context).widthPercent(2.2),
+      fontFamily: 'Tajawal',
+      color: Colors.black);
+
+  clientTableContentStyle() => TextStyle(
+      fontSize: Dimensions(context).widthPercent(1.9),
+      fontFamily: 'Tajawal',
+      color: Colors.black);
 }

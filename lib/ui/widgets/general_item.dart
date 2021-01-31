@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 
-class HomeItem {
+class GeneralItem {
   final context;
 
-  HomeItem({@required this.context});
+  GeneralItem({@required this.context});
 
   Widget item({
     String statistics,
@@ -77,8 +77,9 @@ class HomeItem {
                           height: _dimensions.heightPercent(34),
                           fit: BoxFit.fill)
                       : Image.asset(assetImage,
-                      width: _dimensions.widthPercent(30),
-                      height: _dimensions.heightPercent(34), fit: BoxFit.fill),
+                          width: _dimensions.widthPercent(30),
+                          height: _dimensions.heightPercent(34),
+                          fit: BoxFit.fill),
                 ),
                 statistics == null
                     ? titleOnly(title)
@@ -109,6 +110,7 @@ class HomeItem {
         Text(
           title,
           style: _textStyles.itemImageTitle(),
+
         ),
       ],
     );
@@ -120,6 +122,41 @@ class HomeItem {
     return Text(
       title,
       style: _textStyles.itemImageTitle(),
+    );
+  }
+
+  Widget uiCard({title, onPress}) {
+    TextStyles _textStyles = TextStyles(context: context);
+    return GestureDetector(
+      onTap: onPress,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        // elevation: 5,
+        color: Colors.black,
+        semanticContainer: true,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          textDirection: TextDirection.rtl,
+          children: <Widget>[
+            ClipRRect(
+              child: Opacity(
+                opacity: 0.4,
+                child: Image.asset("assets/images/clients.jpeg",
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.fill),
+              ),
+            ),
+            Text(
+              title,
+              style: _textStyles.itemImageTitle(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

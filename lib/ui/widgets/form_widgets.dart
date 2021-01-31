@@ -39,20 +39,25 @@ class FormWidget {
           focusNode: focusNode,
           style: _textStyles.searchTextFieldStyle(),
           decoration: InputDecoration(
-              enabledBorder:  OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(
+                    Radius.circular(_dimensions.heightPercent(7))),
                 borderSide: BorderSide(color: Colors.black54),
               ),
               focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(_dimensions.heightPercent(7))),
                   borderSide:
                       BorderSide(color: Theme.of(context).primaryColor)),
               suffixIcon: Icon(Icons.search),
               border: InputBorder.none,
               hintText: "... ابحث هنا",
               hintStyle: _textStyles.searchTextFieldHintStyle(),
-              contentPadding:  EdgeInsets.only(
-                  left: _dimensions.heightPercent(1), right: _dimensions.heightPercent(1), top: _dimensions.heightPercent(1.5), bottom: _dimensions.heightPercent(1.5))),
+              contentPadding: EdgeInsets.only(
+                  left: _dimensions.heightPercent(1),
+                  right: _dimensions.heightPercent(1),
+                  top: _dimensions.heightPercent(1.5),
+                  bottom: _dimensions.heightPercent(1.5))),
         ));
   }
 }

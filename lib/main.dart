@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gym_bar_sales/core/locator.dart';
-import 'package:gym_bar_sales/core/view_models/product_category_model.dart';
+import 'package:gym_bar_sales/provider_setup.dart';
 import 'package:gym_bar_sales/ui/routers.dart';
+import 'package:gym_bar_sales/ui/views/panel.dart';
 import 'package:provider/provider.dart';
 
 main() async {
@@ -12,19 +12,19 @@ main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
   runApp(MyApp());
-  setupLocator();
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [ChangeNotifierProvider(create: (_) => ProductCategoryModel())],
+        providers: providers,
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          initialRoute: '/',
+          // initialRoute: '/',
           title: 'Gym Bar',
           theme: ThemeData(fontFamily: 'Tajawal'),
+          home: Panel(),
           onGenerateRoute: Routers.generateRoute,
         ));
   }

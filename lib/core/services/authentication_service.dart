@@ -4,27 +4,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/user.dart';
-import '../locator.dart';
 import 'api.dart';
 
 class AuthenticationService {
-  Api _api = locator<Api>();
-  StreamController<UserProfile> userController =
-      StreamController<UserProfile>();
+  Api _api;
 
-  Future<bool> login(String email, String password) async {
+  UserProfile _fetchedUser;
+
+  Future<UserProfile> authenticateUser(String email, String password) async {
     final UserCredential userCredential =
         (await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     ));
 
-    print("agagagaggagagaagagaga user ID is:  ${userCredential.user.uid}");
-    var fetchedUser = await _api.getUserProfile(userCredential.user.uid);
     if (userCredential != null) {
-      userController.add(fetchedUser);
+      _fetchedUser = await _api.getUserProfile(userCredential.user.uid);
     }
-    return userCredential != null;
+
+    return _fetchedUser;
   }
 
   Future<String> signUp(String email, String password) async {
