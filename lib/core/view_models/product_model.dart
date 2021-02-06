@@ -26,8 +26,9 @@ class ProductModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  isThereSelectedProduct(){
-    var selected = _products.where((product) => product.selectionNo > 0).toList();
+  isThereSelectedProduct() {
+    var selected =
+        _products.where((product) => product.selectionNo > 0).toList();
     return selected.length == 0;
   }
 
@@ -40,6 +41,20 @@ class ProductModel extends ChangeNotifier {
   // Future addProduct({Product product, String branchName}) async {
   //   await _api.addDocument(product.toJson(), "products/branches/$branchName/");
   // }
+  calculateTheTotalPerProduct(selectedBuyerType) {
+    var selectedList =
+        _products.where((product) => product.selectionNo > 0).toList();
+    for (int i = 0; i < selectedList.length; i++) {
+      selectedList[i].theTotalBillPerProduct = selectedList[i].selectionNo *
+          int.parse(
+            selectedBuyerType == "Client"
+                ? selectedList[i].customerPrice
+                : selectedBuyerType == "Employee"
+                    ? selectedList[i].employeePrice
+                    : selectedList[i].housePrice,
+          );
+    }
+  }
 
   Future fetchProducts({branchName}) async {
     // loading = true;
@@ -49,5 +64,13 @@ class ProductModel extends ChangeNotifier {
         result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
     // loading = false;
     notifyListeners();
+  }
+
+  Future updateProduct(
+      {productId, Map<String, dynamic> data, String branchName}) async {
+    await _db
+        .collection("products/branches/$branchName/")
+        .doc(productId)
+        .update(data);
   }
 }

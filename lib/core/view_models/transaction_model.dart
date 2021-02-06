@@ -23,6 +23,12 @@ class TransactionModel extends ChangeNotifier {
         .toList();
   }
 
+  Future addTransaction({MyTransaction transaction, branchName}) async {
+    _db
+        .collection("transactions/branches/$branchName")
+        .add(transaction.toJson());
+  }
+
 // Future fetchTransactionByCustomerName({branchName, customerName}) async {
 //   var result = await _db
 //       .collection("transactions/branches/$branchName/")

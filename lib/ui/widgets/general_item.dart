@@ -8,7 +8,7 @@ class GeneralItem {
 
   GeneralItem({@required this.context});
 
-  Widget item({
+  Widget customCard({
     String statistics,
     @required String title,
     String assetImage,

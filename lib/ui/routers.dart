@@ -1,17 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gym_bar_sales/ui/views/home.dart';
 import 'package:gym_bar_sales/ui/views/more/add_product.dart';
 import 'package:gym_bar_sales/ui/views/more/clients.dart';
 import 'package:gym_bar_sales/ui/views/more/logout.dart';
 import 'package:gym_bar_sales/ui/views/more/more.dart';
 import 'package:gym_bar_sales/ui/views/more/report.dart';
+import 'package:gym_bar_sales/ui/views/panel.dart';
 
 class Routers {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return MaterialPageRoute(builder: (_) => Home());
+        return MaterialPageRoute(builder: (_) => Panel());
       case '/more':
         return MaterialPageRoute(builder: (_) => More());
       case '/logout':
@@ -27,8 +27,7 @@ class Routers {
         return MaterialPageRoute(
             builder: (_) => Scaffold(
                   body: Center(
-                    child: Text('No route defined for ${settings.name}'),
-                  ),
+                      child: Text('No route defined for ${settings.name}')),
                 ));
     }
   }

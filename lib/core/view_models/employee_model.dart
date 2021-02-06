@@ -26,4 +26,12 @@ class EmployeeModel extends ChangeNotifier {
         result.docs.map((doc) => Employee.fromMap(doc.data(), doc.id)).toList();
     notifyListeners();
   }
+
+  Future updateEmployee(
+      {employeeId, Map<String, dynamic> data, String branchName}) async {
+    await _db
+        .collection("employees/branches/$branchName/")
+        .doc(employeeId)
+        .update(data);
+  }
 }

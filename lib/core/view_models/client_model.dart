@@ -57,6 +57,14 @@ class ClientModel extends ChangeNotifier {
         result.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList();
     notifyListeners();
   }
+
+  Future updateClient(
+      {clientId, Map<String, dynamic> data, String branchName}) async {
+    await _db
+        .collection("clients/branches/$branchName/")
+        .doc(clientId)
+        .update(data);
+  }
 }
 
 // import 'package:cloud_firestore/cloud_firestore.dart';

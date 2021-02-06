@@ -2,10 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
+import 'package:gym_bar_sales/core/view_models/total_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/views/home.dart';
-import 'package:gym_bar_sales/ui/widgets/panel/panel_body.dart';
+import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_checkout.dart';
+import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_details.dart';
+import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_table.dart';
+import 'package:gym_bar_sales/ui/widgets/panel/panel_buyer_selection.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
@@ -21,15 +25,17 @@ class _PanelState extends State<Panel> {
   final PanelController _pc = PanelController();
 
   Timer timer;
-  var branch = "بيفرلي";
   var _isInit = true;
 
   @override
   void didChangeDependencies() {
+    String branch = context.read<String>();
+    print(branch);
     if (_isInit) {
       Provider.of<ProductModel>(context).fetchProducts(branchName: branch);
       Provider.of<EmployeeModel>(context).fetchEmployees(branchName: branch);
       Provider.of<ClientModel>(context).fetchClients(branchName: branch);
+      Provider.of<TotalModel>(context).fetchTotal();
       Provider.of<CategoryModel>(context).fetchCategories().then((_) {});
     }
     _isInit = false;
@@ -63,7 +69,9 @@ class _PanelState extends State<Panel> {
     return isLoading
         ? Center(child: CircularProgressIndicator())
         : Scaffold(
-            body: SlidingUpPanel(
+            body: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: SlidingUpPanel(
                 controller: _pc,
                 maxHeight: _dimensions.heightPercent(85),
                 minHeight: _dimensions.heightPercent(13),
@@ -75,10 +83,25 @@ class _PanelState extends State<Panel> {
                 // backdropEnabled: true,
                 backdropOpacity: 0.3,
                 borderRadius: radius,
-                panelBuilder: (sc) => PanelBody(
-                      sc: sc,
-                      pc: _pc,
-                    ),
+                panelBuilder: (sc) => MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: ListView(
+                    controller: sc,
+                    children: [
+                      Column(
+                        mainAxisSize:
+                            MainAxisSize.min, // Use children total size
+                        children: [
+                          PanelBuyerSelection(panelController: _pc),
+                          PanelBillTable(panelController: _pc),
+                          PanelBillDetails(),
+                          PanelBillCheckout(),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
                 collapsed: GestureDetector(
                   onTap: () => changePanelState(),
                   child: Container(
@@ -98,7 +121,9 @@ class _PanelState extends State<Panel> {
                     }
                   },
                   child: Home(),
-                )),
+                ),
+              ),
+            ),
           );
   }
 }

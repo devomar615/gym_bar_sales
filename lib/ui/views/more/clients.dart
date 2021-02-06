@@ -379,6 +379,7 @@ class Clients extends StatelessWidget {
               ],
             ),
           );
+
     body() {
       return Row(
         children: [
