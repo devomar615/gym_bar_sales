@@ -1,15 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/client.dart';
-import 'package:gym_bar_sales/core/models/employee.dart';
-import 'package:gym_bar_sales/core/view_models/base_model.dart';
-import 'package:gym_bar_sales/core/services/api.dart';
 
 class ClientModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   bool nameAscending = false;
   bool cashAscending = false;
+
+  Status _status = Status.Busy;
+
+  Status get status => _status;
 
   List<Client> _client;
   Client _selectedClient;
@@ -52,18 +54,23 @@ class ClientModel extends ChangeNotifier {
   }
 
   Future fetchClients({branchName}) async {
+    _status = Status.Busy;
     var result = await _db.collection("clients/branches/$branchName/").get();
     _client =
         result.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList();
+    _status = Status.Idle;
     notifyListeners();
   }
 
   Future updateClient(
       {clientId, Map<String, dynamic> data, String branchName}) async {
+    _status = Status.Busy;
+
     await _db
         .collection("clients/branches/$branchName/")
         .doc(clientId)
         .update(data);
+    _status = Status.Idle;
   }
 }
 

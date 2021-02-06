@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 
 class ProductModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // bool loading = true;
+  Status _status = Status.Busy;
+
+  Status get status => _status;
+
   List<Product> _products;
 
   List<Product> filterProduct(String selectedCategory) {
@@ -57,20 +61,25 @@ class ProductModel extends ChangeNotifier {
   }
 
   Future fetchProducts({branchName}) async {
+    _status = Status.Busy;
     // loading = true;
     var result = await _db.collection("products/branches/$branchName/").get();
     // var result2 = await _api.getDataCollection("products/branches/$branchName/");
     _products =
         result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
     // loading = false;
+    _status = Status.Idle;
     notifyListeners();
   }
 
   Future updateProduct(
       {productId, Map<String, dynamic> data, String branchName}) async {
+    _status = Status.Busy;
+
     await _db
         .collection("products/branches/$branchName/")
         .doc(productId)
         .update(data);
+    _status = Status.Idle;
   }
 }

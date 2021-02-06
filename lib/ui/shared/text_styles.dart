@@ -69,6 +69,11 @@ class TextStyles {
       fontFamily: 'Tajawal',
       color: Colors.black);
 
+  popupMenuButtonStyle() => TextStyle(
+      fontSize: Dimensions(context).widthPercent(2),
+      fontFamily: 'Tajawal',
+      color: Colors.black);
+
   appBarCalculationsStyle(cash) {
     if (double.parse(cash) <= 0) {
       return TextStyle(
@@ -84,9 +89,15 @@ class TextStyles {
     }
   }
 
+  appBarTextStyle() {
+    return TextStyle(
+        fontSize: Dimensions(context).widthPercent(2.0),
+        fontFamily: 'Tajawal',
+        color: Colors.black);
+  }
+
 // home_item styles
   itemImageTitle() => TextStyle(
-
       fontSize: Dimensions(context).widthPercent(2),
       fontWeight: FontWeight.bold,
       fontFamily: 'Tajawal',

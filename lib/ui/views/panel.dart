@@ -1,18 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/core/view_models/total_model.dart';
+import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
-import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/views/home.dart';
+import 'package:gym_bar_sales/ui/widgets/panel/collapsed_panel.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_checkout.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_details.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_table.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/panel_buyer_selection.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/view_models/client_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_model.dart';
 
@@ -29,14 +30,16 @@ class _PanelState extends State<Panel> {
 
   @override
   void didChangeDependencies() {
-    String branch = context.read<String>();
-    print(branch);
     if (_isInit) {
-      Provider.of<ProductModel>(context).fetchProducts(branchName: branch);
+      String branch = context.read<String>();
+      print(branch);
       Provider.of<EmployeeModel>(context).fetchEmployees(branchName: branch);
       Provider.of<ClientModel>(context).fetchClients(branchName: branch);
       Provider.of<TotalModel>(context).fetchTotal();
-      Provider.of<CategoryModel>(context).fetchCategories().then((_) {});
+      Provider.of<TransactionModel>(context)
+          .fetchTransaction(branchName: branch);
+      Provider.of<CategoryModel>(context).fetchCategories();
+      Provider.of<ProductModel>(context).fetchProducts(branchName: branch);
     }
     _isInit = false;
     super.didChangeDependencies();
@@ -45,31 +48,14 @@ class _PanelState extends State<Panel> {
   @override
   Widget build(BuildContext context) {
     Dimensions _dimensions = Dimensions(context);
-    TextStyles _textStyles = TextStyles(context: context);
-
+    var productModel = Provider.of<ProductModel>(context);
     BorderRadiusGeometry radius = BorderRadius.only(
         topLeft: Radius.circular(_dimensions.heightPercent(3)),
         topRight: Radius.circular(_dimensions.heightPercent(3)));
-
-    var productModel = Provider.of<ProductModel>(context);
-
-    List<Product> selectedList = productModel.getSelectedProducts();
-
-    changePanelState() {
-      if (selectedList.isEmpty || selectedList.length <= 0) {
-        print("no product selected to open the pill");
-      }
-      if (selectedList.length > 0) {
-        // if (_pc.isPanelOpen) _pc.close();
-        if (_pc.isPanelClosed) _pc.open();
-      }
-    }
-
-    var isLoading = false;
-    return isLoading
-        ? Center(child: CircularProgressIndicator())
-        : Scaffold(
-            body: GestureDetector(
+    return Scaffold(
+      body: productModel.status == Status.Busy
+          ? Center(child: CircularProgressIndicator())
+          : GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: SlidingUpPanel(
                 controller: _pc,
@@ -102,17 +88,7 @@ class _PanelState extends State<Panel> {
                     ],
                   ),
                 ),
-                collapsed: GestureDetector(
-                  onTap: () => changePanelState(),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.white, borderRadius: radius),
-                    child: Center(
-                      child:
-                          Text("الفاتوره", style: _textStyles.billTitleStyle()),
-                    ),
-                  ),
-                ),
+                collapsed: CollapsedPanel(pc: _pc),
                 body: GestureDetector(
                   onTap: () {
                     if (_pc.isPanelOpen) {
@@ -124,6 +100,6 @@ class _PanelState extends State<Panel> {
                 ),
               ),
             ),
-          );
+    );
   }
 }

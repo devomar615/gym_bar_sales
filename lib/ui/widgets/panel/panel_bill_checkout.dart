@@ -5,6 +5,7 @@ import 'package:gym_bar_sales/core/models/my_transaction.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/models/total.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
+import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/core/view_models/client_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_model.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
@@ -26,6 +27,7 @@ class PanelBillCheckout extends StatelessWidget {
     EmployeeModel employeeModel = Provider.of<EmployeeModel>(context);
     TotalModel totalModel = Provider.of<TotalModel>(context);
     BillServices billServices = Provider.of<BillServices>(context);
+    HomeServices homeServices = Provider.of<HomeServices>(context);
 
     Employee selectedEmployee = employeeModel.selectedEmployee;
     Client selectedClient = clientModel.selectedClient;
@@ -33,7 +35,6 @@ class PanelBillCheckout extends StatelessWidget {
     List<Total> total = totalModel.total;
     String selectedBuyerType = billServices.selectedBuyerType;
     double billChange = billServices.billChange;
-    bool isCredit = billServices.isCredit;
     TextStyles _textStyles = TextStyles(context: context);
     Dimensions _dimensions = Dimensions(context);
 
@@ -296,6 +297,20 @@ class PanelBillCheckout extends StatelessWidget {
           },
         );
 
+    void sellingTransaction() {
+      if (selectedClient == null &&
+          selectedEmployee == null &&
+          selectedBuyerType != "House") {
+        _noSelectedBuyerNameOrTypeDialog();
+      }
+      if (selectedClient != null ||
+          selectedEmployee != null ||
+          selectedBuyerType == "House") {
+        _confirmTransactionDialog(total[0].cash);
+      }
+    }
+
+    void buyingTransaction() {}
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -309,17 +324,9 @@ class PanelBillCheckout extends StatelessWidget {
             color: Colors.blue,
             child: Text("إتمام العمليه", style: _textStyles.billButtonStyle()),
             onPressed: () {
-              if (selectedClient == null &&
-                  selectedEmployee == null &&
-                  selectedBuyerType != "House") {
-                _noSelectedBuyerNameOrTypeDialog();
-              }
-              if (selectedClient != null ||
-                  selectedEmployee != null ||
-                  selectedBuyerType == "House") {
-                _confirmTransactionDialog(total[0].cash);
-              }
-              // }
+              homeServices.switcherOpen
+                  ? sellingTransaction()
+                  : buyingTransaction();
             },
             shape: RoundedRectangleBorder(
                 borderRadius:

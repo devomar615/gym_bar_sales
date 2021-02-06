@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
@@ -23,112 +24,123 @@ class ProductsGrid extends StatelessWidget {
     List<Product> products = productModel.filterProduct(selectedCategory);
     List<Product> selectedList = productModel.getSelectedProducts();
 
-    return SliverGrid(
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return products.isEmpty
-              ? Center(child: Text('لا يوجد منتجات هنا'))
-              : Padding(
-                  padding: EdgeInsets.only(
-                      left: _dimensions.widthPercent(1),
-                      top: _dimensions.heightPercent(3),
-                      right: _dimensions.widthPercent(1)),
-                  child: double.parse(products[index].netTotalQuantity) <= 0
-                      ? _generalItem.customCard(
-                          selectionNo: null,
-                          networkImage:
-                              "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
-                          title: products[index].name,
-                          backGround: Colors.grey)
-                      : _generalItem.customCard(
-                          backGround: Colors.blue,
-                          onTapDownItem: (_) {},
-                          onTapDownIcon: (_) {
-                            print('down');
-                            timer = Timer.periodic(Duration(milliseconds: 200),
-                                (_) {
-                              if (products[index].selectionNo > 0) {
-                                productModel.removeProductSelectionById(
-                                    products[index].id);
-                              }
-                              productModel.calculateTheTotalPerProduct(
-                                  billServices.selectedBuyerType);
-                              billServices.calculateTheTotalBill(selectedList);
-                              billServices.calculateChange();
-                              if (billServices.selectedBuyerType == "House") {
-                                billServices.calculateOnlyForHouseType();
-                              }
-                            });
-                          },
-                          onPressItem: () {
-                            if (double.parse(products[index].netTotalQuantity) <
-                                    0 ||
-                                products[index].selectionNo >=
-                                    double.parse(
-                                        products[index].netTotalQuantity)) {
-                              print('product needed');
-                            }
+    return productModel.status == Status.Busy
+        ? Center(child: CircularProgressIndicator())
+        : SliverGrid(
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return products.isEmpty
+                    ? Center(child: Text('لا يوجد منتجات هنا'))
+                    : Padding(
+                        padding: EdgeInsets.only(
+                            left: _dimensions.widthPercent(1),
+                            top: _dimensions.heightPercent(3),
+                            right: _dimensions.widthPercent(1)),
+                        child: double.parse(products[index].netTotalQuantity) <=
+                                0
+                            ? _generalItem.customCard(
+                                selectionNo: null,
+                                networkImage:
+                                    "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
+                                title: products[index].name,
+                                backGround: Colors.grey)
+                            : _generalItem.customCard(
+                                backGround: Colors.blue,
+                                onTapDownItem: (_) {},
+                                onTapDownIcon: (_) {
+                                  print('down');
+                                  timer = Timer.periodic(
+                                      Duration(milliseconds: 200), (_) {
+                                    if (products[index].selectionNo > 0) {
+                                      productModel.removeProductSelectionById(
+                                          products[index].id);
+                                    }
+                                    productModel.calculateTheTotalPerProduct(
+                                        billServices.selectedBuyerType);
+                                    billServices
+                                        .calculateTheTotalBill(selectedList);
+                                    billServices.calculateChange();
+                                    if (billServices.selectedBuyerType ==
+                                        "House") {
+                                      billServices.calculateOnlyForHouseType();
+                                    }
+                                  });
+                                },
+                                onPressItem: () {
+                                  if (double.parse(products[index]
+                                              .netTotalQuantity) <
+                                          0 ||
+                                      products[index].selectionNo >=
+                                          double.parse(products[index]
+                                              .netTotalQuantity)) {
+                                    print('product needed');
+                                  }
 
-                            if (double.parse(products[index].netTotalQuantity) >
-                                    0 &&
-                                products[index].selectionNo <
-                                    double.parse(
-                                        products[index].netTotalQuantity)) {
-                              productModel
-                                  .addProductSelectionById(products[index].id);
-                            }
-                            productModel.calculateTheTotalPerProduct(
-                                billServices.selectedBuyerType);
-                            billServices.calculateTheTotalBill(selectedList);
-                            billServices.calculateChange();
-                            if (billServices.selectedBuyerType == "House") {
-                              billServices.calculateOnlyForHouseType();
-                            }
-                          },
-                          onPressIcon: () {
-                            if (products[index].selectionNo > 0) {
-                              productModel.removeProductSelectionById(
-                                  products[index].id);
-                            }
-                            productModel.calculateTheTotalPerProduct(
-                                billServices.selectedBuyerType);
-                            billServices.calculateTheTotalBill(selectedList);
-                            billServices.calculateChange();
-                            if (billServices.selectedBuyerType == "House") {
-                              billServices.calculateOnlyForHouseType();
-                            }
-                            // calculateTheTotalBillPerProduct();
-                            // calculateTheTotalBill();
-                          },
-                          onTapUpIcon: (_) {
-                            print('cancel');
-                            timer.cancel();
-                          },
-                          onTapCancelIcon: () {
-                            print('cancel');
-                            timer.cancel();
-                          },
-                          selectionNo: products[index].selectionNo,
-                          statistics: products[index].selectionNo > 0
-                              ? products[index].selectionNo.toString()
-                              : "",
-                          topSpace: SizedBox(
-                            height: _dimensions.heightPercent(9),
-                          ),
-                          betweenSpace: SizedBox(
-                            height: _dimensions.heightPercent(3),
-                          ),
-                          title: products[index].name,
-                          assetImage: null,
-                          networkImage:
-                              "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
-                        ),
-                );
-        },
-        childCount: products.length,
-      ),
-    );
+                                  if (double.parse(products[index]
+                                              .netTotalQuantity) >
+                                          0 &&
+                                      products[index].selectionNo <
+                                          double.parse(products[index]
+                                              .netTotalQuantity)) {
+                                    productModel.addProductSelectionById(
+                                        products[index].id);
+                                  }
+                                  productModel.calculateTheTotalPerProduct(
+                                      billServices.selectedBuyerType);
+                                  billServices
+                                      .calculateTheTotalBill(selectedList);
+                                  billServices.calculateChange();
+                                  if (billServices.selectedBuyerType ==
+                                      "House") {
+                                    billServices.calculateOnlyForHouseType();
+                                  }
+                                },
+                                onPressIcon: () {
+                                  if (products[index].selectionNo > 0) {
+                                    productModel.removeProductSelectionById(
+                                        products[index].id);
+                                  }
+                                  productModel.calculateTheTotalPerProduct(
+                                      billServices.selectedBuyerType);
+                                  billServices
+                                      .calculateTheTotalBill(selectedList);
+                                  billServices.calculateChange();
+                                  if (billServices.selectedBuyerType ==
+                                      "House") {
+                                    billServices.calculateOnlyForHouseType();
+                                  }
+                                  // calculateTheTotalBillPerProduct();
+                                  // calculateTheTotalBill();
+                                },
+                                onTapUpIcon: (_) {
+                                  print('cancel');
+                                  timer.cancel();
+                                },
+                                onTapCancelIcon: () {
+                                  print('cancel');
+                                  timer.cancel();
+                                },
+                                selectionNo: products[index].selectionNo,
+                                statistics: products[index].selectionNo > 0
+                                    ? products[index].selectionNo.toString()
+                                    : "",
+                                topSpace: SizedBox(
+                                  height: _dimensions.heightPercent(9),
+                                ),
+                                betweenSpace: SizedBox(
+                                  height: _dimensions.heightPercent(3),
+                                ),
+                                title: products[index].name,
+                                assetImage: null,
+                                networkImage:
+                                    "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
+                              ),
+                      );
+              },
+              childCount: products.length,
+            ),
+          );
   }
 }

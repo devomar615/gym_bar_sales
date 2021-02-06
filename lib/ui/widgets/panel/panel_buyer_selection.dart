@@ -3,6 +3,7 @@ import 'package:gym_bar_sales/core/models/client.dart';
 import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
+import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/core/view_models/client_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_model.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
@@ -31,6 +32,7 @@ class PanelBuyerSelection extends StatelessWidget {
     var employeeModel = Provider.of<EmployeeModel>(context);
     var clientModel = Provider.of<ClientModel>(context);
     var billServices = Provider.of<BillServices>(context);
+    HomeServices homeServices = Provider.of<HomeServices>(context);
 
     List<Product> selectedList = productModel.getSelectedProducts();
 
@@ -251,16 +253,19 @@ class PanelBuyerSelection extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(width: _dimensions.widthPercent(2)),
-                        _showNameOfTheBuyer(employees, clients),
+                        homeServices.switcherOpen
+                            ? _showNameOfTheBuyer(employees, clients)
+                            : Text("اسم الراجل بتاع الكاشير",
+                                style: _textStyles.billSearchTitleStyle()),
                         SizedBox(width: _dimensions.widthPercent(1)),
                         Text(':اسم المشتري',
                             style: _textStyles.billSearchTitleStyle()),
                       ],
                     ),
               SizedBox(height: _dimensions.heightPercent(1.5)),
-              Wrap(
-                children: buyerTypeChoices(),
-              ),
+              homeServices.switcherOpen
+                  ? Wrap(children: buyerTypeChoices())
+                  : Container(),
               SizedBox(height: _dimensions.heightPercent(1.5)),
             ],
           ),

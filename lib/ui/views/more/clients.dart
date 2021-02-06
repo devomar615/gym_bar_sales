@@ -41,11 +41,15 @@ class Clients extends StatelessWidget {
 
     var transactionModel = Provider.of<TransactionModel>(context);
 
-    var filteredTransactions;
-    if (selectedClient != null) {
-      filteredTransactions =
-          transactionModel.getTransactionByCustomerName(selectedClient.name);
+    var filteredTransactions = transactionModel.filteredTransactions;
+
+    void fetchTransaction() {
+      var customerName = clientModel.selectedClient.name;
+      transactionModel.fetchTransactionByCustomerName(
+          branchName: "بيفرلي", customerName: customerName);
+      // transactionModel.getTransactionByCustomerName(selectedClient.name);
     }
+
     Widget addPhoto() {
       if (file == null) {
         return _formWidget.logo(
@@ -176,11 +180,13 @@ class Clients extends StatelessWidget {
                   onTap: () {
                     if (selectedClient == null) {
                       clientModel.selectedClient = filteredClients[index];
-                    }
-                    if (filteredClients[index].id == selectedClient.id) {
+                      fetchTransaction();
+                    } else if (filteredClients[index].id == selectedClient.id) {
                       clientModel.selectedClient = null;
-                    } else
+                    } else {
                       clientModel.selectedClient = filteredClients[index];
+                      fetchTransaction();
+                    }
                   },
                 ),
               ),
@@ -330,55 +336,68 @@ class Clients extends StatelessWidget {
       return transactionList;
     }
 
-    rightBody() => selectedClient == null
-        ? Expanded(flex: 2, child: Center(child: Text("no item selected")))
-        : Expanded(
+    rightBody() => selectedClient == null || filteredTransactions == null
+        ? Expanded(
             flex: 2,
-            child: ListView(
-              children: <Widget>[
-                SizedBox(
-                  height: 50,
+            child: Center(
+              child: Text("no item selected"),
+            ),
+          )
+        : transactionModel.status == Status.Busy
+            ? Expanded(
+                flex: 2,
+                child: Center(
+                  child: Text("Loading..."),
                 ),
-                Container(width: 200, height: 200, child: addPhoto()),
-                SizedBox(
-                  height: 15,
-                ),
-                Center(
-                    child: Text(
-                  selectedClient.name,
-                  style: TextStyles(context: context).clientTableContentStyle(),
-                )),
-                SizedBox(
-                  height: 15,
-                ),
-                //header("الوصف"),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    RaisedButton(
-                      onPressed: () {
-                        // dialogue(context, "سحب", () {
-                        //   print("سحب");
-                        // });
-                      },
-                      child: Text("سحب"),
+              )
+            : Expanded(
+                flex: 2,
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 50,
                     ),
-                    RaisedButton(
-                      onPressed: () {
-                        // dialogue(context, "ايداع", () {
-                        //   print("ايداع");
-                        // });
-                      },
-                      child: Text("ايداع"),
+                    Container(width: 200, height: 200, child: addPhoto()),
+                    SizedBox(
+                      height: 15,
                     ),
+                    Center(
+                        child: Text(
+                      selectedClient.name,
+                      style: TextStyles(context: context)
+                          .clientTableContentStyle(),
+                    )),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    //header("الوصف"),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        RaisedButton(
+                          onPressed: () {
+                            // dialogue(context, "سحب", () {
+                            //   print("سحب");
+                            // });
+                          },
+                          child: Text("سحب"),
+                        ),
+                        RaisedButton(
+                          onPressed: () {
+                            // dialogue(context, "ايداع", () {
+                            //   print("ايداع");
+                            // });
+                          },
+                          child: Text("ايداع"),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 15),
+                    tableHead(),
+                    Column(children: tableBuilder()),
                   ],
                 ),
-                SizedBox(height: 15),
-                tableHead(),
-                Column(children: tableBuilder()),
-              ],
-            ),
-          );
+              );
 
     body() {
       return Row(

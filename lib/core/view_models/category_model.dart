@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
 import 'package:gym_bar_sales/core/services/api.dart';
+
+import '../enums.dart';
 
 class CategoryModel extends ChangeNotifier {
   Api _api;
@@ -9,11 +11,13 @@ class CategoryModel extends ChangeNotifier {
 
   List<Category> _categories;
   String _selectedCategory = "All";
+  Status _status = Status.Busy;
+
+  Status get status => _status;
 
   set selectedCategory(String value) {
     _selectedCategory = value;
     notifyListeners();
-
   }
 
   List<Category> get categories => _categories;
@@ -24,16 +28,21 @@ class CategoryModel extends ChangeNotifier {
   //   _selectedCategory = value;
   // }
 
-
   Future addCategory(Category category) async {
+    _status = Status.Busy;
+
     await _api.addDocument(category.toJson(), "categories");
+    _status = Status.Idle;
   }
 
   Future fetchCategories() async {
+    _status = Status.Busy;
+
     var result = await _db.collection("categories").get();
 
     // var result = await _api.getDataCollection("categories");
     _categories =
         result.docs.map((doc) => Category.fromMap(doc.data(), doc.id)).toList();
+    _status = Status.Idle;
   }
 }
