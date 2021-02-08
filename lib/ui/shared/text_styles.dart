@@ -141,4 +141,11 @@ class TextStyles {
       fontSize: Dimensions(context).widthPercent(1.9),
       fontFamily: 'Tajawal',
       color: Colors.black);
+
+// clients_widgets styles
+  iconTitle() => TextStyle(
+      fontSize: Dimensions(context).widthPercent(1.5),
+      fontWeight: FontWeight.bold,
+      fontFamily: 'Tajawal',
+      color: Colors.black);
 }

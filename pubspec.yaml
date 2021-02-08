@@ -27,7 +27,7 @@ dependencies:
   shared_preferences: ^0.5.12+4
   flushbar: ^1.10.4
   provider: ^4.3.3
-  flutter_speed_dial: ^1.2.5
+  flutter_speed_dial: ^2.1.1
   search_widget: ^1.0.2
   cupertino_icons: ^1.0.0
   sliding_up_panel: ^1.0.2
@@ -65,6 +65,8 @@ flutter:
     - assets/images/logo.jpg
     - assets/images/add.jpg
     - assets/images/myprofile.jpg
+    - assets/images/deposit.png
+    - assets/images/withdraw.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

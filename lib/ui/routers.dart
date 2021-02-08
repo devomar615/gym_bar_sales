@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/ui/views/more/clients.dart';
 import 'package:gym_bar_sales/ui/views/more/logout.dart';
 import 'package:gym_bar_sales/ui/views/more/report.dart';
-import 'package:gym_bar_sales/ui/views/panel.dart';
+import 'package:gym_bar_sales/ui/views/bill_panel.dart';
 import 'package:gym_bar_sales/ui/views/settings.dart';
 
 class Routers {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return MaterialPageRoute(builder: (_) => Panel());
+        return MaterialPageRoute(builder: (_) => BillPanel());
       case '/logout':
         return MaterialPageRoute(builder: (_) => Logout());
       case '/settings':

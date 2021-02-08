@@ -17,12 +17,12 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:gym_bar_sales/core/view_models/client_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_model.dart';
 
-class Panel extends StatefulWidget {
+class BillPanel extends StatefulWidget {
   @override
-  _PanelState createState() => _PanelState();
+  _BillPanelState createState() => _BillPanelState();
 }
 
-class _PanelState extends State<Panel> {
+class _BillPanelState extends State<BillPanel> {
   final PanelController _pc = PanelController();
 
   Timer timer;
