@@ -22,7 +22,7 @@ class Clients extends StatelessWidget {
             ClientsList(),
             OneClientInfo(),
             SizedBox(
-              width: 20,
+              width: 20
             ),
           ],
         ),

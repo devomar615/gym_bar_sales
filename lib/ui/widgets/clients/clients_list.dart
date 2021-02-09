@@ -167,7 +167,7 @@ class ClientsList extends StatelessWidget {
                       clientModel.selectedClient = filteredClients[index];
                       fetchTransaction();
                     } else if (filteredClients[index].id == selectedClient.id) {
-                      clientModel.selectedClient = null;
+                      // clientModel.selectedClient = null;
                     } else {
                       clientModel.selectedClient = filteredClients[index];
                       fetchTransaction();

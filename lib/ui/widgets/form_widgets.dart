@@ -26,6 +26,49 @@ class FormWidget {
     );
   }
 
+  Widget formTextFieldTemplate({
+    controller,
+    validator,
+    hint,
+    ValueChanged<String> onChanged,
+    secure = false,
+    double height = 51,
+    double left = 10,
+    double right = 10,
+    double bottom = 0,
+    double top = 0,
+  }) {
+    return Container(
+      margin:
+          EdgeInsets.only(left: left, right: right, bottom: bottom, top: top),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          height: height,
+          child: TextFormField(
+            onChanged: onChanged,
+            controller: controller,
+            validator: validator,
+            obscureText: secure,
+            textAlign: TextAlign.right,
+            decoration: InputDecoration(
+              isDense: true,
+//            contentPadding: EdgeInsets.only(top: height, right: 10,),
+//               labelStyle: formLabelsStyle,
+              labelText: hint,
+//          hintStyle: TextStyle(decoration: ),
+              border: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   searchTextField(controller, focusNode) {
     Dimensions _dimensions = Dimensions(context);
     TextStyles _textStyles = TextStyles(context: context);

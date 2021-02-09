@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_bar_sales/core/models/product.dart';
 
 class BillServices extends ChangeNotifier {
   String _selectedBuyerType = "Client";
@@ -53,6 +54,15 @@ class BillServices extends ChangeNotifier {
     double sum = 0;
     selectedList.forEach((element) {
       sum += element.theTotalBillPerProduct;
+    });
+    totalBill = sum;
+    notifyListeners();
+  }
+
+  calculateTheTotalBuyingBill(List<Product> selectedList) {
+    double sum = 0;
+    selectedList.forEach((element) {
+      sum += element.theTotalBillPerProduct * element.selectionNo;
     });
     totalBill = sum;
     notifyListeners();

@@ -25,8 +25,21 @@ class ProductModel extends ChangeNotifier {
     return _products.where((product) => product.selectionNo > 0).toList();
   }
 
+  addProductSelectionById(productId) {
+    _products.firstWhere((product) => product.id == productId).selectionNo += 1;
+    notifyListeners();
+  }
+
   removeProductSelectionById(productId) {
     _products.firstWhere((product) => product.id == productId).selectionNo -= 1;
+    notifyListeners();
+  }
+
+  cleanProductSelection() {
+    _products.forEach((element) {
+      element.theTotalBillPerProduct = 0;
+      element.selectionNo = 0;
+    });
     notifyListeners();
   }
 
@@ -36,8 +49,13 @@ class ProductModel extends ChangeNotifier {
     return selected.length == 0;
   }
 
-  addProductSelectionById(productId) {
-    _products.firstWhere((product) => product.id == productId).selectionNo += 1;
+  addTheTotalBuyingPerProduct(
+      {@required double changingValue, @required productId}) {
+
+    _products
+        .firstWhere((product) => product.id == productId)
+        .theTotalBillPerProduct = changingValue;
+
     notifyListeners();
   }
 
@@ -59,6 +77,17 @@ class ProductModel extends ChangeNotifier {
           );
     }
   }
+
+  // calculateTheTotalBill(selectedList) {
+  //   double sum = 0;
+  //   selectedList.forEach((element) {
+  //     sum += element.theTotalBillPerProduct;
+  //   });
+  //   totalBill = sum;
+  //   notifyListeners();
+  // }
+  //
+  //
 
   Future fetchProducts({branchName}) async {
     _status = Status.Busy;

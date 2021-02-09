@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/models/category.dart';
+import 'package:gym_bar_sales/core/services/bill_services.dart';
 import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
+import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
@@ -25,7 +27,9 @@ class Home extends StatelessWidget {
     Dimensions _dimensions = Dimensions(context);
 
     CategoryModel categoryModel = Provider.of<CategoryModel>(context);
+    ProductModel productModel = Provider.of<ProductModel>(context);
     HomeServices homeServices = Provider.of<HomeServices>(context);
+    BillServices billServices = Provider.of<BillServices>(context);
     String selectedCategory = categoryModel.selectedCategory;
     List<Category> categories = categoryModel.categories;
     String transactionType = homeServices.transactionType;
@@ -87,15 +91,16 @@ class Home extends StatelessWidget {
         Navigator.pushNamed(context, '/clients');
       }
       if (choice == "البلاغات") {
-        Navigator.pushNamed(context, '/report');
+        // Navigator.pushNamed(context, '/report');
       }
       if (choice == "تسجيل الخروج") {
-        Navigator.pushNamed(context, '/logout');
+        // Navigator.pushNamed(context, '/logout');
       }
       if (choice == "الاعدادات") {
-        Navigator.pushNamed(context, '/settings');
+        // Navigator.pushNamed(context, '/settings');
       }
     }
+
     Widget more() {
       return PopupMenuButton(
         itemBuilder: (BuildContext context) {
@@ -180,6 +185,8 @@ class Home extends StatelessWidget {
                   value: switcherOpen,
                   onChanged: (_) {
                     homeServices.changeSwitchSide();
+                    productModel.cleanProductSelection();
+                    billServices.totalBill = 0;
                   },
                 )),
           ),

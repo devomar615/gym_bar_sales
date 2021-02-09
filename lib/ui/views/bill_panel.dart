@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
+import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/core/view_models/total_model.dart';
@@ -8,9 +9,10 @@ import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/views/home.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/collapsed_panel.dart';
+import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_buying_table.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_checkout.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_details.dart';
-import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_table.dart';
+import 'package:gym_bar_sales/ui/widgets/panel/panel_bill_selling_table.dart';
 import 'package:gym_bar_sales/ui/widgets/panel/panel_buyer_selection.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -49,6 +51,8 @@ class _BillPanelState extends State<BillPanel> {
   Widget build(BuildContext context) {
     Dimensions _dimensions = Dimensions(context);
     var productModel = Provider.of<ProductModel>(context);
+    HomeServices homeServices = Provider.of<HomeServices>(context);
+
     BorderRadiusGeometry radius = BorderRadius.only(
         topLeft: Radius.circular(_dimensions.heightPercent(3)),
         topRight: Radius.circular(_dimensions.heightPercent(3)));
@@ -80,7 +84,9 @@ class _BillPanelState extends State<BillPanel> {
                             MainAxisSize.min, // Use children total size
                         children: [
                           PanelBuyerSelection(panelController: _pc),
-                          PanelBillTable(panelController: _pc),
+                          homeServices.switcherOpen
+                              ? PanelBillSellingTable(panelController: _pc)
+                              : PanelBillBuyingTable(panelController: _pc),
                           PanelBillDetails(),
                           PanelBillCheckout(),
                         ],

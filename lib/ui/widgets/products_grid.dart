@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
+import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
@@ -20,6 +21,8 @@ class ProductsGrid extends StatelessWidget {
     CategoryModel categoryModel = Provider.of<CategoryModel>(context);
     ProductModel productModel = Provider.of<ProductModel>(context);
     BillServices billServices = Provider.of<BillServices>(context);
+    HomeServices homeServices = Provider.of<HomeServices>(context);
+
     String selectedCategory = categoryModel.selectedCategory;
     List<Product> products = productModel.filterProduct(selectedCategory);
     List<Product> selectedList = productModel.getSelectedProducts();
@@ -57,14 +60,24 @@ class ProductsGrid extends StatelessWidget {
                                       productModel.removeProductSelectionById(
                                           products[index].id);
                                     }
-                                    productModel.calculateTheTotalPerProduct(
-                                        billServices.selectedBuyerType);
-                                    billServices
-                                        .calculateTheTotalBill(selectedList);
-                                    billServices.calculateChange();
-                                    if (billServices.selectedBuyerType ==
-                                        "House") {
-                                      billServices.calculateOnlyForHouseType();
+                                    if (homeServices.transactionType == "بيع") {
+                                      productModel.calculateTheTotalPerProduct(
+                                          billServices.selectedBuyerType);
+                                      billServices
+                                          .calculateTheTotalBill(selectedList);
+                                      billServices.calculateChange();
+                                      if (billServices.selectedBuyerType ==
+                                          "House") {
+                                        billServices
+                                            .calculateOnlyForHouseType();
+                                      }
+                                    }
+
+                                    if (homeServices.transactionType ==
+                                        "شراء") {
+                                      print("yes شراء");
+                                      billServices.calculateTheTotalBuyingBill(
+                                          selectedList);
                                     }
                                   });
                                 },
@@ -87,14 +100,23 @@ class ProductsGrid extends StatelessWidget {
                                     productModel.addProductSelectionById(
                                         products[index].id);
                                   }
-                                  productModel.calculateTheTotalPerProduct(
-                                      billServices.selectedBuyerType);
-                                  billServices
-                                      .calculateTheTotalBill(selectedList);
-                                  billServices.calculateChange();
-                                  if (billServices.selectedBuyerType ==
-                                      "House") {
-                                    billServices.calculateOnlyForHouseType();
+
+                                  if (homeServices.transactionType == "بيع") {
+                                    productModel.calculateTheTotalPerProduct(
+                                        billServices.selectedBuyerType);
+                                    billServices
+                                        .calculateTheTotalBill(selectedList);
+                                    billServices.calculateChange();
+                                    if (billServices.selectedBuyerType ==
+                                        "House") {
+                                      billServices.calculateOnlyForHouseType();
+                                    }
+                                  }
+
+                                  if (homeServices.transactionType == "شراء") {
+                                    print("yes شراء");
+                                    billServices.calculateTheTotalBuyingBill(
+                                        selectedList);
                                   }
                                 },
                                 onPressIcon: () {
@@ -102,17 +124,25 @@ class ProductsGrid extends StatelessWidget {
                                     productModel.removeProductSelectionById(
                                         products[index].id);
                                   }
-                                  productModel.calculateTheTotalPerProduct(
-                                      billServices.selectedBuyerType);
-                                  billServices
-                                      .calculateTheTotalBill(selectedList);
-                                  billServices.calculateChange();
-                                  if (billServices.selectedBuyerType ==
-                                      "House") {
-                                    billServices.calculateOnlyForHouseType();
+                                  if (homeServices.transactionType == "بيع") {
+                                    productModel.calculateTheTotalPerProduct(
+                                        billServices.selectedBuyerType);
+                                    billServices
+                                        .calculateTheTotalBill(selectedList);
+                                    billServices.calculateChange();
+                                    if (billServices.selectedBuyerType ==
+                                        "House") {
+                                      billServices.calculateOnlyForHouseType();
+                                    }
+                                    // calculateTheTotalBillPerProduct();
+                                    // calculateTheTotalBill();
                                   }
-                                  // calculateTheTotalBillPerProduct();
-                                  // calculateTheTotalBill();
+
+                                  if (homeServices.transactionType == "شراء") {
+                                    print("yes شراء");
+                                    billServices.calculateTheTotalBuyingBill(
+                                        selectedList);
+                                  }
                                 },
                                 onTapUpIcon: (_) {
                                   print('cancel');

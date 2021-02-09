@@ -9,10 +9,10 @@ import 'package:provider/provider.dart';
 
 Timer timer;
 
-class PanelBillTable extends StatelessWidget {
+class PanelBillSellingTable extends StatelessWidget {
   final panelController;
 
-  PanelBillTable({this.panelController});
+  PanelBillSellingTable({this.panelController});
 
   @override
   Widget build(BuildContext context) {

@@ -27,27 +27,50 @@ class OneClientInfo extends StatelessWidget {
 
     var filteredTransactions = transactionModel.filteredTransactions;
 
-    Widget withdraw() {
-      return GestureDetector(
-        onTap: () {},
-        child: Container(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20.0),
-            child: Image.asset('assets/images/withdraw.png',
-                width: _dimensions.widthPercent(7),
-                height: _dimensions.widthPercent(7)),
-          ),
-        ),
-      );
-    }
+    onTapTransaction(String type) => showDialog<void>(
+          context: context,
+          barrierDismissible: true,
+          // false = user must tap button, true = tap outside dialog
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: Text(type),
+              content: TextField(
+                onChanged: (value) {},
+                decoration: InputDecoration(labelText: 'اكتب المبلغ هنا'),
+                keyboardType: TextInputType.number,
+                maxLength: 3,
+                maxLengthEnforced: true,
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('اتمام'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                  },
+                ),
+                FlatButton(
+                  child: Text('الغاء'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                  },
+                ),
+              ],
+            );
+          },
+        );
 
-    Widget deposit() {
+    Widget transactionChoices(String type) {
       return GestureDetector(
-        onTap: () {},
+        onTap: () {
+          onTapTransaction(type);
+        },
         child: Container(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20.0),
-            child: Image.asset('assets/images/deposit.png',
+            child: Image.asset(
+                type == "ايداع"
+                    ? 'assets/images/deposit.png'
+                    : 'assets/images/withdraw.png',
                 width: _dimensions.widthPercent(7),
                 height: _dimensions.widthPercent(7)),
           ),
@@ -200,7 +223,7 @@ class OneClientInfo extends StatelessWidget {
           )
         : Expanded(
             flex: 2,
-            child: Column(
+            child: ListView(
               children: <Widget>[
                 SizedBox(height: _dimensions.heightPercent(3)),
                 Container(
@@ -220,7 +243,7 @@ class OneClientInfo extends StatelessWidget {
                   children: [
                     Column(
                       children: [
-                        withdraw(),
+                        transactionChoices("سحب"),
                         Text(
                           "سحب",
                           style: _textStyles.iconTitle(),
@@ -230,7 +253,7 @@ class OneClientInfo extends StatelessWidget {
                     SizedBox(width: _dimensions.widthPercent(1)),
                     Column(
                       children: [
-                        deposit(),
+                        transactionChoices("ايداع"),
                         Text(
                           "ايداع",
                           style: _textStyles.iconTitle(),
