@@ -121,6 +121,23 @@ class PanelBillCheckout extends StatelessWidget {
     var tempTransactorName = "Omar";
     var tempBranchName = context.read<String>();
 
+    updateProductOnDatabase() {
+      for (int i = 0; i < selectedList.length; i++) {
+        print('netTotalQuantity of prodduct number $i =' +
+            selectedList[i].netTotalQuantity);
+        print('id of prodduct number $i is=' + selectedList[i].id);
+        productModel.updateProduct(
+            branchName: tempBranchName,
+            productId: selectedList[i].id,
+            data: {
+              "netTotalQuantity": updateProductQuantity(i).toString(),
+              "wholesaleQuantity": updateProductWholesaleQuantity(i)
+              //     });
+            });
+        print('Products Updated');
+      }
+    }
+
     transaction() {
       print('beginning transaction...');
 
@@ -143,21 +160,9 @@ class PanelBillCheckout extends StatelessWidget {
             paid: billServices.payedAmount.toString(),
             change: billChange.toString(),
           ));
+
       print('Transaction Added');
-      for (int i = 0; i < selectedList.length; i++) {
-        print('netTotalQuantity of prodduct number $i =' +
-            selectedList[i].netTotalQuantity);
-        print('id of prodduct number $i is=' + selectedList[i].id);
-        productModel.updateProduct(
-            branchName: tempBranchName,
-            productId: selectedList[i].id,
-            data: {
-              "netTotalQuantity": updateProductQuantity(i).toString(),
-              "wholesaleQuantity": updateProductWholesaleQuantity(i)
-              //     });
-            });
-        print('Products Updated');
-      }
+      updateProductOnDatabase();
     }
 
     calculateNewTreasury({String oldCash, double cashToAdd}) {
@@ -210,6 +215,16 @@ class PanelBillCheckout extends StatelessWidget {
                 FlatButton(
                   child: Text('اتمام'),
                   onPressed: () {
+                    // print("Fitshing all needed data for security reasons");
+
+                    // totalModel.fetchTotal();
+                    // if (billServices.selectedBuyerType == 'Client') {
+                    //   clientModel.fetchClients();
+                    // }
+                    // if (billServices.selectedBuyerType == 'Employee') {
+                    //   employeeModel.fetchEmployees();
+                    // }
+
                     if (billChange < 0) {
                       transaction();
                       if (billServices.selectedBuyerType == 'Client') {
@@ -255,7 +270,7 @@ class PanelBillCheckout extends StatelessWidget {
                       transaction();
                       totalModel.updateTotal(data: {
                         'cash': calculateNewTreasury(
-                            oldCash: cash, cashToAdd: billServices.payedAmount)
+                            oldCash: cash, cashToAdd: billServices.totalBill)
                       }, docId: branch);
                       //الاجمالي يروح للخزنه
                     }
@@ -264,11 +279,16 @@ class PanelBillCheckout extends StatelessWidget {
                       transaction();
                       totalModel.updateTotal(data: {
                         'cash': calculateNewTreasury(
-                            oldCash: cash, cashToAdd: billServices.payedAmount)
+                            oldCash: cash, cashToAdd: billServices.totalBill)
                       }, docId: branch);
                       //الاجمالي يروح للخزنه
 
                     }
+                    // todo: to refresh data you must use streams in your app [idiot]
+                    // todo: go read about it and rebuild the whole project again hehehehe
+                    // todo: link to help [https://dev.to/nitishk72/understanding-streams-in-flutter-dart-2pb8]
+                    // todo: another link [https://medium.com/flutter-community/real-time-stats-monitor-with-flutter-and-firebase-576cd554b9ca]
+
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
                   },
                 ),
@@ -311,6 +331,7 @@ class PanelBillCheckout extends StatelessWidget {
     }
 
     void buyingTransaction() {}
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,

@@ -59,14 +59,14 @@ class BillServices extends ChangeNotifier {
     notifyListeners();
   }
 
-  calculateTheTotalBuyingBill(List<Product> selectedList) {
-    double sum = 0;
-    selectedList.forEach((element) {
-      sum += element.theTotalBillPerProduct * element.selectionNo;
-    });
-    totalBill = sum;
-    notifyListeners();
-  }
+  // calculateTheTotalBuyingBill(List<Product> selectedList) {
+  //   double sum = 0;
+  //   selectedList.forEach((element) {
+  //     sum += element.theTotalBillPerProduct * element.selectionNo;
+  //   });
+  //   totalBill = sum;
+  //   notifyListeners();
+  // }
 
   calculateOnlyForHouseType() {
     payedAmount = totalBill;

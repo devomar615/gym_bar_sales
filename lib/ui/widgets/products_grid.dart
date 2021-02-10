@@ -76,8 +76,9 @@ class ProductsGrid extends StatelessWidget {
                                     if (homeServices.transactionType ==
                                         "شراء") {
                                       print("yes شراء");
-                                      billServices.calculateTheTotalBuyingBill(
-                                          selectedList);
+                                      billServices
+                                          .calculateTheTotalBill(selectedList);
+                                      billServices.calculateOnlyForHouseType();
                                     }
                                   });
                                 },
@@ -115,8 +116,9 @@ class ProductsGrid extends StatelessWidget {
 
                                   if (homeServices.transactionType == "شراء") {
                                     print("yes شراء");
-                                    billServices.calculateTheTotalBuyingBill(
-                                        selectedList);
+                                    billServices
+                                        .calculateTheTotalBill(selectedList);
+                                    billServices.calculateOnlyForHouseType();
                                   }
                                 },
                                 onPressIcon: () {
@@ -140,8 +142,9 @@ class ProductsGrid extends StatelessWidget {
 
                                   if (homeServices.transactionType == "شراء") {
                                     print("yes شراء");
-                                    billServices.calculateTheTotalBuyingBill(
-                                        selectedList);
+                                    billServices
+                                        .calculateTheTotalBill(selectedList);
+                                    billServices.calculateOnlyForHouseType();
                                   }
                                 },
                                 onTapUpIcon: (_) {
@@ -169,7 +172,7 @@ class ProductsGrid extends StatelessWidget {
                               ),
                       );
               },
-              childCount: products.length,
+              childCount: productModel.filterProduct(selectedCategory).length,
             ),
           );
   }

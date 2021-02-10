@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
+import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ class PanelBillDetails extends StatelessWidget {
     Dimensions _dimensions = Dimensions(context);
 
     BillServices billServices = Provider.of<BillServices>(context);
+    HomeServices homeServices = Provider.of<HomeServices>(context);
     String selectedBuyerType = billServices.selectedBuyerType;
     double payedAmount = billServices.payedAmount;
     double billChange = billServices.billChange;
@@ -79,10 +81,12 @@ class PanelBillDetails extends StatelessWidget {
           children: [
             GestureDetector(
                 onTap: () {
-                  if (selectedBuyerType != "House") {
+                  if (selectedBuyerType != "House" &&
+                      homeServices.transactionType != "شراء") {
                     _changePayAmountDialog();
                   }
-                  if (selectedBuyerType == "House") {
+                  if (selectedBuyerType == "House" ||
+                      homeServices.transactionType == "شراء") {
                     print("house pay must be equal to total bill");
                   }
                 },
@@ -94,7 +98,7 @@ class PanelBillDetails extends StatelessWidget {
           ],
         ),
         SizedBox(height: _dimensions.heightPercent(2)),
-        selectedBuyerType == "House"
+        selectedBuyerType == "House" || homeServices.transactionType == "شراء"
             ? Container()
             : Row(
                 mainAxisAlignment: MainAxisAlignment.end,

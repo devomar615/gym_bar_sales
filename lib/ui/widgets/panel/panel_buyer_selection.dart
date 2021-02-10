@@ -72,9 +72,11 @@ class PanelBuyerSelection extends StatelessWidget {
             employeeModel.selectedEmployee = null;
             clientModel.selectedClient = null;
 
-            productModel.calculateTheTotalPerProduct(selectedBuyerType);
+            productModel
+                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
             billServices.calculateTheTotalBill(selectedList);
             billServices.calculateChange();
+
             billServices.calculateOnlyForHouseType();
           },
         ),
@@ -96,7 +98,8 @@ class PanelBuyerSelection extends StatelessWidget {
             employeeModel.selectedEmployee = null;
             clientModel.selectedClient = null;
 
-            productModel.calculateTheTotalPerProduct(selectedBuyerType);
+            productModel
+                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
             billServices.calculateTheTotalBill(selectedList);
             billServices.calculateChange();
           },
@@ -118,7 +121,9 @@ class PanelBuyerSelection extends StatelessWidget {
             billServices.payedAmount = 0;
             employeeModel.selectedEmployee = null;
             clientModel.selectedClient = null;
-            productModel.calculateTheTotalPerProduct(selectedBuyerType);
+
+            productModel
+                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
             billServices.calculateTheTotalBill(selectedList);
             billServices.calculateChange();
           },

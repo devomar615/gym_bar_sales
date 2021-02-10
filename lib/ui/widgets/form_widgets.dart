@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 
@@ -37,6 +38,8 @@ class FormWidget {
     double right = 10,
     double bottom = 0,
     double top = 0,
+    TextInputType keyboardType,
+    List<TextInputFormatter> inputFormatters,
   }) {
     return Container(
       margin:
@@ -46,6 +49,7 @@ class FormWidget {
         child: Container(
           height: height,
           child: TextFormField(
+            inputFormatters: inputFormatters,
             onChanged: onChanged,
             controller: controller,
             validator: validator,
@@ -63,6 +67,7 @@ class FormWidget {
                 ),
               ),
             ),
+            keyboardType: keyboardType,
           ),
         ),
       ),

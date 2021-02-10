@@ -44,12 +44,12 @@ class ClientModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Client> filterClients(String selectedEmployeeType) {
-    if (selectedEmployeeType == "all") {
+  List<Client> filterClients(String selectedClientType) {
+    if (selectedClientType == "all") {
       return _client;
     } else
       return _client
-          .where((client) => client.type == selectedEmployeeType)
+          .where((client) => client.type == selectedClientType)
           .toList();
   }
 

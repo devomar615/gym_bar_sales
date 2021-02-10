@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
@@ -30,11 +32,8 @@ class PanelBillBuyingTable extends StatelessWidget {
     onMinusProduct(index) {
       productModel.removeProductSelectionById(selectedList[index].id);
 
-      billServices.calculateTheTotalBuyingBill(selectedList);
-      billServices.calculateChange();
-      if (billServices.selectedBuyerType == "House") {
-        billServices.calculateOnlyForHouseType();
-      }
+      billServices.calculateTheTotalBill(selectedList);
+      billServices.calculateOnlyForHouseType();
 
       print(selectedList.length);
     }
@@ -58,11 +57,8 @@ class PanelBillBuyingTable extends StatelessWidget {
               double.parse(selectedList[index].netTotalQuantity)) {
         productModel.addProductSelectionById(selectedList[index].id);
 
-        billServices.calculateTheTotalBuyingBill(selectedList);
-        billServices.calculateChange();
-        if (billServices.selectedBuyerType == "House") {
-          billServices.calculateOnlyForHouseType();
-        }
+        billServices.calculateTheTotalBill(selectedList);
+        billServices.calculateOnlyForHouseType();
       }
     }
 
@@ -126,14 +122,22 @@ class PanelBillBuyingTable extends StatelessWidget {
                       SizedBox(width: _dimensions.widthPercent(14.5)),
                       Container(
                         child: _formWidget.formTextFieldTemplate(
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9]')),
+                            ],
+                            keyboardType: TextInputType.number,
                             onChanged: (String value) {
-                          print(value);
-                          productModel.addTheTotalBuyingPerProduct(
-                              changingValue: double.parse(value),
-                              productId: selectedList[index].id);
-                          billServices
-                              .calculateTheTotalBuyingBill(selectedList);
-                        }),
+                              if (value.length == 0) {
+                                value = "0";
+                              }
+                              print(value);
+                              productModel.addTheTotalBuyingPerProduct(
+                                  changingValue: double.parse(value),
+                                  productId: selectedList[index].id);
+                              billServices.calculateTheTotalBill(selectedList);
+                              billServices.calculateOnlyForHouseType();
+                            }),
                         constraints: BoxConstraints(
                           maxWidth: _dimensions.widthPercent(7.5),
                           minWidth: _dimensions.widthPercent(7.5),

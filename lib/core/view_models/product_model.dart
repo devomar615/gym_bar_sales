@@ -12,6 +12,8 @@ class ProductModel extends ChangeNotifier {
 
   List<Product> _products;
 
+  List<Product> get products => _products;
+
   List<Product> filterProduct(String selectedCategory) {
     if (selectedCategory == "All") {
       return _products;
@@ -66,6 +68,7 @@ class ProductModel extends ChangeNotifier {
   calculateTheTotalPerProduct(selectedBuyerType) {
     var selectedList =
         _products.where((product) => product.selectionNo > 0).toList();
+
     for (int i = 0; i < selectedList.length; i++) {
       selectedList[i].theTotalBillPerProduct = selectedList[i].selectionNo *
           int.parse(
@@ -76,6 +79,7 @@ class ProductModel extends ChangeNotifier {
                     : selectedList[i].housePrice,
           );
     }
+    notifyListeners();
   }
 
   // calculateTheTotalBill(selectedList) {
