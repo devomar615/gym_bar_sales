@@ -71,6 +71,7 @@ class ClientModel extends ChangeNotifier {
         .doc(clientId)
         .update(data);
     _status = Status.Idle;
+    notifyListeners();
   }
 }
 

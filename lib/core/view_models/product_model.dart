@@ -6,7 +6,7 @@ import 'package:gym_bar_sales/core/models/product.dart';
 class ProductModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Status _status = Status.Idle;
+  Status _status = Status.Busy;
 
   Status get status => _status;
 
@@ -81,43 +81,55 @@ class ProductModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // calculateTheTotalBill(selectedList) {
-  //   double sum = 0;
-  //   selectedList.forEach((element) {
-  //     sum += element.theTotalBillPerProduct;
-  //   });
-  //   totalBill = sum;
-  //   notifyListeners();
-  // }
-  //
-  //
-
   Future fetchProducts({branchName}) async {
-    // _status = Status.Busy;
+    _status = Status.Busy;
     // loading = true;
     var result = await _db.collection("products/branches/$branchName/").get();
     // var result2 = await _api.getDataCollection("products/branches/$branchName/");
     _products =
         result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
     // loading = false;
-    // _status = Status.Idle;
+    _status = Status.Idle;
     notifyListeners();
   }
 
   fetchProductStream(branchName) {
     Stream<QuerySnapshot> result =
-    _db.collection("products/branches/$branchName/").snapshots();
+        _db.collection("products/branches/$branchName/").snapshots();
     return result;
+  }
+
+  Future fetchProductById({branchName, id}) async {
+    print("Printing IDDDDDDDD");
+    print(id);
+    _status = Status.Busy;
+    Product product = await _db
+        .collection("products/branches/$branchName/")
+        .doc(id)
+        .get()
+        .then((snapshot) {
+      Map<String, dynamic> map = snapshot.data();
+      print("prinitng name");
+      print(map['name']);
+
+      return Product.fromMap(map, id);
+    });
+
+    print(product.name);
+    _status = Status.Idle;
+    notifyListeners();
+    return product;
   }
 
   Future updateProduct(
       {productId, Map<String, dynamic> data, String branchName}) async {
     // _status = Status.Busy;
-
+    _status = Status.Busy;
     await _db
         .collection("products/branches/$branchName/")
         .doc(productId)
         .update(data);
-    // _status = Status.Idle;
+    _status = Status.Idle;
+    notifyListeners();
   }
 }

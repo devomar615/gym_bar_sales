@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Product {
   String id,
       name,
@@ -45,7 +47,7 @@ class Product {
       : id = '0',
         name = '';
 
-  Product.fromMap(Map snapshot, String id)
+  Product.fromMap(Map <String, dynamic> snapshot, String id)
       : id = id ?? "",
         name = snapshot['name'] ?? '',
         netTotalQuantity = snapshot['netTotalQuantity'] ?? '',
@@ -63,6 +65,7 @@ class Product {
         theAmountOfSalesPerProduct = snapshot['theAmountOfSalesPerProduct'],
         supplierName = snapshot['supplierName'] ?? '',
         photo = snapshot['photo'] ?? '';
+
 
   toJson() {
     return {
@@ -84,4 +87,8 @@ class Product {
       "photo": photo,
     };
   }
+
+  // factory Product.fromDocument(DocumentSnapshot doc,id) {
+  //   return Product.fromMap(doc.data(),id);
+  // }
 }

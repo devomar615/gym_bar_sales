@@ -47,6 +47,7 @@ class TransactionModel extends ChangeNotifier {
         .collection("transactions/branches/$branchName")
         .add(transaction.toJson());
     _status = Status.Idle;
+    notifyListeners();
   }
 
   Future fetchTransactionByCustomerName({branchName, customerName}) async {

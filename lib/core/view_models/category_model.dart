@@ -33,6 +33,7 @@ class CategoryModel extends ChangeNotifier {
 
     await _api.addDocument(category.toJson(), "categories");
     _status = Status.Idle;
+    notifyListeners();
   }
 
   Future fetchCategories() async {
@@ -44,5 +45,6 @@ class CategoryModel extends ChangeNotifier {
     _categories =
         result.docs.map((doc) => Category.fromMap(doc.data(), doc.id)).toList();
     _status = Status.Idle;
+    notifyListeners();
   }
 }

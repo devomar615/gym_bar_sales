@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/client.dart';
 import 'package:gym_bar_sales/core/models/employee.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
@@ -225,57 +226,67 @@ class PanelBuyerSelection extends StatelessWidget {
       }
     }
 
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            print("header tapped");
-            changePanelState();
-          },
-          //todo: maybe error;
-          child: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: Column(
-              children: [
-                SizedBox(height: _dimensions.heightPercent(2)),
-                Text(
-                  "الفاتوره",
-                  style: _textStyles.billTitleStyle(),
-                ),
-              ],
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {},
-          child: Column(
-            children: [
-              SizedBox(height: _dimensions.heightPercent(2)),
-              selectedBuyerType == "House"
-                  ? Container()
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+    return clientModel.status == Status.Busy
+        ? Center(
+            child: CircularProgressIndicator(),
+          )
+        : employeeModel.status == Status.Busy
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      print("header tapped");
+                      changePanelState();
+                    },
+                    //todo: maybe error;
+                    child: GestureDetector(
+                      onTap: () => FocusScope.of(context).unfocus(),
+                      child: Column(
+                        children: [
+                          SizedBox(height: _dimensions.heightPercent(2)),
+                          Text(
+                            "الفاتوره",
+                            style: _textStyles.billTitleStyle(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Column(
                       children: [
-                        SizedBox(width: _dimensions.widthPercent(2)),
+                        SizedBox(height: _dimensions.heightPercent(2)),
+                        selectedBuyerType == "House"
+                            ? Container()
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(width: _dimensions.widthPercent(2)),
+                                  homeServices.switcherOpen
+                                      ? _showNameOfTheBuyer(employees, clients)
+                                      : Text("اسم الراجل بتاع الكاشير",
+                                          style: _textStyles
+                                              .billSearchTitleStyle()),
+                                  SizedBox(width: _dimensions.widthPercent(1)),
+                                  Text(':اسم المشتري',
+                                      style:
+                                          _textStyles.billSearchTitleStyle()),
+                                ],
+                              ),
+                        SizedBox(height: _dimensions.heightPercent(1.5)),
                         homeServices.switcherOpen
-                            ? _showNameOfTheBuyer(employees, clients)
-                            : Text("اسم الراجل بتاع الكاشير",
-                                style: _textStyles.billSearchTitleStyle()),
-                        SizedBox(width: _dimensions.widthPercent(1)),
-                        Text(':اسم المشتري',
-                            style: _textStyles.billSearchTitleStyle()),
+                            ? Wrap(children: buyerTypeChoices())
+                            : Container(),
+                        SizedBox(height: _dimensions.heightPercent(1.5)),
                       ],
                     ),
-              SizedBox(height: _dimensions.heightPercent(1.5)),
-              homeServices.switcherOpen
-                  ? Wrap(children: buyerTypeChoices())
-                  : Container(),
-              SizedBox(height: _dimensions.heightPercent(1.5)),
-            ],
-          ),
-        ),
-      ],
-    );
+                  ),
+                ],
+              );
   }
 }

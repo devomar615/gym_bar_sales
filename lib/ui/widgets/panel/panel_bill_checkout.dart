@@ -37,21 +37,18 @@ class PanelBillCheckout extends StatelessWidget {
     double billChange = billServices.billChange;
     TextStyles _textStyles = TextStyles(context: context);
     Dimensions _dimensions = Dimensions(context);
+    updateProductQuantity(index) async {
+      Product product = await productModel.fetchProductById(
+          branchName: "بيفرلي", id: selectedList[index].id);
 
-    updateProductQuantity(index) {
-      //todo: greyout the outstock products
-      //todo: greyout the outstock products
-      //todo: greyout the outstock products
-      //todo: greyout the outstock products
-      //todo: greyout the outstock products
-
-      double currentTotalAmount =
-          double.parse(selectedList[index].netTotalQuantity);
+      // get currentTotalAmount from database
+      double currentTotalAmount = double.parse(product.netTotalQuantity);
       print('printing current total amount...');
       print(currentTotalAmount);
 
       double billQuantity = selectedList[index].selectionNo *
           double.parse(selectedList[index].theAmountOfSalesPerProduct);
+
       print('printing bill quantity...');
       print(billQuantity);
 
@@ -59,17 +56,21 @@ class PanelBillCheckout extends StatelessWidget {
       print('printing new quantity after transaction...');
       print(newQuantity);
 
-      return newQuantity;
+      return newQuantity.toString();
     }
 
-    updateProductWholesaleQuantity(index) {
+    updateProductWholesaleQuantity(index) async {
+      Product product = await productModel.fetchProductById(
+          branchName: "بيفرلي", id: selectedList[index].id);
+      //get currentWholesaleAmount from database
       double currentWholesaleAmount =
-          double.parse(selectedList[index].quantityOfWholesaleUnit);
+          double.parse(product.quantityOfWholesaleUnit);
       print('printing current wholesaleAmount...');
       print(currentWholesaleAmount);
 
       double newWholesaleQuantity =
-          updateProductQuantity(index) / currentWholesaleAmount;
+          double.parse(await updateProductQuantity(index)) /
+              currentWholesaleAmount;
       print('printing new wholesaleQuantity...');
       print(newWholesaleQuantity);
 
@@ -121,7 +122,7 @@ class PanelBillCheckout extends StatelessWidget {
     var tempTransactorName = "Omar";
     var tempBranchName = context.read<String>();
 
-    updateProductOnDatabase() {
+    updateProductOnDatabase() async {
       for (int i = 0; i < selectedList.length; i++) {
         print('netTotalQuantity of prodduct number $i =' +
             selectedList[i].netTotalQuantity);
@@ -130,8 +131,8 @@ class PanelBillCheckout extends StatelessWidget {
             branchName: tempBranchName,
             productId: selectedList[i].id,
             data: {
-              "netTotalQuantity": updateProductQuantity(i).toString(),
-              "wholesaleQuantity": updateProductWholesaleQuantity(i)
+              "netTotalQuantity": await updateProductQuantity(i),
+              "wholesaleQuantity": await updateProductWholesaleQuantity(i)
               //     });
             });
         print('Products Updated');
@@ -215,7 +216,8 @@ class PanelBillCheckout extends StatelessWidget {
                 FlatButton(
                   child: Text('اتمام'),
                   onPressed: () {
-                    // print("Fitshing all needed data for security reasons");
+                    print("Fitshing all needed data for security reasons");
+                    totalModel.fetchTotal();
 
                     // totalModel.fetchTotal();
                     // if (billServices.selectedBuyerType == 'Client') {

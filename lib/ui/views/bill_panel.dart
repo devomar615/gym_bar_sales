@@ -34,6 +34,7 @@ class _BillPanelState extends State<BillPanel> {
   void didChangeDependencies() {
     if (_isInit) {
       String branch = context.read<String>();
+      Provider.of<ProductModel>(context).fetchProducts(branchName: branch);
       print(branch);
       Provider.of<EmployeeModel>(context).fetchEmployees(branchName: branch);
       Provider.of<ClientModel>(context).fetchClients(branchName: branch);
@@ -41,7 +42,6 @@ class _BillPanelState extends State<BillPanel> {
       Provider.of<TransactionModel>(context)
           .fetchTransaction(branchName: branch);
       Provider.of<CategoryModel>(context).fetchCategories();
-      Provider.of<ProductModel>(context).fetchProducts(branchName: branch);
     }
     _isInit = false;
     super.didChangeDependencies();
