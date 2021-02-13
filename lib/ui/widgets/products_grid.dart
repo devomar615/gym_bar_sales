@@ -42,11 +42,14 @@ class ProductsGrid extends StatelessWidget {
                             top: _dimensions.heightPercent(3),
                             right: _dimensions.widthPercent(1)),
                         child: double.parse(products[index].netTotalQuantity) <=
-                                0
+                                    0 ||
+                                double.parse(
+                                        products[index].netTotalQuantity) ==
+                                    null
                             ? _generalItem.customCard(
-                                selectionNo: null,
+                                selectionNo: 0,
                                 networkImage:
-                                    "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
+                                    "https://i.ytimg.com/vi/ANRZ_ZRHJEw/hqdefault.jpg",
                                 title: products[index].name,
                                 backGround: Colors.grey)
                             : _generalItem.customCard(
@@ -120,6 +123,7 @@ class ProductsGrid extends StatelessWidget {
                                         .calculateTheTotalBill(selectedList);
                                     billServices.calculateOnlyForHouseType();
                                   }
+
                                 },
                                 onPressIcon: () {
                                   if (products[index].selectionNo > 0) {
@@ -163,8 +167,7 @@ class ProductsGrid extends StatelessWidget {
                                   height: _dimensions.heightPercent(9),
                                 ),
                                 betweenSpace: SizedBox(
-                                  height: _dimensions.heightPercent(3),
-                                ),
+                                    height: _dimensions.heightPercent(3)),
                                 title: products[index].name,
                                 assetImage: null,
                                 networkImage:

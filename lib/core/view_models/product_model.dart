@@ -6,7 +6,7 @@ import 'package:gym_bar_sales/core/models/product.dart';
 class ProductModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Status _status = Status.Busy;
+  Status _status = Status.Idle;
 
   Status get status => _status;
 
@@ -24,7 +24,7 @@ class ProductModel extends ChangeNotifier {
   }
 
   List<Product> getSelectedProducts() {
-    return _products.where((product) => product.selectionNo > 0).toList();
+    return products.where((product) => product.selectionNo > 0).toList();
   }
 
   addProductSelectionById(productId) {
@@ -53,7 +53,6 @@ class ProductModel extends ChangeNotifier {
 
   addTheTotalBuyingPerProduct(
       {@required double changingValue, @required productId}) {
-
     _products
         .firstWhere((product) => product.id == productId)
         .theTotalBillPerProduct = changingValue;
@@ -94,25 +93,31 @@ class ProductModel extends ChangeNotifier {
   //
 
   Future fetchProducts({branchName}) async {
-    _status = Status.Busy;
+    // _status = Status.Busy;
     // loading = true;
     var result = await _db.collection("products/branches/$branchName/").get();
     // var result2 = await _api.getDataCollection("products/branches/$branchName/");
     _products =
         result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
     // loading = false;
-    _status = Status.Idle;
+    // _status = Status.Idle;
     notifyListeners();
+  }
+
+  fetchProductStream(branchName) {
+    Stream<QuerySnapshot> result =
+    _db.collection("products/branches/$branchName/").snapshots();
+    return result;
   }
 
   Future updateProduct(
       {productId, Map<String, dynamic> data, String branchName}) async {
-    _status = Status.Busy;
+    // _status = Status.Busy;
 
     await _db
         .collection("products/branches/$branchName/")
         .doc(productId)
         .update(data);
-    _status = Status.Idle;
+    // _status = Status.Idle;
   }
 }
