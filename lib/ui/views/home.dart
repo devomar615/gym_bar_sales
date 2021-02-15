@@ -221,258 +221,216 @@ class Home extends StatelessWidget {
       );
     }
 
-    return StreamBuilder(
-      stream: productModel.fetchProductStream("بيفرلي"),
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.hasError) {
-          return Text('Something went wrong');
+    Widget showGeneralCard({liveProducts, index}) {
+      if (double.parse(liveProducts
+                  .firstWhere((element) => element.id == products[index].id)
+                  .netTotalQuantity) <=
+              0 ||
+          double.parse(liveProducts
+                  .firstWhere((element) => element.id == products[index].id)
+                  .netTotalQuantity) ==
+              null) {
+        if (switcherOpen) {
+          return _generalItem.customCard(
+              selectionNo: 0,
+              networkImage: "https://i.ytimg.com/vi/ANRZ_ZRHJEw/hqdefault.jpg",
+              title: products[index].name,
+              backGround: Colors.grey);
         }
+      }
+      return _generalItem.customCard(
+        backGround: Colors.blue,
+        onTapDownItem: (_) {},
+        onTapDownIcon: (_) {
+          print('down');
+          timer = Timer.periodic(Duration(milliseconds: 200), (_) {
+            if (products[index].selectionNo > 0) {
+              productModel.removeProductSelectionById(products[index].id);
+            }
+            if (homeServices.transactionType == "بيع") {
+              productModel
+                  .calculateTheTotalPerProduct(billServices.selectedBuyerType);
+              billServices.calculateTheTotalBill(selectedList);
+              billServices.calculateChange();
+              if (billServices.selectedBuyerType == "House") {
+                billServices.calculateOnlyForHouseType();
+              }
+            }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          print("Loading");
-        }
-        List<Product> liveProducts;
+            if (homeServices.transactionType == "شراء") {
+              print("yes شراء");
+              billServices.calculateTheTotalBill(selectedList);
+              billServices.calculateOnlyForHouseType();
+            }
+          });
+        },
+        onPressItem: () {
+          if (double.parse(liveProducts
+                      .firstWhere((element) => element.id == products[index].id)
+                      .netTotalQuantity) <
+                  0 ||
+              products[index].selectionNo >=
+                  double.parse(liveProducts
+                      .firstWhere((element) => element.id == products[index].id)
+                      .netTotalQuantity)) {
+            print('product needed');
+          }
+          if (!switcherOpen) {
+            productModel.addProductSelectionById(products[index].id);
+          }
+          if (double.parse(liveProducts
+                      .firstWhere((element) => element.id == products[index].id)
+                      .netTotalQuantity) >
+                  0 &&
+              products[index].selectionNo <
+                  double.parse(liveProducts
+                      .firstWhere((element) => element.id == products[index].id)
+                      .netTotalQuantity)) {
+            productModel.addProductSelectionById(products[index].id);
+          }
 
-        if (snapshot.hasData) {
-          liveProducts = snapshot.data.docs
-              .map<Product>((DocumentSnapshot document) =>
-                  Product.fromMap(document.data(), document.id))
-              .toList();
-          print("live dataaaa");
-        }
+          if (homeServices.transactionType == "بيع") {
+            productModel
+                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
+            billServices.calculateTheTotalBill(selectedList);
+            billServices.calculateChange();
+            if (billServices.selectedBuyerType == "House") {
+              billServices.calculateOnlyForHouseType();
+            }
+          }
 
-        // List <Product> selectedList = productModel.getSelectedProducts(products);
+          if (homeServices.transactionType == "شراء") {
+            print("yes شراء");
+            billServices.calculateTheTotalBill(selectedList);
+            billServices.calculateOnlyForHouseType();
+          }
+        },
+        onPressIcon: () {
+          if (products[index].selectionNo > 0) {
+            productModel.removeProductSelectionById(products[index].id);
+          }
+          if (homeServices.transactionType == "بيع") {
+            productModel
+                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
+            billServices.calculateTheTotalBill(selectedList);
+            billServices.calculateChange();
+            if (billServices.selectedBuyerType == "House") {
+              billServices.calculateOnlyForHouseType();
+            }
+            // calculateTheTotalBillPerProduct();
+            // calculateTheTotalBill();
+          }
 
-        return snapshot.hasData
-            ? CustomScrollView(
-                slivers: <Widget>[
-                  SliverAppBar(
-                    elevation: 0,
-                    backgroundColor: Colors.white,
-                    collapsedHeight: _dimensions.heightPercent(32.25),
-                    // expandedHeight: _dimensions.heightPercent(30),
-                    flexibleSpace: FlexibleSpaceBar(
-                        title: Column(
-                      children: [
-                        appBar(),
-                        SizedBox(height: _dimensions.heightPercent(1)),
-                        transactionTypeSwitcher(),
-                        Container(
-                          height: _dimensions.heightPercent(7),
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: _buildCategoryList(),
+          if (homeServices.transactionType == "شراء") {
+            print("yes شراء");
+            billServices.calculateTheTotalBill(selectedList);
+            billServices.calculateOnlyForHouseType();
+          }
+        },
+        onTapUpIcon: (_) {
+          print('cancel');
+          timer.cancel();
+        },
+        onTapCancelIcon: () {
+          print('cancel');
+          timer.cancel();
+        },
+        selectionNo: products[index].selectionNo,
+        statistics: products[index].selectionNo > 0
+            ? products[index].selectionNo.toString()
+            : "",
+        topSpace: SizedBox(
+          height: _dimensions.heightPercent(9),
+        ),
+        betweenSpace: SizedBox(height: _dimensions.heightPercent(3)),
+        title: products[index].name,
+        assetImage: null,
+        networkImage:
+            "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
+      );
+    }
+
+    return categoryModel.status == Status.Busy
+        ? Center(
+            child: CircularProgressIndicator(),
+          )
+        : StreamBuilder(
+            stream: productModel.fetchProductStream("بيفرلي"),
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Something went wrong');
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                print("Loading");
+              }
+              List<Product> liveProducts;
+
+              if (snapshot.hasData) {
+                liveProducts = snapshot.data.docs
+                    .map<Product>((DocumentSnapshot document) =>
+                        Product.fromMap(document.data(), document.id))
+                    .toList();
+                print("live dataaaa");
+              }
+
+              // List <Product> selectedList = productModel.getSelectedProducts(products);
+
+              return snapshot.hasData
+                  ? CustomScrollView(
+                      slivers: <Widget>[
+                        SliverAppBar(
+                          elevation: 0,
+                          backgroundColor: Colors.white,
+                          collapsedHeight: _dimensions.heightPercent(32.25),
+                          // expandedHeight: _dimensions.heightPercent(30),
+                          flexibleSpace: FlexibleSpaceBar(
+                              title: Column(
+                            children: [
+                              appBar(),
+                              SizedBox(height: _dimensions.heightPercent(1)),
+                              transactionTypeSwitcher(),
+                              Container(
+                                height: _dimensions.heightPercent(7),
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  children: _buildCategoryList(),
+                                ),
+                              ),
+                            ],
+                          )),
+                          floating: true,
+                          pinned: true,
+                        ),
+                        SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 5),
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              return products.isEmpty
+                                  ? Center(child: Text('لا يوجد منتجات هنا'))
+                                  : Padding(
+                                      padding: EdgeInsets.only(
+                                          left: _dimensions.widthPercent(1),
+                                          top: _dimensions.heightPercent(3),
+                                          right: _dimensions.widthPercent(1)),
+                                      child: showGeneralCard(
+                                          liveProducts: liveProducts,
+                                          index: index),
+                                    );
+                            },
+                            childCount: productModel
+                                .filterProduct(selectedCategory)
+                                .length,
                           ),
                         ),
                       ],
-                    )),
-                    floating: true,
-                    pinned: true,
-                  ),
-                  SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 5),
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        return products.isEmpty
-                            ? Center(child: Text('لا يوجد منتجات هنا'))
-                            : Padding(
-                                padding: EdgeInsets.only(
-                                    left: _dimensions.widthPercent(1),
-                                    top: _dimensions.heightPercent(3),
-                                    right: _dimensions.widthPercent(1)),
-                                child: double.parse(liveProducts
-                                                .firstWhere((element) =>
-                                                    element.id ==
-                                                    products[index].id)
-                                                .netTotalQuantity) <=
-                                            0 ||
-                                        double.parse(liveProducts
-                                                .firstWhere((element) =>
-                                                    element.id ==
-                                                    products[index].id)
-                                                .netTotalQuantity) ==
-                                            null
-                                    ? _generalItem.customCard(
-                                        selectionNo: 0,
-                                        networkImage:
-                                            "https://i.ytimg.com/vi/ANRZ_ZRHJEw/hqdefault.jpg",
-                                        title: products[index].name,
-                                        backGround: Colors.grey)
-                                    : _generalItem.customCard(
-                                        backGround: Colors.blue,
-                                        onTapDownItem: (_) {},
-                                        onTapDownIcon: (_) {
-                                          print('down');
-                                          timer = Timer.periodic(
-                                              Duration(milliseconds: 200), (_) {
-                                            if (products[index].selectionNo >
-                                                0) {
-                                              productModel
-                                                  .removeProductSelectionById(
-                                                      products[index].id);
-                                            }
-                                            if (homeServices.transactionType ==
-                                                "بيع") {
-                                              productModel
-                                                  .calculateTheTotalPerProduct(
-                                                      billServices
-                                                          .selectedBuyerType);
-                                              billServices
-                                                  .calculateTheTotalBill(
-                                                      selectedList);
-                                              billServices.calculateChange();
-                                              if (billServices
-                                                      .selectedBuyerType ==
-                                                  "House") {
-                                                billServices
-                                                    .calculateOnlyForHouseType();
-                                              }
-                                            }
-
-                                            if (homeServices.transactionType ==
-                                                "شراء") {
-                                              print("yes شراء");
-                                              billServices
-                                                  .calculateTheTotalBill(
-                                                      selectedList);
-                                              billServices
-                                                  .calculateOnlyForHouseType();
-                                            }
-                                          });
-                                        },
-                                        onPressItem: () {
-                                          if (double.parse(liveProducts
-                                                      .firstWhere((element) =>
-                                                          element.id ==
-                                                          products[index].id)
-                                                      .netTotalQuantity) <
-                                                  0 ||
-                                              products[index].selectionNo >=
-                                                  double.parse(liveProducts
-                                                      .firstWhere((element) =>
-                                                          element.id ==
-                                                          products[index].id)
-                                                      .netTotalQuantity)) {
-                                            print('product needed');
-                                          }
-
-                                          if (double.parse(liveProducts
-                                                      .firstWhere((element) =>
-                                                          element.id ==
-                                                          products[index].id)
-                                                      .netTotalQuantity) >
-                                                  0 &&
-                                              products[index].selectionNo <
-                                                  double.parse(liveProducts
-                                                      .firstWhere((element) =>
-                                                          element.id ==
-                                                          products[index].id)
-                                                      .netTotalQuantity)) {
-                                            productModel
-                                                .addProductSelectionById(
-                                                    products[index].id);
-                                          }
-
-                                          if (homeServices.transactionType ==
-                                              "بيع") {
-                                            productModel
-                                                .calculateTheTotalPerProduct(
-                                                    billServices
-                                                        .selectedBuyerType);
-                                            billServices.calculateTheTotalBill(
-                                                selectedList);
-                                            billServices.calculateChange();
-                                            if (billServices
-                                                    .selectedBuyerType ==
-                                                "House") {
-                                              billServices
-                                                  .calculateOnlyForHouseType();
-                                            }
-                                          }
-
-                                          if (homeServices.transactionType ==
-                                              "شراء") {
-                                            print("yes شراء");
-                                            billServices.calculateTheTotalBill(
-                                                selectedList);
-                                            billServices
-                                                .calculateOnlyForHouseType();
-                                          }
-                                        },
-                                        onPressIcon: () {
-                                          if (products[index].selectionNo > 0) {
-                                            productModel
-                                                .removeProductSelectionById(
-                                                    products[index].id);
-                                          }
-                                          if (homeServices.transactionType ==
-                                              "بيع") {
-                                            productModel
-                                                .calculateTheTotalPerProduct(
-                                                    billServices
-                                                        .selectedBuyerType);
-                                            billServices.calculateTheTotalBill(
-                                                selectedList);
-                                            billServices.calculateChange();
-                                            if (billServices
-                                                    .selectedBuyerType ==
-                                                "House") {
-                                              billServices
-                                                  .calculateOnlyForHouseType();
-                                            }
-                                            // calculateTheTotalBillPerProduct();
-                                            // calculateTheTotalBill();
-                                          }
-
-                                          if (homeServices.transactionType ==
-                                              "شراء") {
-                                            print("yes شراء");
-                                            billServices.calculateTheTotalBill(
-                                                selectedList);
-                                            billServices
-                                                .calculateOnlyForHouseType();
-                                          }
-                                        },
-                                        onTapUpIcon: (_) {
-                                          print('cancel');
-                                          timer.cancel();
-                                        },
-                                        onTapCancelIcon: () {
-                                          print('cancel');
-                                          timer.cancel();
-                                        },
-                                        selectionNo:
-                                            products[index].selectionNo,
-                                        statistics:
-                                            products[index].selectionNo > 0
-                                                ? products[index]
-                                                    .selectionNo
-                                                    .toString()
-                                                : "",
-                                        topSpace: SizedBox(
-                                          height: _dimensions.heightPercent(9),
-                                        ),
-                                        betweenSpace: SizedBox(
-                                            height:
-                                                _dimensions.heightPercent(3)),
-                                        title: products[index].name,
-                                        assetImage: null,
-                                        networkImage:
-                                            "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
-                                      ),
-                              );
-                      },
-                      childCount:
-                          productModel.filterProduct(selectedCategory).length,
-                    ),
-                  ),
-                ],
-              )
-            : Center(
-                child: CircularProgressIndicator(),
-              );
-      },
-    );
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(),
+                    );
+            },
+          );
   }
 }

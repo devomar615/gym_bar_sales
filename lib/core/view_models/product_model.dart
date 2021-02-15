@@ -88,6 +88,7 @@ class ProductModel extends ChangeNotifier {
     // var result2 = await _api.getDataCollection("products/branches/$branchName/");
     _products =
         result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
+    print(_products[1].name);
     // loading = false;
     _status = Status.Idle;
     notifyListeners();

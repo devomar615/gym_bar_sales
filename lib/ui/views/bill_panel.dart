@@ -88,7 +88,7 @@ class _BillPanelState extends State<BillPanel> {
                               ? PanelBillSellingTable(panelController: _pc)
                               : PanelBillBuyingTable(panelController: _pc),
                           PanelBillDetails(),
-                          PanelBillCheckout(),
+                          PanelBillCheckout(panelController: _pc),
                         ],
                       ),
                     ],

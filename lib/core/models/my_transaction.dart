@@ -17,12 +17,12 @@ class MyTransaction {
   var sellingProducts;
   String total, //change could sent as debit if the paid is less than total.
       paid, //increase [$incomeCash].
-      change, //change could be sent as deposit
+      change; //change could be sent as deposit
 
-      //info about buying
+  //info about buying
 
-      buyingProduct,
-      buyingQuantity,
+  var buyingProducts;
+  String buyingQuantity,
       buyingProductCategory,
       buyingCompanyName,
       buyingCashAmount, //increase [$outcomeCash]
@@ -51,7 +51,7 @@ class MyTransaction {
       this.paid,
       this.change,
       //
-      this.buyingProduct,
+      this.buyingProducts,
       this.buyingQuantity,
       this.buyingProductCategory,
       this.buyingCompanyName,
@@ -80,7 +80,7 @@ class MyTransaction {
         paid = snapshot['paid'] ?? '',
         change = snapshot['change'] ?? '',
         //
-        buyingProduct = snapshot['buyingProduct'] ?? '',
+        buyingProducts = snapshot['buyingProducts'] ?? '',
         buyingQuantity = snapshot['buyingQuantity'] ?? '',
         buyingProductCategory = snapshot['buyingProductCategory'] ?? '',
         buyingCompanyName = snapshot['buyingCompanyName'] ?? '',
@@ -112,7 +112,7 @@ class MyTransaction {
       "change": change,
       //
 
-      "buyingProduct": buyingProduct,
+      "buyingProducts": buyingProducts,
       "buyingQuantity": buyingQuantity,
       "buyingProductCategory": buyingProductCategory,
       "buyingCompanyName": buyingCompanyName,

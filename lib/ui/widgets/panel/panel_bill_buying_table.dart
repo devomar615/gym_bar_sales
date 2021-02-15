@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
+import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
@@ -27,6 +28,8 @@ class PanelBillBuyingTable extends StatelessWidget {
 
     var billServices = Provider.of<BillServices>(context);
 
+    var homeServices = Provider.of<HomeServices>(context);
+
     List<Product> selectedList = productModel.getSelectedProducts();
 
     onMinusProduct(index) {
@@ -49,7 +52,9 @@ class PanelBillBuyingTable extends StatelessWidget {
     onPlusProduct(index) {
       if (selectedList[index].selectionNo >=
           double.parse(selectedList[index].netTotalQuantity)) {
-        print("product needed");
+        if (homeServices.switcherOpen) {
+          print("product needed");
+        }
       }
 
       if (double.parse(selectedList[index].netTotalQuantity) > 0 &&
@@ -57,6 +62,11 @@ class PanelBillBuyingTable extends StatelessWidget {
               double.parse(selectedList[index].netTotalQuantity)) {
         productModel.addProductSelectionById(selectedList[index].id);
 
+        billServices.calculateTheTotalBill(selectedList);
+        billServices.calculateOnlyForHouseType();
+      }
+      if (!homeServices.switcherOpen) {
+        productModel.addProductSelectionById(selectedList[index].id);
         billServices.calculateTheTotalBill(selectedList);
         billServices.calculateOnlyForHouseType();
       }
@@ -135,6 +145,7 @@ class PanelBillBuyingTable extends StatelessWidget {
                               productModel.addTheTotalBuyingPerProduct(
                                   changingValue: double.parse(value),
                                   productId: selectedList[index].id);
+
                               billServices.calculateTheTotalBill(selectedList);
                               billServices.calculateOnlyForHouseType();
                             }),
@@ -144,6 +155,9 @@ class PanelBillBuyingTable extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: _dimensions.widthPercent(17.5)),
+                      //todo: ممكن نضيف هنا اذا كانت عملية الشراء جمله يعني علبه مثلا او مش جمله
+                      //todo: ممكن نضيف هنا اذا كانت عملية الشراء جمله يعني علبه مثلا او مش جمله
+                      //todo: ممكن نضيف هنا اذا كانت عملية الشراء جمله يعني علبه مثلا او مش جمله
                       Row(
                         children: [
                           Container(

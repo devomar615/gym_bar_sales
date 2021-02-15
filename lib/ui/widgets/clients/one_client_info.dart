@@ -196,7 +196,7 @@ class OneClientInfo extends StatelessWidget {
                                   filteredTransactions[index].transactionType ==
                                           "selling"
                                       ? filteredTransactions[index]
-                                          .buyingProduct
+                                          .buyingProducts
                                       : filteredTransactions[index]
                                           .transactionType,
                                   style: _textStyles.billTableContentStyle())),

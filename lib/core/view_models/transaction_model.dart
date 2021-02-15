@@ -42,7 +42,6 @@ class TransactionModel extends ChangeNotifier {
 
   Future addTransaction({MyTransaction transaction, branchName}) async {
     _status = Status.Busy;
-
     _db
         .collection("transactions/branches/$branchName")
         .add(transaction.toJson());
