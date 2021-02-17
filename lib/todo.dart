@@ -3,3 +3,9 @@
 
 //todo: add consumer to changed widgets only;
 //todo: test checkout button on the bill;
+
+
+
+//todo: check data and add english language.
+
+//todo: add themes.

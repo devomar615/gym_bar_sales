@@ -11,10 +11,6 @@ import 'core/view_models/category_model.dart';
 final String branch = "بيفرلي";
 
 var providers = [
-  // ChangeNotifierProvider(
-  //   create: (_) => Auth(),
-  // ),
-
   Provider(create: (_) => branch),
   ChangeNotifierProvider(create: (_) => CategoryModel()),
   ChangeNotifierProvider(create: (_) => ProductModel()),
@@ -24,27 +20,4 @@ var providers = [
   ChangeNotifierProvider(create: (_) => TotalModel()),
   ChangeNotifierProvider(create: (_) => BillServices()),
   ChangeNotifierProvider(create: (_) => HomeServices()),
-
-  // ChangeNotifierProxyProvider<Auth, ProductsViewModel>(
-  //   create: null,
-  //   update: (ctx, auth, previousProducts) => ProductsViewModel(
-  //     auth.token,
-  //     auth.userId,
-  //     previousProducts == null ? [] : previousProducts.items,
-  //   ),
-  // ),
-
-  // ChangeNotifierProvider(
-  //   create: (_) => Cart(),
-  // ),
-
-  // ChangeNotifierProxyProvider<Auth, Orders>(
-  //   create: null,
-  //   update: (ctx, auth, previousOrders) => Orders(
-  //     auth.token,
-  //     auth.userId,
-  //     previousOrders == null ? [] : previousOrders.orders,
-  //   ),
-  // ),
-
 ];

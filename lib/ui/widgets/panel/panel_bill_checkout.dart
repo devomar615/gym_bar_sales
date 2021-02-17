@@ -199,13 +199,12 @@ class PanelBillCheckout extends StatelessWidget {
             )
           : MyTransaction(
               transactorName: tempTransactorName,
-              transactionType: "selling",
-              transactionAmount: billServices.totalBill.toString(),
+              transactionType: "buying",
+              transactionAmount: billServices.payedAmount.toString(),
               date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
               hour: DateFormat('h:mm a').format(DateTime.now()),
               branch: tempBranchName,
               buyingProducts: sellingProducts(),
-              buyingCashAmount: billServices.payedAmount.toString(),
             );
 
       transactionModel.addTransaction(
@@ -415,7 +414,7 @@ class PanelBillCheckout extends StatelessWidget {
                     }, docId: branch);
                     // productModel.cleanProductSelection();
                     // billServices.totalBill = 0;
-                    _autoClosePanel();
+                    // _autoClosePanel();
                   },
                 ),
                 FlatButton(

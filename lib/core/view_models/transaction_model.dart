@@ -62,6 +62,14 @@ class TransactionModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  fetchTransactionStreamByCustomerName({branchName, customerName}) {
+    Stream<QuerySnapshot> result = _db
+        .collection("transactions/branches/$branchName/")
+        .where("customerName", isEqualTo: customerName)
+        .snapshots();
+    return result;
+  }
+
 // Future fetchFilteredTransaction({
 //   @required branchName,
 //   field,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:gym_bar_sales/core/enums.dart';
@@ -130,53 +131,95 @@ class ClientsList extends StatelessWidget {
     }
 
     clientsList() {
-      //     .fetchTransaction(branchName: branch)
-      return ListView.builder(
-        itemCount: filteredClients.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-                vertical: _dimensions.widthPercent(0.4),
-                horizontal: _dimensions.widthPercent(1)),
-            child: Card(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(_dimensions.widthPercent(1)),
-              ),
-              child: ListTileTheme(
-                selectedColor: filteredClients[index].type == 'دائن'
-                    ? Colors.red
-                    : Colors.blue,
-                child: ListTile(
-                  leading: Icon(
-                    Icons.account_circle,
-                    size: _dimensions.widthPercent(4),
-                  ),
-                  title: Text(filteredClients[index].name),
-                  subtitle: Text(filteredClients[index].cash,
-                      style: TextStyle(
-                          color: filteredClients[index].type == 'دائن'
+      return StreamBuilder(
+        stream: clientModel.fetchClientStream(branchName: branch),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.hasError) {
+            return Text('Something went wrong');
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            print("Loading");
+          }
+
+          List<Client> liveClient;
+          if (snapshot.hasData) {
+            liveClient = snapshot.data.docs
+                .map<Client>((DocumentSnapshot document) =>
+                    Client.fromMap(document.data(), document.id))
+                .toList();
+          }
+
+          return snapshot.hasData
+              ? ListView.builder(
+                  itemCount: filteredClients.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: _dimensions.widthPercent(0.4),
+                          horizontal: _dimensions.widthPercent(1)),
+                      child: Card(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              _dimensions.widthPercent(1)),
+                        ),
+                        child: ListTileTheme(
+                          selectedColor: liveClient
+                                      .firstWhere((element) =>
+                                          element.id ==
+                                          filteredClients[index].id)
+                                      .type ==
+                                  'دائن'
                               ? Colors.red
-                              : Colors.green)),
-                  selected: selectedClient == null
-                      ? false
-                      : filteredClients[index].id == selectedClient.id,
-                  onTap: () {
-                    if (selectedClient == null) {
-                      clientModel.selectedClient = filteredClients[index];
-                      fetchTransaction();
-                    } else if (filteredClients[index].id == selectedClient.id) {
-                      // clientModel.selectedClient = null;
-                    } else {
-                      clientModel.selectedClient = filteredClients[index];
-                      fetchTransaction();
-                    }
+                              : Colors.blue,
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.account_circle,
+                              size: _dimensions.widthPercent(4),
+                            ),
+                            title: Text(filteredClients[index].name),
+                            subtitle: Text(
+                                liveClient
+                                    .firstWhere((element) =>
+                                        element.id == filteredClients[index].id)
+                                    .cash,
+                                style: TextStyle(
+                                    color: liveClient
+                                                .firstWhere((element) =>
+                                                    element.id ==
+                                                    filteredClients[index].id)
+                                                .type ==
+                                            'دائن'
+                                        ? Colors.red
+                                        : Colors.green)),
+                            selected: selectedClient == null
+                                ? false
+                                : filteredClients[index].id ==
+                                    selectedClient.id,
+                            onTap: () {
+                              if (selectedClient == null) {
+                                clientModel.selectedClient =
+                                    filteredClients[index];
+                                fetchTransaction();
+                              } else if (filteredClients[index].id ==
+                                  selectedClient.id) {
+                                // clientModel.selectedClient = null;
+                              } else {
+                                clientModel.selectedClient =
+                                    filteredClients[index];
+                                fetchTransaction();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    );
                   },
-                ),
-              ),
-            ),
-          );
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
+                );
         },
       );
     }

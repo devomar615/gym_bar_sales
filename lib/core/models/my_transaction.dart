@@ -10,29 +10,22 @@ class MyTransaction {
       date,
       hour,
       branch,
-      //info about selling only
       customerName, //الشخص اللي اتعمل عليه العمليه ويمكن ان يكون عميل او موظف حسب العمليه
+
+      //info about selling only
       customerId,
-      customerType;
-  var sellingProducts;
-  String total, //change could sent as debit if the paid is less than total.
+      customerType,
+      total, //change could sent as debit if the paid is less than total.
       paid, //increase [$incomeCash].
       change; //change could be sent as deposit
+
+  var sellingProducts;
 
   //info about buying
 
   var buyingProducts;
-  String buyingQuantity,
-      buyingProductCategory,
-      buyingCompanyName,
-      buyingCashAmount, //increase [$outcomeCash]
-      notes,
+  String buyingProductCategory, buyingCompanyName, notes;
 
-      //info about withdraw
-      withdrawCashAmount, //increase [$outcomeCash]
-
-      //info about deposit
-      depositCashAmount; //increase [$outcomeCash]
   MyTransaction(
       {this.id,
       @required this.transactorName,
@@ -52,15 +45,9 @@ class MyTransaction {
       this.change,
       //
       this.buyingProducts,
-      this.buyingQuantity,
       this.buyingProductCategory,
       this.buyingCompanyName,
-      this.buyingCashAmount,
-      this.notes,
-      //
-      this.withdrawCashAmount,
-      //
-      this.depositCashAmount});
+      this.notes});
 
   MyTransaction.fromMap(Map snapshot, String id)
       : id = id ?? "",
@@ -81,16 +68,9 @@ class MyTransaction {
         change = snapshot['change'] ?? '',
         //
         buyingProducts = snapshot['buyingProducts'] ?? '',
-        buyingQuantity = snapshot['buyingQuantity'] ?? '',
         buyingProductCategory = snapshot['buyingProductCategory'] ?? '',
         buyingCompanyName = snapshot['buyingCompanyName'] ?? '',
-        buyingCashAmount = snapshot['buyingCashAmount,'] ?? '',
-        notes = snapshot['notes'] ?? '',
-        //
-        withdrawCashAmount = snapshot['withdrawCashAmount'] ?? '',
-        //
-
-        depositCashAmount = snapshot['depositCashAmount'] ?? '';
+        notes = snapshot['notes'] ?? '';
 
   toJson() {
     return {
@@ -113,17 +93,9 @@ class MyTransaction {
       //
 
       "buyingProducts": buyingProducts,
-      "buyingQuantity": buyingQuantity,
       "buyingProductCategory": buyingProductCategory,
       "buyingCompanyName": buyingCompanyName,
-      "buyingCashAmount": buyingCashAmount,
-      "notes": notes,
-      //
-
-      "withdrawCashAmount": withdrawCashAmount,
-      //
-
-      "depositCashAmount": depositCashAmount,
+      "notes": notes
     };
   }
 }

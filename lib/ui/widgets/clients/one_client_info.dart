@@ -1,23 +1,32 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:gym_bar_sales/core/enums.dart';
+import 'package:flutter/services.dart';
 import 'package:gym_bar_sales/core/models/client.dart';
+import 'package:gym_bar_sales/core/models/my_transaction.dart';
+import 'package:gym_bar_sales/core/models/total.dart';
 import 'package:gym_bar_sales/core/view_models/client_model.dart';
+import 'package:gym_bar_sales/core/view_models/total_model.dart';
 import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 File file;
+var branch = "بيفرلي";
+var transactorName = "عمر";
 
 class OneClientInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ClientModel clientModel = Provider.of<ClientModel>(context);
+    TotalModel totalModel = Provider.of<TotalModel>(context, listen: false);
 
     Client selectedClient = clientModel.selectedClient;
+    List<Total> total = totalModel.total;
 
     FormWidget _formWidget = FormWidget(context: context);
     Dimensions _dimensions = Dimensions(context);
@@ -25,7 +34,54 @@ class OneClientInfo extends StatelessWidget {
 
     var transactionModel = Provider.of<TransactionModel>(context);
 
-    var filteredTransactions = transactionModel.filteredTransactions;
+    // var filteredTransactions = transactionModel.filteredTransactions;
+
+    transaction(type) {
+      transactionModel.addTransaction(
+          branchName: branch,
+          transaction: MyTransaction(
+            transactorName: transactorName,
+            transactionType: type,
+            transactionAmount: clientModel.cashToAdd.toString(),
+            customerName: selectedClient.name,
+            date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+            hour: DateFormat('h:mm a').format(DateTime.now()),
+            branch: branch,
+          ));
+    }
+
+    updateTreasury({String transactionType}) async {
+      totalModel.fetchTotal();
+
+      double currentCash = double.parse(total[0].cash);
+
+      double updatedCash = transactionType == "ايداع"
+          ? currentCash + clientModel.cashToAdd
+          : currentCash - clientModel.cashToAdd;
+
+      totalModel
+          .updateTotal(docId: branch, data: {'cash': updatedCash.toString()});
+    }
+
+    updateClientCash({String transactionType}) async {
+      Client client = await clientModel.fetchClientById(
+          branchName: branch, id: selectedClient.id);
+      double currentCash = double.parse(client.cash);
+
+      double updatedCash = transactionType == "ايداع"
+          ? currentCash + clientModel.cashToAdd
+          : currentCash - clientModel.cashToAdd;
+
+      String updatedType;
+      if (updatedCash == 0) updatedType = "خالص";
+      if (updatedCash < 0) updatedType = "دائن";
+      if (updatedCash > 0) updatedType = "مدين";
+
+      clientModel.updateClient(
+          branchName: branch,
+          clientId: selectedClient.id,
+          data: {'cash': updatedCash.toString(), 'type': updatedType});
+    }
 
     onTapTransaction(String type) => showDialog<void>(
           context: context,
@@ -35,16 +91,29 @@ class OneClientInfo extends StatelessWidget {
             return AlertDialog(
               title: Text(type),
               content: TextField(
-                onChanged: (value) {},
+                onChanged: (value) {
+                  print(value);
+                  clientModel.cashToAdd = double.parse(value);
+                  print(clientModel.cashToAdd);
+                },
                 decoration: InputDecoration(labelText: 'اكتب المبلغ هنا'),
                 keyboardType: TextInputType.number,
                 maxLength: 3,
                 maxLengthEnforced: true,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                ],
               ),
               actions: <Widget>[
                 FlatButton(
                   child: Text('اتمام'),
                   onPressed: () {
+                    if (clientModel.cashToAdd > 0) {
+                      updateClientCash(transactionType: type);
+                      transaction(type);
+                      updateTreasury(transactionType: type);
+                    } else
+                      print("cash cannot be null or equal 0");
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
                   },
                 ),
@@ -139,82 +208,111 @@ class OneClientInfo extends StatelessWidget {
     }
 
     tableBuilder() {
-      return transactionModel.status == Status.Busy
-          ? Center(child: Text("Loading..."))
-          : ListView.builder(
-              shrinkWrap: true,
-              itemCount: filteredTransactions.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Column(
-                  children: [
-                    Container(
-                      constraints: BoxConstraints(
-                        minHeight: _dimensions.heightPercent(5),
-                        maxHeight: _dimensions.heightPercent(5),
-                      ),
-                      child: Row(
+      return StreamBuilder(
+        stream: transactionModel.fetchTransactionStreamByCustomerName(
+            branchName: branch, customerName: selectedClient.name),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (snapshot.hasError) {
+            return Text('Something went wrong');
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            print("Loading");
+          }
+
+          List<MyTransaction> filteredTransactions;
+          if (snapshot.hasData) {
+            filteredTransactions = snapshot.data.docs
+                .map<MyTransaction>((DocumentSnapshot document) =>
+                    MyTransaction.fromMap(document.data(), document.id))
+                .toList();
+            filteredTransactions.sort((a, b) => b.date.compareTo(a.date));
+          }
+
+          return snapshot.hasData
+              ? ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: filteredTransactions.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Column(
+                      children: [
+                        Container(
+                          constraints: BoxConstraints(
+                            minHeight: _dimensions.heightPercent(5),
+                            maxHeight: _dimensions.heightPercent(5),
+                          ),
+                          child: Row(
 //                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          SizedBox(width: _dimensions.widthPercent(4)),
-                          Container(
-                            child: Text(filteredTransactions[index].date,
-                                style: _textStyles.billTableContentStyle()),
-                            constraints: BoxConstraints(
-                              maxWidth: _dimensions.widthPercent(10),
-                              minWidth: _dimensions.widthPercent(10),
-                            ),
-                          ),
-                          SizedBox(width: _dimensions.widthPercent(7.5)),
-                          Container(
-                            child: Text(filteredTransactions[index].total,
-                                style: _textStyles.billTableContentStyle()),
-                            constraints: BoxConstraints(
-                              maxWidth: _dimensions.widthPercent(10),
-                              minWidth: _dimensions.widthPercent(10),
-                            ),
-                          ),
-                          SizedBox(width: _dimensions.widthPercent(6)),
-                          Row(
-                            children: [
+                            children: <Widget>[
+                              SizedBox(width: _dimensions.widthPercent(4)),
                               Container(
+                                child: Text(filteredTransactions[index].date,
+                                    style: _textStyles.billTableContentStyle()),
                                 constraints: BoxConstraints(
                                   maxWidth: _dimensions.widthPercent(10),
                                   minWidth: _dimensions.widthPercent(10),
                                 ),
-                                child: Text(filteredTransactions[index].paid,
-                                    style: _textStyles.billTableContentStyle()),
                               ),
-                              SizedBox(width: _dimensions.widthPercent(7)),
+                              SizedBox(width: _dimensions.widthPercent(7.5)),
+                              Container(
+                                child: Text(filteredTransactions[index].total,
+                                    style: _textStyles.billTableContentStyle()),
+                                constraints: BoxConstraints(
+                                  maxWidth: _dimensions.widthPercent(10),
+                                  minWidth: _dimensions.widthPercent(10),
+                                ),
+                              ),
+                              SizedBox(width: _dimensions.widthPercent(6)),
+                              Row(
+                                children: [
+                                  Container(
+                                    constraints: BoxConstraints(
+                                      maxWidth: _dimensions.widthPercent(10),
+                                      minWidth: _dimensions.widthPercent(10),
+                                    ),
+                                    child: Text(
+                                        filteredTransactions[index].paid,
+                                        style: _textStyles
+                                            .billTableContentStyle()),
+                                  ),
+                                  SizedBox(width: _dimensions.widthPercent(7)),
+                                ],
+                              ),
+                              Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth: _dimensions.widthPercent(10),
+                                    minWidth: _dimensions.widthPercent(10),
+                                  ),
+                                  child: Text(
+                                      filteredTransactions[index]
+                                                  .transactionType ==
+                                              "selling"
+                                          ? filteredTransactions[index]
+                                              .buyingProducts
+                                          : filteredTransactions[index]
+                                              .transactionType,
+                                      style:
+                                          _textStyles.billTableContentStyle())),
                             ],
                           ),
-                          Container(
-                              constraints: BoxConstraints(
-                                maxWidth: _dimensions.widthPercent(10),
-                                minWidth: _dimensions.widthPercent(10),
-                              ),
-                              child: Text(
-                                  filteredTransactions[index].transactionType ==
-                                          "selling"
-                                      ? filteredTransactions[index]
-                                          .buyingProducts
-                                      : filteredTransactions[index]
-                                          .transactionType,
-                                  style: _textStyles.billTableContentStyle())),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: _dimensions.heightPercent(1)),
-                    Divider(height: 1, color: Colors.black),
-                    SizedBox(height: _dimensions.heightPercent(1)),
+                        ),
+                        SizedBox(height: _dimensions.heightPercent(1)),
+                        Divider(height: 1, color: Colors.black),
+                        SizedBox(height: _dimensions.heightPercent(1)),
 
-                    // Divider(height: 1, color: Colors.black),
-                  ],
+                        // Divider(height: 1, color: Colors.black),
+                      ],
+                    );
+                  },
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
                 );
-              },
-            );
+        },
+      );
     }
 
-    return selectedClient == null || filteredTransactions == null
+    return selectedClient == null
         ? Expanded(
             flex: 2,
             child: Center(
@@ -265,7 +363,7 @@ class OneClientInfo extends StatelessWidget {
                 SizedBox(height: _dimensions.heightPercent(2)),
                 tableHead(),
                 SizedBox(height: _dimensions.heightPercent(2)),
-                Expanded(child: tableBuilder()),
+                tableBuilder(),
               ],
             ),
           );
