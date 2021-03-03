@@ -255,7 +255,9 @@ class OneClientInfo extends StatelessWidget {
                               ),
                               SizedBox(width: _dimensions.widthPercent(7.5)),
                               Container(
-                                child: Text(filteredTransactions[index].total,
+                                child: Text(
+                                    filteredTransactions[index]
+                                        .transactionAmount,
                                     style: _textStyles.billTableContentStyle()),
                                 constraints: BoxConstraints(
                                   maxWidth: _dimensions.widthPercent(10),

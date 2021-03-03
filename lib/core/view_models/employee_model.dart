@@ -24,9 +24,11 @@ class EmployeeModel extends ChangeNotifier {
 
   Future fetchEmployees({branchName}) async {
     _status = Status.Busy;
+
     var result = await _db.collection("employees/branches/$branchName/").get();
     _employees =
         result.docs.map((doc) => Employee.fromMap(doc.data(), doc.id)).toList();
+
     _status = Status.Idle;
     notifyListeners();
   }

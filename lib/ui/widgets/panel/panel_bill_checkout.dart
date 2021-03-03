@@ -51,10 +51,8 @@ class PanelBillCheckout extends StatelessWidget {
       }
     }
 
-    updateProductQuantity(
-        {productId, selectionNo, theAmountOfSalesPerProduct}) async {
-      Product product = await productModel.fetchProductById(
-          branchName: "بيفرلي", id: productId);
+    updateProductQuantity({productId, selectionNo, theAmountOfSalesPerProduct}) async {
+      Product product = await productModel.fetchProductById(branchName: "بيفرلي", id: productId);
 
       // get currentTotalAmount from database
       double currentTotalAmount = double.parse(product.netTotalQuantity);
@@ -65,8 +63,7 @@ class PanelBillCheckout extends StatelessWidget {
       print(selectionNo);
       print('printing theAmountOfSalesPerProduct...');
       print(theAmountOfSalesPerProduct);
-      double billQuantity =
-          selectionNo * double.parse(theAmountOfSalesPerProduct);
+      double billQuantity = selectionNo * double.parse(theAmountOfSalesPerProduct);
 
       print('printing bill quantity...');
       print(billQuantity);
@@ -81,13 +78,10 @@ class PanelBillCheckout extends StatelessWidget {
       return newQuantity.toString();
     }
 
-    updateProductWholesaleQuantity(
-        {productId, selectionNo, theAmountOfSalesPerProduct}) async {
-      Product product = await productModel.fetchProductById(
-          branchName: "بيفرلي", id: productId);
+    updateProductWholesaleQuantity({productId, selectionNo, theAmountOfSalesPerProduct}) async {
+      Product product = await productModel.fetchProductById(branchName: "بيفرلي", id: productId);
       //get currentWholesaleAmount from database
-      double currentWholesaleAmount =
-          double.parse(product.quantityOfWholesaleUnit);
+      double currentWholesaleAmount = double.parse(product.quantityOfWholesaleUnit);
       print('printing current wholesaleAmount...');
       print(currentWholesaleAmount);
 
@@ -104,8 +98,7 @@ class PanelBillCheckout extends StatelessWidget {
 
     sellingProducts() {
       var map = {};
-      selectedList
-          .forEach((products) => map[products.name] = products.selectionNo);
+      selectedList.forEach((products) => map[products.name] = products.selectionNo);
       print(map);
       return map;
     }
@@ -149,29 +142,24 @@ class PanelBillCheckout extends StatelessWidget {
 
     updateProductOnDatabase() async {
       for (int i = 0; i < selectedList.length; i++) {
-        print('netTotalQuantity of prodduct number $i =' +
-            selectedList[i].netTotalQuantity);
+        print('netTotalQuantity of prodduct number $i =' + selectedList[i].netTotalQuantity);
         print('id of prodduct number $i is=' + selectedList[i].id);
         print('selection number of prodduct number $i is=' +
             selectedList[i].selectionNo.toString());
 
-        productModel.updateProduct(
-            branchName: tempBranchName,
-            productId: selectedList[i].id,
-            data: {
-              "netTotalQuantity": await updateProductQuantity(
-                  productId: selectedList[i].id,
-                  selectionNo: selectedList[i].selectionNo,
-                  theAmountOfSalesPerProduct:
-                      selectedList[i].theAmountOfSalesPerProduct),
+        productModel
+            .updateProduct(branchName: tempBranchName, productId: selectedList[i].id, data: {
+          "netTotalQuantity": await updateProductQuantity(
+              productId: selectedList[i].id,
+              selectionNo: selectedList[i].selectionNo,
+              theAmountOfSalesPerProduct: selectedList[i].theAmountOfSalesPerProduct),
 
-              "wholesaleQuantity": await updateProductWholesaleQuantity(
-                  productId: selectedList[i].id,
-                  selectionNo: selectedList[i].selectionNo,
-                  theAmountOfSalesPerProduct:
-                      selectedList[i].theAmountOfSalesPerProduct),
-              //     });
-            });
+          "wholesaleQuantity": await updateProductWholesaleQuantity(
+              productId: selectedList[i].id,
+              selectionNo: selectedList[i].selectionNo,
+              theAmountOfSalesPerProduct: selectedList[i].theAmountOfSalesPerProduct),
+          //     });
+        });
 
         print('Products Updated');
       }
@@ -207,8 +195,7 @@ class PanelBillCheckout extends StatelessWidget {
               buyingProducts: sellingProducts(),
             );
 
-      transactionModel.addTransaction(
-          branchName: tempBranchName, transaction: myTransaction);
+      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction);
 
       print('Transaction Added');
       updateProductOnDatabase();
@@ -239,8 +226,7 @@ class PanelBillCheckout extends StatelessWidget {
             return AlertDialog(
               title: Text('تاكيد العمليه'),
               content: billChange < 0
-                  ? Text(
-                      'تحذير سيتم اضافه باقي الفاتوره علي حساب العميل هل تريد المتابعه ؟')
+                  ? Text('تحذير سيتم اضافه باقي الفاتوره علي حساب العميل هل تريد المتابعه ؟')
                   : billChange > 0
                       ? Column(
                           mainAxisSize: MainAxisSize.min,
@@ -255,8 +241,7 @@ class PanelBillCheckout extends StatelessWidget {
                               },
                             ),
                             SizedBox(height: _dimensions.heightPercent(0.5)),
-                            Text(
-                                "عدم الاختيار تعني ان الباقي قد تم تسليمه بالكامل للعميل"),
+                            Text("عدم الاختيار تعني ان الباقي قد تم تسليمه بالكامل للعميل"),
                           ],
                         )
                       : Text("هل تريد اتمام العمليه ؟"),
@@ -284,18 +269,15 @@ class PanelBillCheckout extends StatelessWidget {
                     if (billChange < 0) {
                       transaction();
                       if (billServices.selectedBuyerType == 'Client') {
-                        updateClientCash(
-                            selectedClient.cash, selectedClient.id, true);
+                        updateClientCash(selectedClient.cash, selectedClient.id, true);
                       }
                       if (billServices.selectedBuyerType == 'Employee') {
-                        updateEmployeeCash(
-                            selectedEmployee.cash, selectedEmployee.id, true);
+                        updateEmployeeCash(selectedEmployee.cash, selectedEmployee.id, true);
                       }
 
                       totalModel.updateTotal(data: {
                         'cash': calculateNewTreasury(
-                            oldCash: total[0].cash,
-                            cashToAdd: billServices.payedAmount)
+                            oldCash: total[0].cash, cashToAdd: billServices.payedAmount)
                       }, docId: branch);
 
                       print('الباقي اقل');
@@ -306,17 +288,14 @@ class PanelBillCheckout extends StatelessWidget {
                     if (billServices.isCredit) {
                       transaction();
                       if (billServices.selectedBuyerType == 'Client') {
-                        updateClientCash(
-                            selectedClient.cash, selectedClient.id, false);
+                        updateClientCash(selectedClient.cash, selectedClient.id, false);
                       }
                       if (billServices.selectedBuyerType == 'Employee') {
-                        updateEmployeeCash(
-                            selectedEmployee.cash, selectedEmployee.id, false);
+                        updateEmployeeCash(selectedEmployee.cash, selectedEmployee.id, false);
                       }
                       totalModel.updateTotal(data: {
                         'cash': calculateNewTreasury(
-                            oldCash: total[0].cash,
-                            cashToAdd: billServices.payedAmount)
+                            oldCash: total[0].cash, cashToAdd: billServices.payedAmount)
                       }, docId: branch);
                       print('الباقي اكتر');
 
@@ -327,8 +306,7 @@ class PanelBillCheckout extends StatelessWidget {
                       transaction();
                       totalModel.updateTotal(data: {
                         'cash': calculateNewTreasury(
-                            oldCash: total[0].cash,
-                            cashToAdd: billServices.totalBill)
+                            oldCash: total[0].cash, cashToAdd: billServices.totalBill)
                       }, docId: branch);
                       //الاجمالي يروح للخزنه
                     }
@@ -337,17 +315,11 @@ class PanelBillCheckout extends StatelessWidget {
                       transaction();
                       totalModel.updateTotal(data: {
                         'cash': calculateNewTreasury(
-                            oldCash: total[0].cash,
-                            cashToAdd: billServices.totalBill)
+                            oldCash: total[0].cash, cashToAdd: billServices.totalBill)
                       }, docId: branch);
                       //الاجمالي يروح للخزنه
 
                     }
-                    // todo: to refresh data you must use streams in your app [idiot]
-                    // todo: go read about it and rebuild the whole project again hehehehe
-                    // todo: link to help [https://dev.to/nitishk72/understanding-streams-in-flutter-dart-2pb8]
-                    // todo: another link [https://medium.com/flutter-community/real-time-stats-monitor-with-flutter-and-firebase-576cd554b9ca]
-
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
 
                     _autoClosePanel();
@@ -380,14 +352,10 @@ class PanelBillCheckout extends StatelessWidget {
 
     void sellingTransaction() {
       print("yes switcher open");
-      if (selectedClient == null &&
-          selectedEmployee == null &&
-          selectedBuyerType != "House") {
+      if (selectedClient == null && selectedEmployee == null && selectedBuyerType != "House") {
         _noSelectedBuyerNameOrTypeDialog();
       }
-      if (selectedClient != null ||
-          selectedEmployee != null ||
-          selectedBuyerType == "House") {
+      if (selectedClient != null || selectedEmployee != null || selectedBuyerType == "House") {
         _confirmTransactionDialog();
       }
     }
@@ -399,8 +367,7 @@ class PanelBillCheckout extends StatelessWidget {
           builder: (BuildContext dialogContext) {
             return AlertDialog(
               title: Text('إتمام عملية شراء'),
-              content: Text(
-                  'هل تود اتمام عملية الشراء وسوف يتم سحب هذا المبلغ من الغزنه'),
+              content: Text('هل تود اتمام عملية الشراء وسوف يتم سحب هذا المبلغ من الغزنه'),
               actions: <Widget>[
                 FlatButton(
                   child: Text('إتمام'),
@@ -409,8 +376,7 @@ class PanelBillCheckout extends StatelessWidget {
                     transaction();
                     totalModel.updateTotal(data: {
                       'cash': calculateNewTreasury(
-                          oldCash: total[0].cash,
-                          cashToAdd: billServices.totalBill)
+                          oldCash: total[0].cash, cashToAdd: billServices.totalBill)
                     }, docId: branch);
                     // productModel.cleanProductSelection();
                     // billServices.totalBill = 0;
@@ -453,8 +419,7 @@ class PanelBillCheckout extends StatelessWidget {
               }
             },
             shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(_dimensions.heightPercent(1))),
+                borderRadius: BorderRadius.circular(_dimensions.heightPercent(1))),
           ),
         )),
         SizedBox(height: _dimensions.heightPercent(2.5)),

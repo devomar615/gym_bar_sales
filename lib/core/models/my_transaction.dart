@@ -15,7 +15,6 @@ class MyTransaction {
       //info about selling only
       customerId,
       customerType,
-      total, //change could sent as debit if the paid is less than total.
       paid, //increase [$incomeCash].
       change; //change could be sent as deposit
 
@@ -40,7 +39,6 @@ class MyTransaction {
       this.customerId,
       this.customerType,
       this.sellingProducts,
-      this.total,
       this.paid,
       this.change,
       //
@@ -63,7 +61,6 @@ class MyTransaction {
         customerId = snapshot['customerId'] ?? '',
         customerType = snapshot['customerType'] ?? '',
         sellingProducts = snapshot['sellingProducts'] ?? '',
-        total = snapshot['total'] ?? '',
         paid = snapshot['paid'] ?? '',
         change = snapshot['change'] ?? '',
         //
@@ -87,7 +84,6 @@ class MyTransaction {
       "customerId": customerId,
       "customerType": customerType,
       "sellingProducts": sellingProducts,
-      "total": total,
       "paid": paid,
       "change": change,
       //
