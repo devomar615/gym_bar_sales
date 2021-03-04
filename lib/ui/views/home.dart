@@ -180,7 +180,7 @@ class Home extends StatelessWidget {
               ),
               SizedBox(width: _dimensions.widthPercent(2)),
               Text(
-                ':الخزينه',
+                ':الخزنه',
                 style: _textStyles.profileNameTitleStyle(),
               ),
               SizedBox(width: _dimensions.widthPercent(2)),
@@ -346,7 +346,7 @@ class Home extends StatelessWidget {
         title: products[index].name,
         assetImage: null,
         networkImage:
-            "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg",
+            "https://cdn.seif-online.com//wp-content/uploads/2020/01/362035.jpg",
       );
     }
 
@@ -382,13 +382,13 @@ class Home extends StatelessWidget {
                         SliverAppBar(
                           elevation: 0,
                           backgroundColor: Colors.white,
-                          collapsedHeight: _dimensions.heightPercent(32.25),
+                          collapsedHeight: _dimensions.heightPercent(35),
                           // expandedHeight: _dimensions.heightPercent(30),
                           flexibleSpace: FlexibleSpaceBar(
                               title: Column(
                             children: [
                               appBar(),
-                              SizedBox(height: _dimensions.heightPercent(1)),
+                              // SizedBox(height: _dimensions.heightPercent(1)),
                               transactionTypeSwitcher(),
                               Container(
                                 height: _dimensions.heightPercent(7),
