@@ -11,10 +11,11 @@ import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/core/view_models/total_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
+import 'package:gym_bar_sales/ui/views/more/clients.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
+import 'package:gym_bar_sales/ui/widgets/products_grid.dart';
 import 'package:provider/provider.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
-import 'package:gym_bar_sales/ui/widgets/general_item.dart';
 
 File file;
 Timer timer;
@@ -31,7 +32,6 @@ class Home extends StatelessWidget {
     TextStyles _textStyles = TextStyles(context: context);
     FormWidget _formWidget = FormWidget(context: context);
     Dimensions _dimensions = Dimensions(context);
-    GeneralItem _generalItem = GeneralItem(context: context);
     CategoryModel categoryModel = Provider.of<CategoryModel>(context);
     ProductModel productModel = Provider.of<ProductModel>(context);
     TotalModel totalModel = Provider.of<TotalModel>(context, listen: false);
@@ -41,22 +41,17 @@ class Home extends StatelessWidget {
     List<Category> categories = categoryModel.categories;
     String transactionType = homeServices.transactionType;
     bool switcherOpen = homeServices.switcherOpen;
-    List<Product> products = productModel.filterProduct(selectedCategory);
-    var selectedList = productModel.getSelectedProducts();
 
     Widget addPhoto() {
       if (file == null) {
         return _formWidget.logo(
-            imageContent:
-                Image.asset("assets/images/myprofile.jpg", fit: BoxFit.cover),
-            backgroundColor: Colors.white);
+            imageContent: Image.asset("assets/images/myprofile.jpg", fit: BoxFit.cover), backgroundColor: Colors.white);
       } else
-        return _formWidget.logo(
-            imageContent: Image.file(file, fit: BoxFit.cover));
+        return _formWidget.logo(imageContent: Image.file(file, fit: BoxFit.cover));
     }
 
     _buildCategoryList() {
-      List<Widget> choices = List();
+      List<Widget> choices = [];
       choices.add(Container(
           padding: EdgeInsets.only(left: _dimensions.heightPercent(2)),
           child: ChoiceChip(
@@ -129,7 +124,7 @@ class Home extends StatelessWidget {
         onSelected: (choice) {
           onSelected(choice);
         },
-        icon: Icon(Icons.more_vert_rounded, size: _dimensions.widthPercent(4)),
+        child: Icon(Icons.more_vert_rounded, size: _dimensions.widthPercent(4)),
       );
     }
 
@@ -140,10 +135,7 @@ class Home extends StatelessWidget {
           Row(
             children: <Widget>[
               SizedBox(width: _dimensions.widthPercent(1)),
-              Container(
-                  height: _dimensions.heightPercent(15),
-                  width: _dimensions.widthPercent(15),
-                  child: addPhoto()),
+              Container(height: _dimensions.heightPercent(15), width: _dimensions.widthPercent(15), child: addPhoto()),
               SizedBox(width: _dimensions.widthPercent(1)),
               Text(
                 "عمر خالد",
@@ -154,28 +146,24 @@ class Home extends StatelessWidget {
               //   "model.total[0].cash",
               //   style: _textStyles.appBarCalculationsStyle(),
               // ),
-              StreamBuilder<QuerySnapshot>(
-                stream: totalModel.fetchTotalStream(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
+              StreamBuilder<DocumentSnapshot>(
+                stream: totalModel.fetchTotalStream(branch),
+                builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                   if (snapshot.hasError) {
                     return Text('Something went wrong');
                   }
 
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    print("Loading");
+                  if (snapshot.connectionState == ConnectionState.waiting) {}
+                  if (snapshot.hasData) {
+                    return Text(
+                      snapshot.data['cash'],
+                      style: _textStyles.profileNameTitleStyle(),
+                    );
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
                   }
-
-                  return snapshot.hasData
-                      ? Text(
-                          snapshot.data.docs.map((DocumentSnapshot document) {
-                            return document.data()['cash'];
-                          }).toString(),
-                          style: _textStyles.profileNameTitleStyle(),
-                        )
-                      : Center(
-                          child: CircularProgressIndicator(),
-                        );
                 },
               ),
               SizedBox(width: _dimensions.widthPercent(2)),
@@ -221,216 +209,52 @@ class Home extends StatelessWidget {
       );
     }
 
-    Widget showGeneralCard({liveProducts, index}) {
-      if (double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity) <=
-              0 ||
-          double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity) ==
-              null) {
-        if (switcherOpen) {
-          return _generalItem.customCard(
-              selectionNo: 0,
-              networkImage: "https://i.ytimg.com/vi/ANRZ_ZRHJEw/hqdefault.jpg",
-              title: products[index].name,
-              backGround: Colors.grey);
-        }
-      }
-      return _generalItem.customCard(
-        backGround: Colors.blue,
-        onTapDownItem: (_) {},
-        onTapDownIcon: (_) {
-          print('down');
-          timer = Timer.periodic(Duration(milliseconds: 200), (_) {
-            if (products[index].selectionNo > 0) {
-              productModel.removeProductSelectionById(products[index].id);
-            }
-            if (homeServices.transactionType == "بيع") {
-              productModel
-                  .calculateTheTotalPerProduct(billServices.selectedBuyerType);
-              billServices.calculateTheTotalBill(selectedList);
-              billServices.calculateChange();
-              if (billServices.selectedBuyerType == "House") {
-                billServices.calculateOnlyForHouseType();
-              }
-            }
-
-            if (homeServices.transactionType == "شراء") {
-              print("yes شراء");
-              billServices.calculateTheTotalBill(selectedList);
-              billServices.calculateOnlyForHouseType();
-            }
-          });
-        },
-        onPressItem: () {
-          if (double.parse(liveProducts
-                      .firstWhere((element) => element.id == products[index].id)
-                      .netTotalQuantity) <
-                  0 ||
-              products[index].selectionNo >=
-                  double.parse(liveProducts
-                      .firstWhere((element) => element.id == products[index].id)
-                      .netTotalQuantity)) {
-            print('product needed');
-          }
-          if (!switcherOpen) {
-            productModel.addProductSelectionById(products[index].id);
-          }
-          if (double.parse(liveProducts
-                      .firstWhere((element) => element.id == products[index].id)
-                      .netTotalQuantity) >
-                  0 &&
-              products[index].selectionNo <
-                  double.parse(liveProducts
-                      .firstWhere((element) => element.id == products[index].id)
-                      .netTotalQuantity)) {
-            productModel.addProductSelectionById(products[index].id);
-          }
-
-          if (homeServices.transactionType == "بيع") {
-            productModel
-                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
-            billServices.calculateTheTotalBill(selectedList);
-            billServices.calculateChange();
-            if (billServices.selectedBuyerType == "House") {
-              billServices.calculateOnlyForHouseType();
-            }
-          }
-
-          if (homeServices.transactionType == "شراء") {
-            print("yes شراء");
-            billServices.calculateTheTotalBill(selectedList);
-            billServices.calculateOnlyForHouseType();
-          }
-        },
-        onPressIcon: () {
-          if (products[index].selectionNo > 0) {
-            productModel.removeProductSelectionById(products[index].id);
-          }
-          if (homeServices.transactionType == "بيع") {
-            productModel
-                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
-            billServices.calculateTheTotalBill(selectedList);
-            billServices.calculateChange();
-            if (billServices.selectedBuyerType == "House") {
-              billServices.calculateOnlyForHouseType();
-            }
-            // calculateTheTotalBillPerProduct();
-            // calculateTheTotalBill();
-          }
-
-          if (homeServices.transactionType == "شراء") {
-            print("yes شراء");
-            billServices.calculateTheTotalBill(selectedList);
-            billServices.calculateOnlyForHouseType();
-          }
-        },
-        onTapUpIcon: (_) {
-          print('cancel');
-          timer.cancel();
-        },
-        onTapCancelIcon: () {
-          print('cancel');
-          timer.cancel();
-        },
-        selectionNo: products[index].selectionNo,
-        statistics: products[index].selectionNo > 0
-            ? products[index].selectionNo.toString()
-            : "",
-        topSpace: SizedBox(
-          height: _dimensions.heightPercent(9),
-        ),
-        betweenSpace: SizedBox(height: _dimensions.heightPercent(3)),
-        title: products[index].name,
-        assetImage: null,
-        networkImage:
-            "https://cdn.seif-online.com//wp-content/uploads/2020/01/362035.jpg",
-      );
-    }
-
     return categoryModel.status == Status.Busy
-        ? Center(
-            child: CircularProgressIndicator(),
-          )
-        : StreamBuilder(
-            stream: productModel.fetchProductStream("بيفرلي"),
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-              if (snapshot.hasError) {
-                return Text('Something went wrong');
-              }
-
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                print("Loading");
-              }
-              List<Product> liveProducts;
-
-              if (snapshot.hasData) {
-                liveProducts = snapshot.data.docs
-                    .map<Product>((DocumentSnapshot document) =>
-                        Product.fromMap(document.data(), document.id))
-                    .toList();
-                print("live dataaaa");
-              }
-
-              // List <Product> selectedList = productModel.getSelectedProducts(products);
-
-              return snapshot.hasData
-                  ? CustomScrollView(
-                      slivers: <Widget>[
-                        SliverAppBar(
-                          elevation: 0,
-                          backgroundColor: Colors.white,
-                          collapsedHeight: _dimensions.heightPercent(35),
-                          // expandedHeight: _dimensions.heightPercent(30),
-                          flexibleSpace: FlexibleSpaceBar(
-                              title: Column(
-                            children: [
-                              appBar(),
-                              // SizedBox(height: _dimensions.heightPercent(1)),
-                              transactionTypeSwitcher(),
-                              Container(
-                                height: _dimensions.heightPercent(7),
-                                child: ListView(
-                                  scrollDirection: Axis.horizontal,
-                                  children: _buildCategoryList(),
-                                ),
-                              ),
-                            ],
-                          )),
-                          floating: true,
-                          pinned: true,
+        ? Center(child: CircularProgressIndicator())
+        : Container(
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                appBar(),
+                transactionTypeSwitcher(),
+                Container(
+                  height: _dimensions.heightPercent(7),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: _buildCategoryList(),
                         ),
-                        SliverGrid(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 5),
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              return products.isEmpty
-                                  ? Center(child: Text('لا يوجد منتجات هنا'))
-                                  : Padding(
-                                      padding: EdgeInsets.only(
-                                          left: _dimensions.widthPercent(1),
-                                          top: _dimensions.heightPercent(3),
-                                          right: _dimensions.widthPercent(1)),
-                                      child: showGeneralCard(
-                                          liveProducts: liveProducts,
-                                          index: index),
-                                    );
-                            },
-                            childCount: productModel
-                                .filterProduct(selectedCategory)
-                                .length,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Center(
-                      child: CircularProgressIndicator(),
-                    );
-            },
+                      ),
+                    ],
+                  ),
+                ),
+                StreamBuilder(
+                  stream: productModel.fetchProductStream("بيفرلي"),
+                  builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Something went wrong');
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {}
+                    List<Product> liveProducts;
+
+                    if (snapshot.hasData) {
+                      liveProducts = snapshot.data.docs
+                          .map<Product>((DocumentSnapshot document) => Product.fromMap(document.data(), document.id))
+                          .toList();
+                    }
+
+                    return snapshot.hasData
+                        ? ProductsGrid(liveProducts: liveProducts)
+                        : Center(
+                            child: CircularProgressIndicator(),
+                          );
+                  },
+                ),
+              ],
+            ),
           );
   }
 }

@@ -14,8 +14,7 @@ class FormWidget {
       child: Container(
         child: CircleAvatar(
           child: ClipOval(child: imageContent),
-          backgroundColor:
-              backgroundColor != null ? backgroundColor : Colors.blueAccent,
+          backgroundColor: backgroundColor != null ? backgroundColor : Colors.blueAccent,
           maxRadius: _dimensions.heightPercent(30),
 //          backgroundImage: imageContent,
         ),
@@ -42,8 +41,7 @@ class FormWidget {
     List<TextInputFormatter> inputFormatters,
   }) {
     return Container(
-      margin:
-          EdgeInsets.only(left: left, right: right, bottom: bottom, top: top),
+      margin: EdgeInsets.only(left: left, right: right, bottom: bottom, top: top),
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Container(
@@ -74,13 +72,41 @@ class FormWidget {
     );
   }
 
+  Widget formButtonTemplate({
+    @required context,
+    @required text,
+    @required onTab,
+    color = Colors.blue,
+    double minWidth = 150,
+    double height = 40,
+  }) {
+    TextStyles _textStyles = TextStyles(context: context);
+    return Container(
+      constraints: BoxConstraints(
+        minWidth: minWidth,
+      ),
+      height: height,
+      child: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(color),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+        ),
+        child: Text(
+          text,
+          style: _textStyles.formButtonStyle(),
+        ),
+        onPressed: onTab,
+      ),
+    );
+  }
+
   searchTextField(controller, focusNode) {
     Dimensions _dimensions = Dimensions(context);
     TextStyles _textStyles = TextStyles(context: context);
     return Padding(
-        padding: EdgeInsets.symmetric(
-            vertical: _dimensions.heightPercent(1),
-            horizontal: _dimensions.widthPercent(1)),
+        padding: EdgeInsets.symmetric(vertical: _dimensions.heightPercent(1), horizontal: _dimensions.widthPercent(1)),
         child: TextField(
           textAlign: TextAlign.right,
           controller: controller,
@@ -88,15 +114,12 @@ class FormWidget {
           style: _textStyles.searchTextFieldStyle(),
           decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                    Radius.circular(_dimensions.heightPercent(7))),
+                borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
                 borderSide: BorderSide(color: Colors.black54),
               ),
               focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                      Radius.circular(_dimensions.heightPercent(7))),
-                  borderSide:
-                      BorderSide(color: Theme.of(context).primaryColor)),
+                  borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor)),
               suffixIcon: Icon(Icons.search),
               border: InputBorder.none,
               hintText: "... ابحث هنا",

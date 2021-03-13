@@ -1,5 +1,6 @@
-import 'package:badges/badges.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 
@@ -7,6 +8,8 @@ class GeneralItem {
   final context;
 
   GeneralItem({@required this.context});
+
+  Widget showNotificationNumberManager(number, _dimensions, _textStyles) {}
 
   Widget customCard({
     String statistics,
@@ -24,79 +27,108 @@ class GeneralItem {
     Function onTapCancelIcon,
     topSpace,
     betweenSpace,
+    bool bigTitle = false,
     @required selectionNo,
   }) {
     Dimensions _dimensions = Dimensions(context);
-    TextStyles _textStyles = TextStyles(context: context);
-
     return GestureDetector(
       onTap: onPressIcon,
       onTapDown: onTapDownIcon,
       onTapUp: onTapUpIcon,
       onTapCancel: onTapCancelIcon,
-      child: Badge(
-        position: BadgePosition.topEnd(
-            end: -_dimensions.heightPercent(0.1),
-            top: -_dimensions.heightPercent(2)),
-        padding: EdgeInsets.all(_dimensions.heightPercent(1.5)),
-        badgeColor: Colors.red,
-        badgeContent: Column(
+      child: GestureDetector(
+        onTapUp: onTapUpItem,
+        onTapDown: onTapDownItem,
+        onTapCancel: onTapCancelItem,
+        onTap: onPressItem,
+        child: Stack(
           children: [
-            SizedBox(
-              height: _dimensions.heightPercent(0.5),
-            ),
-            Text(
-              '-',
-              style: _textStyles.itemBadgeStyle(),
-            ),
-          ],
-        ),
-        showBadge: selectionNo > 0,
-        child: GestureDetector(
-          onTapUp: onTapUpItem,
-          onTapDown: onTapDownItem,
-          onTapCancel: onTapCancelItem,
-          onTap: onPressItem,
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(_dimensions.heightPercent(1))),
-            elevation: 5,
-            color: networkImage == null ? backGround : Colors.black,
-            semanticContainer: true,
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: Stack(
-              alignment: AlignmentDirectional.center,
-              textDirection: TextDirection.rtl,
-              children: <Widget>[
-                Opacity(
-                  opacity: 0.4,
-                  child: assetImage == null
-                      ? Image.network(networkImage,
-                          width: _dimensions.widthPercent(30),
-                          height: _dimensions.heightPercent(34),
-                          fit: BoxFit.fill)
-                      : Image.asset(assetImage,
-                          width: _dimensions.widthPercent(30),
-                          height: _dimensions.heightPercent(34),
-                          fit: BoxFit.fill),
+            Container(
+              width: _dimensions.widthPercent(70),
+              height: _dimensions.widthPercent(70),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(_dimensions.heightPercent(1))),
+                elevation: 5,
+                color: networkImage == null ? backGround : Colors.black,
+                semanticContainer: true,
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: Stack(
+                  alignment: AlignmentDirectional.center,
+                  textDirection: TextDirection.rtl,
+                  children: <Widget>[
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Opacity(
+                        opacity: 0.4,
+                        child: FittedBox(
+                          fit: BoxFit.fill,
+                          child: assetImage == null
+                              ? CachedNetworkImage(
+                                  imageUrl: networkImage,
+                                  placeholder: (context, url) =>
+                                      Center(child: CircularProgressIndicator()),
+                                  errorWidget: (context, url, error) => new Icon(Icons.error),
+                                )
+                              : Image.asset(assetImage),
+                        ),
+                      ),
+                    ),
+                    if (statistics == null)
+                      titleOnly(bigTitle: bigTitle, title: title)
+                    else
+                      titleStatistics(
+                          bigTitle: bigTitle,
+                          title: title,
+                          statistics: statistics,
+                          topSpace: topSpace,
+                          betweenSpace: betweenSpace)
+                  ],
                 ),
-                statistics == null
-                    ? titleOnly(title)
-                    : titleStatistics(
-                        title: title,
-                        statistics: statistics,
-                        topSpace: topSpace,
-                        betweenSpace: betweenSpace),
-              ],
+              ),
             ),
-          ),
+            if (selectionNo > 0)
+              Positioned(
+                top: 0.0,
+                right: 0.0,
+                child: GestureDetector(
+                  onTap: onPressIcon,
+                  onTapDown: onTapDownIcon,
+                  onTapUp: onTapUpIcon,
+                  onTapCancel: onTapCancelIcon,
+                  child: Container(
+                    // height: _dimensions.heightPercent(2.),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(_dimensions.widthPercent(30)),
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: _dimensions.widthPercent(2.5),
+                      maxWidth: _dimensions.widthPercent(10),
+                      minHeight: _dimensions.widthPercent(2.5),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.remove,
+                          color: Colors.white,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container()
+          ],
         ),
       ),
     );
   }
 
-  titleStatistics({title, statistics, topSpace, betweenSpace}) {
+  titleStatistics({bool bigTitle, title, statistics, topSpace, betweenSpace}) {
     TextStyles _textStyles = TextStyles(context: context);
 
     return Column(
@@ -109,54 +141,18 @@ class GeneralItem {
         betweenSpace != null ? betweenSpace : SizedBox(),
         Text(
           title,
-          style: _textStyles.itemImageTitle(),
-
+          style: bigTitle ? _textStyles.itemImageTitle() : _textStyles.itemImageTitleSmall(),
         ),
       ],
     );
   }
 
-  titleOnly(title) {
+  titleOnly({bool bigTitle, title}) {
     TextStyles _textStyles = TextStyles(context: context);
 
     return Text(
       title,
-      style: _textStyles.itemImageTitle(),
-    );
-  }
-
-  Widget uiCard({title, onPress}) {
-    TextStyles _textStyles = TextStyles(context: context);
-    return GestureDetector(
-      onTap: onPress,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        // elevation: 5,
-        color: Colors.black,
-        semanticContainer: true,
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-        child: Stack(
-          alignment: AlignmentDirectional.center,
-          textDirection: TextDirection.rtl,
-          children: <Widget>[
-            ClipRRect(
-              child: Opacity(
-                opacity: 0.4,
-                child: Image.asset("assets/images/clients.jpeg",
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.fill),
-              ),
-            ),
-            Text(
-              title,
-              style: _textStyles.itemImageTitle(),
-            ),
-          ],
-        ),
-      ),
+      style: bigTitle ? _textStyles.itemImageTitle() : _textStyles.itemImageTitleSmall(),
     );
   }
 }

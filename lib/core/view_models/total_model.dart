@@ -31,8 +31,13 @@ class TotalModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  fetchTotalStream() {
-    Stream<QuerySnapshot> result = _db.collection("total").snapshots();
+  // fetchTotalStream() {
+  //   Stream<QuerySnapshot> result = _db.collection("total").doc().snapshots();
+  //   return result;
+  // }
+
+  Stream fetchTotalStream(branchName) {
+    var result =_db.collection("total").doc(branchName).snapshots();
     return result;
   }
 

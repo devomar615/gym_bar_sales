@@ -18,11 +18,11 @@ class MyTransaction {
       paid, //increase [$incomeCash].
       change; //change could be sent as deposit
 
-  var sellingProducts;
+  Map<String, dynamic> sellingProducts;
 
   //info about buying
 
-  var buyingProducts;
+  Map<String, dynamic> buyingProducts;
   String buyingProductCategory, buyingCompanyName, notes;
 
   MyTransaction(
@@ -60,11 +60,11 @@ class MyTransaction {
         customerName = snapshot['customerName'] ?? '',
         customerId = snapshot['customerId'] ?? '',
         customerType = snapshot['customerType'] ?? '',
-        sellingProducts = snapshot['sellingProducts'] ?? '',
+        sellingProducts = snapshot['sellingProducts'] ?? {},
         paid = snapshot['paid'] ?? '',
         change = snapshot['change'] ?? '',
         //
-        buyingProducts = snapshot['buyingProducts'] ?? '',
+        buyingProducts = snapshot['buyingProducts'] ?? {},
         buyingProductCategory = snapshot['buyingProductCategory'] ?? '',
         buyingCompanyName = snapshot['buyingCompanyName'] ?? '',
         notes = snapshot['notes'] ?? '';

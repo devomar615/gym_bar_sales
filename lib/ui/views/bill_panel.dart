@@ -39,8 +39,7 @@ class _BillPanelState extends State<BillPanel> {
       Provider.of<EmployeeModel>(context).fetchEmployees(branchName: branch);
       Provider.of<ClientModel>(context).fetchClients(branchName: branch);
       Provider.of<TotalModel>(context).fetchTotal();
-      Provider.of<TransactionModel>(context)
-          .fetchTransaction(branchName: branch);
+      Provider.of<TransactionModel>(context).fetchTransaction(branchName: branch);
       Provider.of<CategoryModel>(context).fetchCategories();
     }
     _isInit = false;
@@ -80,8 +79,7 @@ class _BillPanelState extends State<BillPanel> {
                     controller: sc,
                     children: [
                       Column(
-                        mainAxisSize:
-                            MainAxisSize.min, // Use children total size
+                        mainAxisSize: MainAxisSize.min, // Use children total size
                         children: [
                           PanelBuyerSelection(panelController: _pc),
                           homeServices.switcherOpen
@@ -98,6 +96,7 @@ class _BillPanelState extends State<BillPanel> {
                 body: GestureDetector(
                   onTap: () {
                     if (_pc.isPanelOpen) {
+                      print("oops you pressed hard dude!");
                       FocusScope.of(context).unfocus();
                       _pc.close();
                     }

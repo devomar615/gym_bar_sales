@@ -59,14 +59,14 @@ class PanelBuyerSelection extends StatelessWidget {
       return [
         ChoiceChip(
           padding:
-              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(2)),
+              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
           labelStyle: _textStyles.chipLabelStyleLight(),
           backgroundColor: Colors.white,
           selectedColor: Colors.blue,
           shape: StadiumBorder(
             side: BorderSide(color: Colors.blue),
           ),
-          label: Text("عامل"),
+          label: Text("عامل",style: _textStyles.chipLabelStyle()),
           selected: selectedBuyerType == "House",
           onSelected: (selected) {
             billServices.selectedBuyerType = "House";
@@ -84,14 +84,14 @@ class PanelBuyerSelection extends StatelessWidget {
         SizedBox(width: _dimensions.widthPercent(2)),
         ChoiceChip(
           padding:
-              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(2)),
+              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
           labelStyle: _textStyles.chipLabelStyleLight(),
           backgroundColor: Colors.white,
           selectedColor: Colors.blue,
           shape: StadiumBorder(
             side: BorderSide(color: Colors.blue),
           ),
-          label: Text("موظف"),
+          label: Text("موظف",style: _textStyles.chipLabelStyle()),
           selected: selectedBuyerType == "Employee",
           onSelected: (selected) {
             billServices.selectedBuyerType = "Employee";
@@ -108,14 +108,14 @@ class PanelBuyerSelection extends StatelessWidget {
         SizedBox(width: _dimensions.widthPercent(2)),
         ChoiceChip(
           padding:
-              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(2)),
+              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
           labelStyle: _textStyles.chipLabelStyleLight(),
           selectedColor: Colors.blue,
           backgroundColor: Colors.white,
           shape: StadiumBorder(
             side: BorderSide(color: Colors.blue),
           ),
-          label: Text("عميل"),
+          label: Text("عميل",style: _textStyles.chipLabelStyle()),
           selected: selectedBuyerType == "Client",
           onSelected: (selected) {
             billServices.selectedBuyerType = "Client";
