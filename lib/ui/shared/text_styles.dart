@@ -9,7 +9,6 @@ class TextStyles {
   billTitleStyle() =>
       TextStyle(fontSize: Dimensions(context).widthPercent(3), fontWeight: FontWeight.w900, fontFamily: 'Tajawal');
 
-  //font 35 = percent 4
   billSearchTitleStyle() =>
       TextStyle(fontWeight: FontWeight.bold, fontSize: Dimensions(context).widthPercent(1.9), fontFamily: 'Tajawal');
 
@@ -22,15 +21,12 @@ class TextStyles {
 
   searchTextFieldHintStyle() => TextStyle(fontSize: Dimensions(context).widthPercent(1.5), color: Colors.black54);
 
-//font 25 = percent 1.9
-
   billTableTitleStyle() => TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: Dimensions(context).widthPercent(2.2),
       fontFamily: 'Tajawal',
       color: Colors.black);
 
-// font 30 = 2.2
   billTableContentStyle() =>
       TextStyle(fontSize: Dimensions(context).widthPercent(1.9), fontFamily: 'Tajawal', color: Colors.black);
 
@@ -89,7 +85,6 @@ class TextStyles {
 
   itemImageStatistics() =>
       TextStyle(fontSize: Dimensions(context).widthPercent(2), fontFamily: 'Tajawal', color: Colors.white);
-
 
 // form_widget styles
   formLabelsStyle() => TextStyle(

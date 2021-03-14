@@ -9,8 +9,6 @@ class GeneralItem {
 
   GeneralItem({@required this.context});
 
-  Widget showNotificationNumberManager(number, _dimensions, _textStyles) {}
-
   Widget customCard({
     String statistics,
     @required String title,
@@ -47,8 +45,7 @@ class GeneralItem {
               width: _dimensions.widthPercent(70),
               height: _dimensions.widthPercent(70),
               child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(_dimensions.heightPercent(1))),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_dimensions.heightPercent(1))),
                 elevation: 5,
                 color: networkImage == null ? backGround : Colors.black,
                 semanticContainer: true,
@@ -67,8 +64,7 @@ class GeneralItem {
                           child: assetImage == null
                               ? CachedNetworkImage(
                                   imageUrl: networkImage,
-                                  placeholder: (context, url) =>
-                                      Center(child: CircularProgressIndicator()),
+                                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
                                   errorWidget: (context, url, error) => new Icon(Icons.error),
                                 )
                               : Image.asset(assetImage),
