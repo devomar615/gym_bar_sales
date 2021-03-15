@@ -7,6 +7,7 @@ import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Timer timer;
 
@@ -78,7 +79,7 @@ class PanelBillSellingTable extends StatelessWidget {
 
     tableHead() {
       return Container(
-        height: _dimensions.heightPercent(6),
+        height: kIsWeb ? _dimensions.heightPercent(9) : _dimensions.heightPercent(6),
         color: Colors.blue,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -140,108 +141,111 @@ class PanelBillSellingTable extends StatelessWidget {
 
           return snapshot.hasData
               ? Container(
-                height: _dimensions.heightPercent(30),
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: selectedList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Column(
-                        children: <Widget>[
-                          Container(
-                            constraints: BoxConstraints(
-                              minHeight: _dimensions.heightPercent(5),
-                              maxHeight: _dimensions.heightPercent(15),
-                            ),
-                            child: Row(
+                  height: kIsWeb
+                      ? _dimensions.heightPercent(40)
+                      : selectedList.length <= 3
+                          ? _dimensions.heightPercent(20)
+                          : _dimensions.heightPercent(24.5),
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: selectedList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
+                          children: <Widget>[
+                            Container(
+                              constraints: BoxConstraints(
+                                minHeight: _dimensions.heightPercent(5),
+                                maxHeight: _dimensions.heightPercent(15),
+                              ),
+                              child: Row(
 //                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: <Widget>[
-                                SizedBox(width: _dimensions.widthPercent(9)),
-                                Container(
-                                  child: Text(selectedList[index].theTotalBillPerProduct.toString(),
-                                      style: _textStyles.billTableContentStyle()),
-                                  constraints: BoxConstraints(
-                                    maxWidth: _dimensions.widthPercent(7.5),
-                                    minWidth: _dimensions.widthPercent(7.5),
-                                  ),
-                                ),
-                                SizedBox(width: _dimensions.widthPercent(20)),
-                                Container(
-                                  child: Text(
-                                      selectedBuyerType == "Client"
-                                          ? selectedList[index].customerPrice
-                                          : selectedBuyerType == "Employee"
-                                              ? selectedList[index].employeePrice
-                                              : selectedList[index].housePrice,
-                                      style: _textStyles.billTableContentStyle()),
-                                  constraints: BoxConstraints(
-                                    maxWidth: _dimensions.widthPercent(7.5),
-                                    minWidth: _dimensions.widthPercent(7.5),
-                                  ),
-                                ),
-                                SizedBox(width: _dimensions.widthPercent(7)),
-                                Row(
-                                  children: [
-                                    Container(
-                                      constraints: BoxConstraints(
-                                        maxWidth: _dimensions.widthPercent(7.5),
-                                        minWidth: _dimensions.widthPercent(7.5),
-                                      ),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          onMinusProduct(index);
-                                          _autoClosePanel();
-                                        },
-                                        onTapDown: (TapDownDetails details) {
-                                          timer = Timer.periodic(
-                                              Duration(milliseconds: 200), (t) => onMinusProduct(index));
-                                          _autoClosePanel();
-                                        },
-                                        onTapUp: (TapUpDetails details) => cancelTimer(),
-                                        onTapCancel: () => cancelTimer(),
-                                        child: Icon(Icons.remove_circle,
-                                            color: Colors.red, size: _dimensions.widthPercent(3.5)),
-                                      ),
-                                    ),
-                                    SizedBox(width: _dimensions.widthPercent(3)),
-                                    Container(
-                                      constraints: BoxConstraints(
-                                        maxWidth: _dimensions.widthPercent(3),
-                                        minWidth: _dimensions.widthPercent(3),
-                                      ),
-                                      child: Text(selectedList[index].selectionNo.toInt().toString(),
-                                          style: _textStyles.billTableContentStyle()),
-                                    ),
-                                    SizedBox(width: _dimensions.widthPercent(2)),
-                                    Container(
-                                      constraints: BoxConstraints(
-                                        maxWidth: _dimensions.widthPercent(7.5),
-                                        minWidth: _dimensions.widthPercent(7.5),
-                                      ),
-                                      child: IconButton(
-                                          color: Colors.green,
-                                          iconSize: _dimensions.widthPercent(3.5),
-                                          icon: Icon(Icons.add_circle),
-                                          onPressed: () => onPlusProduct(index, liveProducts)),
-                                    ),
-                                    SizedBox(width: _dimensions.widthPercent(8)),
-                                  ],
-                                ),
-                                Container(
+                                children: <Widget>[
+                                  SizedBox(width: _dimensions.widthPercent(9)),
+                                  Container(
+                                    child: Text(selectedList[index].theTotalBillPerProduct.toString(),
+                                        style: _textStyles.billTableContentStyle()),
                                     constraints: BoxConstraints(
-                                      maxWidth: _dimensions.widthPercent(15),
+                                      maxWidth: _dimensions.widthPercent(7.5),
                                       minWidth: _dimensions.widthPercent(7.5),
                                     ),
-                                    child:
-                                        Text(selectedList[index].name, style: _textStyles.billTableContentStyle()))
-                              ],
+                                  ),
+                                  SizedBox(width: _dimensions.widthPercent(20)),
+                                  Container(
+                                    child: Text(
+                                        selectedBuyerType == "Client"
+                                            ? selectedList[index].customerPrice
+                                            : selectedBuyerType == "Employee"
+                                                ? selectedList[index].employeePrice
+                                                : selectedList[index].housePrice,
+                                        style: _textStyles.billTableContentStyle()),
+                                    constraints: BoxConstraints(
+                                      maxWidth: _dimensions.widthPercent(7.5),
+                                      minWidth: _dimensions.widthPercent(7.5),
+                                    ),
+                                  ),
+                                  SizedBox(width: _dimensions.widthPercent(7)),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: _dimensions.widthPercent(7.5),
+                                          minWidth: _dimensions.widthPercent(7.5),
+                                        ),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            onMinusProduct(index);
+                                            _autoClosePanel();
+                                          },
+                                          onTapDown: (TapDownDetails details) {
+                                            timer = Timer.periodic(
+                                                Duration(milliseconds: 200), (t) => onMinusProduct(index));
+                                            _autoClosePanel();
+                                          },
+                                          onTapUp: (TapUpDetails details) => cancelTimer(),
+                                          onTapCancel: () => cancelTimer(),
+                                          child: Icon(Icons.remove_circle,
+                                              color: Colors.red, size: _dimensions.widthPercent(3.5)),
+                                        ),
+                                      ),
+                                      SizedBox(width: _dimensions.widthPercent(3)),
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: _dimensions.widthPercent(3),
+                                          minWidth: _dimensions.widthPercent(3),
+                                        ),
+                                        child: Text(selectedList[index].selectionNo.toInt().toString(),
+                                            style: _textStyles.billTableContentStyle()),
+                                      ),
+                                      SizedBox(width: _dimensions.widthPercent(2)),
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: _dimensions.widthPercent(7.5),
+                                          minWidth: _dimensions.widthPercent(7.5),
+                                        ),
+                                        child: IconButton(
+                                            color: Colors.green,
+                                            iconSize: _dimensions.widthPercent(3.5),
+                                            icon: Icon(Icons.add_circle),
+                                            onPressed: () => onPlusProduct(index, liveProducts)),
+                                      ),
+                                      SizedBox(width: _dimensions.widthPercent(8)),
+                                    ],
+                                  ),
+                                  Container(
+                                      constraints: BoxConstraints(
+                                        maxWidth: _dimensions.widthPercent(15),
+                                        minWidth: _dimensions.widthPercent(7.5),
+                                      ),
+                                      child: Text(selectedList[index].name, style: _textStyles.billTableContentStyle()))
+                                ],
+                              ),
                             ),
-                          ),
-                          Divider(height: 1, color: Colors.black),
-                          Divider(height: 1, color: Colors.black),
-                        ],
-                      );
-                    }),
-              )
+                            Divider(height: 1, color: Colors.black),
+                            Divider(height: 1, color: Colors.black),
+                          ],
+                        );
+                      }),
+                )
               : Center(
                   child: CircularProgressIndicator(),
                 );

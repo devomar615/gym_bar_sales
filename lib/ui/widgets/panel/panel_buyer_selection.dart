@@ -13,6 +13,7 @@ import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:search_widget/search_widget.dart';
+// import 'package:flutter/foundation.dart' show kIsWeb;
 
 double billChange = 0;
 // bool isCredit = false;
@@ -58,23 +59,21 @@ class PanelBuyerSelection extends StatelessWidget {
     List<Widget> buyerTypeChoices() {
       return [
         ChoiceChip(
-          padding:
-              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
+          padding: EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
           labelStyle: _textStyles.chipLabelStyleLight(),
           backgroundColor: Colors.white,
           selectedColor: Colors.blue,
           shape: StadiumBorder(
             side: BorderSide(color: Colors.blue),
           ),
-          label: Text("عامل",style: _textStyles.chipLabelStyle()),
+          label: Text("عامل", style: _textStyles.chipLabelStyle()),
           selected: selectedBuyerType == "House",
           onSelected: (selected) {
             billServices.selectedBuyerType = "House";
             employeeModel.selectedEmployee = null;
             clientModel.selectedClient = null;
 
-            productModel
-                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
+            productModel.calculateTheTotalPerProduct(billServices.selectedBuyerType);
             billServices.calculateTheTotalBill(selectedList);
             billServices.calculateChange();
 
@@ -83,15 +82,14 @@ class PanelBuyerSelection extends StatelessWidget {
         ),
         SizedBox(width: _dimensions.widthPercent(2)),
         ChoiceChip(
-          padding:
-              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
+          padding: EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
           labelStyle: _textStyles.chipLabelStyleLight(),
           backgroundColor: Colors.white,
           selectedColor: Colors.blue,
           shape: StadiumBorder(
             side: BorderSide(color: Colors.blue),
           ),
-          label: Text("موظف",style: _textStyles.chipLabelStyle()),
+          label: Text("موظف", style: _textStyles.chipLabelStyle()),
           selected: selectedBuyerType == "Employee",
           onSelected: (selected) {
             billServices.selectedBuyerType = "Employee";
@@ -99,23 +97,21 @@ class PanelBuyerSelection extends StatelessWidget {
             employeeModel.selectedEmployee = null;
             clientModel.selectedClient = null;
 
-            productModel
-                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
+            productModel.calculateTheTotalPerProduct(billServices.selectedBuyerType);
             billServices.calculateTheTotalBill(selectedList);
             billServices.calculateChange();
           },
         ),
         SizedBox(width: _dimensions.widthPercent(2)),
         ChoiceChip(
-          padding:
-              EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
+          padding: EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1)),
           labelStyle: _textStyles.chipLabelStyleLight(),
           selectedColor: Colors.blue,
           backgroundColor: Colors.white,
           shape: StadiumBorder(
             side: BorderSide(color: Colors.blue),
           ),
-          label: Text("عميل",style: _textStyles.chipLabelStyle()),
+          label: Text("عميل", style: _textStyles.chipLabelStyle()),
           selected: selectedBuyerType == "Client",
           onSelected: (selected) {
             billServices.selectedBuyerType = "Client";
@@ -123,8 +119,7 @@ class PanelBuyerSelection extends StatelessWidget {
             employeeModel.selectedEmployee = null;
             clientModel.selectedClient = null;
 
-            productModel
-                .calculateTheTotalPerProduct(billServices.selectedBuyerType);
+            productModel.calculateTheTotalPerProduct(billServices.selectedBuyerType);
             billServices.calculateTheTotalBill(selectedList);
             billServices.calculateChange();
           },
@@ -142,18 +137,15 @@ class PanelBuyerSelection extends StatelessWidget {
             listContainerHeight: MediaQuery.of(context).size.height / 4,
             queryBuilder: (String query, List<Employee> employee) {
               return employee
-                  .where((Employee employee) =>
-                      employee.name.toLowerCase().contains(query.toLowerCase()))
+                  .where((Employee employee) => employee.name.toLowerCase().contains(query.toLowerCase()))
                   .toList();
             },
             popupListItemBuilder: (Employee employee) {
               return Column(
                 children: <Widget>[
                   Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: _dimensions.widthPercent(1.8)),
-                      child: Text(employee.name,
-                          style: _textStyles.searchListItemStyle())),
+                      padding: EdgeInsets.symmetric(horizontal: _dimensions.widthPercent(1.8)),
+                      child: Text(employee.name, style: _textStyles.searchListItemStyle())),
                 ],
               );
             },
@@ -165,8 +157,7 @@ class PanelBuyerSelection extends StatelessWidget {
               print(selectedEmployee.name);
             },
             noItemsFoundWidget: Center(child: Text("No item Found")),
-            textFieldBuilder:
-                (TextEditingController controller, FocusNode focusNode) {
+            textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
               return _formWidget.searchTextField(controller, focusNode);
             },
           ),
@@ -180,10 +171,7 @@ class PanelBuyerSelection extends StatelessWidget {
             hideSearchBoxWhenItemSelected: false,
             listContainerHeight: MediaQuery.of(context).size.height / 4,
             queryBuilder: (String query, List<Client> client) {
-              return client
-                  .where((Client client) =>
-                      client.name.toLowerCase().contains(query.toLowerCase()))
-                  .toList();
+              return client.where((Client client) => client.name.toLowerCase().contains(query.toLowerCase())).toList();
             },
             popupListItemBuilder: (Client client) {
               return Column(
@@ -202,8 +190,7 @@ class PanelBuyerSelection extends StatelessWidget {
               print(selectedClient.name);
             },
             noItemsFoundWidget: Center(child: Text("No item Found")),
-            textFieldBuilder:
-                (TextEditingController controller, FocusNode focusNode) {
+            textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
               return _formWidget.searchTextField(controller, focusNode);
             },
           ),
@@ -217,23 +204,17 @@ class PanelBuyerSelection extends StatelessWidget {
         return Flexible(child: searchWidget());
       }
       if (selectedClient != null) {
-        return Text(selectedClient.name,
-            style: _textStyles.billSearchTitleStyle());
+        return Text(selectedClient.name, style: _textStyles.billSearchTitleStyle());
       }
       if (selectedEmployee != null) {
-        return Text(selectedEmployee.name,
-            style: _textStyles.billSearchTitleStyle());
+        return Text(selectedEmployee.name, style: _textStyles.billSearchTitleStyle());
       }
     }
 
     return clientModel.status == Status.Busy
-        ? Center(
-            child: CircularProgressIndicator(),
-          )
+        ? Center(child: CircularProgressIndicator())
         : employeeModel.status == Status.Busy
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
+            ? Center(child: CircularProgressIndicator())
             : Column(
                 children: [
                   GestureDetector(
@@ -269,19 +250,13 @@ class PanelBuyerSelection extends StatelessWidget {
                                   SizedBox(width: _dimensions.widthPercent(2)),
                                   homeServices.switcherOpen
                                       ? _showNameOfTheBuyer(employees, clients)
-                                      : Text("اسم الراجل بتاع الكاشير",
-                                          style: _textStyles
-                                              .billSearchTitleStyle()),
+                                      : Text("اسم الراجل بتاع الكاشير", style: _textStyles.billSearchTitleStyle()),
                                   SizedBox(width: _dimensions.widthPercent(1)),
-                                  Text(':اسم المشتري',
-                                      style:
-                                          _textStyles.billSearchTitleStyle()),
+                                  Text(':اسم المشتري', style: _textStyles.billSearchTitleStyle()),
                                 ],
                               ),
                         SizedBox(height: _dimensions.heightPercent(1.5)),
-                        homeServices.switcherOpen
-                            ? Wrap(children: buyerTypeChoices())
-                            : Container(),
+                        homeServices.switcherOpen ? Wrap(children: buyerTypeChoices()) : Container(),
                         SizedBox(height: _dimensions.heightPercent(1.5)),
                       ],
                     ),

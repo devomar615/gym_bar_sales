@@ -18,6 +18,7 @@ import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:gym_bar_sales/core/view_models/client_model.dart';
 import 'package:gym_bar_sales/core/view_models/employee_model.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class BillPanel extends StatefulWidget {
   @override
@@ -81,11 +82,21 @@ class _BillPanelState extends State<BillPanel> {
                       Column(
                         mainAxisSize: MainAxisSize.min, // Use children total size
                         children: [
-                          PanelBuyerSelection(panelController: _pc),
+                          kIsWeb
+                              ? Row(
+                                  children: [
+                                    Flexible(
+                                      flex: 1,
+                                      child: PanelBillDetails(),
+                                    ),
+                                    Flexible(flex: 2, child: PanelBuyerSelection(panelController: _pc)),
+                                  ],
+                                )
+                              : PanelBuyerSelection(panelController: _pc),
                           homeServices.switcherOpen
                               ? PanelBillSellingTable(panelController: _pc)
                               : PanelBillBuyingTable(panelController: _pc),
-                          PanelBillDetails(),
+                          if (!kIsWeb) PanelBillDetails(),
                           PanelBillCheckout(panelController: _pc),
                         ],
                       ),

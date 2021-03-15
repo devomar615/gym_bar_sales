@@ -4,6 +4,7 @@ import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:provider/provider.dart';
+// import 'package:flutter/foundation.dart' show kIsWeb;
 
 class PanelBillDetails extends StatelessWidget {
   @override
@@ -40,7 +41,7 @@ class PanelBillDetails extends StatelessWidget {
               maxLengthEnforced: true,
             ),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('اتمام'),
                 onPressed: () {
                   Navigator.of(dialogContext).pop(); // Dismiss alert dialog
@@ -81,17 +82,14 @@ class PanelBillDetails extends StatelessWidget {
           children: [
             GestureDetector(
                 onTap: () {
-                  if (selectedBuyerType != "House" &&
-                      homeServices.transactionType != "شراء") {
+                  if (selectedBuyerType != "House" && homeServices.transactionType != "شراء") {
                     _changePayAmountDialog();
                   }
-                  if (selectedBuyerType == "House" ||
-                      homeServices.transactionType == "شراء") {
+                  if (selectedBuyerType == "House" || homeServices.transactionType == "شراء") {
                     print("house pay must be equal to total bill");
                   }
                 },
-                child: Text(payedAmount.toString(),
-                    style: _textStyles.billInfoStyle())),
+                child: Text(payedAmount.toString(), style: _textStyles.billInfoStyle())),
             SizedBox(width: _dimensions.widthPercent(3)),
             Text('المدفوع', style: _textStyles.billInfoStyle()),
             SizedBox(width: _dimensions.widthPercent(2.5)),
@@ -112,18 +110,13 @@ class PanelBillDetails extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black12),
-                        borderRadius:
-                            BorderRadius.circular(_dimensions.heightPercent(1)),
+                        borderRadius: BorderRadius.circular(_dimensions.heightPercent(1)),
                       ),
                       child: Column(
                         children: [
                           SizedBox(height: _dimensions.heightPercent(1.5)),
-                          Text('الباقي: ' + billChange.toString(),
-                              style:
-                                  _textStyles.billCustomInfoStyle(billChange)),
-                          SizedBox(
-                              width: _dimensions.widthPercent(12),
-                              height: _dimensions.heightPercent(1))
+                          Text('الباقي: ' + billChange.toString(), style: _textStyles.billCustomInfoStyle(billChange)),
+                          SizedBox(width: _dimensions.widthPercent(12), height: _dimensions.heightPercent(1))
                         ],
                       )),
                   SizedBox(width: _dimensions.widthPercent(2.5)),

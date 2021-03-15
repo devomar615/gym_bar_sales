@@ -70,7 +70,8 @@ class PanelBillCheckout extends StatelessWidget {
       print(billQuantity);
 
       double newQuantity =
-          homeServices.switcherOpen ? currentTotalAmount - billQuantity : currentTotalAmount + billQuantity;
+      homeServices.switcherOpen ? currentTotalAmount - billQuantity : currentTotalAmount +
+          billQuantity;
 
       print('printing new quantity after transaction...');
       print(newQuantity);
@@ -86,7 +87,9 @@ class PanelBillCheckout extends StatelessWidget {
       print(currentWholesaleAmount);
 
       double newWholesaleQuantity = double.parse(await updateProductQuantity(
-              productId: productId, selectionNo: selectionNo, theAmountOfSalesPerProduct: theAmountOfSalesPerProduct)) /
+          productId: productId,
+          selectionNo: selectionNo,
+          theAmountOfSalesPerProduct: theAmountOfSalesPerProduct)) /
           currentWholesaleAmount;
       print('printing new wholesaleQuantity...');
       print(newWholesaleQuantity);
@@ -115,7 +118,9 @@ class PanelBillCheckout extends StatelessWidget {
       if (updatedCash > 0) updatedType = "مدين";
 
       clientModel.updateClient(
-          branchName: branch, clientId: clientId, data: {'cash': updatedCash.toString(), 'type': updatedType});
+          branchName: branch,
+          clientId: clientId,
+          data: {'cash': updatedCash.toString(), 'type': updatedType});
     }
 
     updateEmployeeCash(employeeCash, employeeId, credit) {
@@ -126,7 +131,9 @@ class PanelBillCheckout extends StatelessWidget {
       if (updatedCash < 0) updatedType = "دائن";
       if (updatedCash > 0) updatedType = "مدين";
       employeeModel.updateEmployee(
-          branchName: branch, employeeId: employeeId, data: {'cash': updatedCash.toString(), 'type': updatedType});
+          branchName: branch,
+          employeeId: employeeId,
+          data: {'cash': updatedCash.toString(), 'type': updatedType});
     }
 
     // todo:channnnge temp data;
@@ -138,9 +145,11 @@ class PanelBillCheckout extends StatelessWidget {
       for (int i = 0; i < selectedList.length; i++) {
         print('netTotalQuantity of prodduct number $i =' + selectedList[i].netTotalQuantity);
         print('id of prodduct number $i is=' + selectedList[i].id);
-        print('selection number of prodduct number $i is=' + selectedList[i].selectionNo.toString());
+        print('selection number of prodduct number $i is=' +
+            selectedList[i].selectionNo.toString());
 
-        productModel.updateProduct(branchName: tempBranchName, productId: selectedList[i].id, data: {
+        productModel.updateProduct(
+            branchName: tempBranchName, productId: selectedList[i].id, data: {
           "netTotalQuantity": await updateProductQuantity(
               productId: selectedList[i].id,
               selectionNo: selectedList[i].selectionNo,
@@ -161,31 +170,31 @@ class PanelBillCheckout extends StatelessWidget {
       print('beginning transaction...');
       MyTransaction myTransaction = homeServices.switcherOpen
           ? MyTransaction(
-              transactorName: tempTransactorName,
-              transactionType: "selling",
-              transactionAmount: billServices.totalBill.toString(),
-              date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-              hour: DateFormat('h:mm a').format(DateTime.now()),
-              branch: tempBranchName,
-              customerName: billServices.selectedBuyerType == 'Employee'
-                  ? selectedEmployee.name
-                  : billServices.selectedBuyerType == 'Client'
-                      ? selectedClient.name
-                      : 'المشتري عامل',
-              customerType: billServices.selectedBuyerType,
-              sellingProducts: sellingProducts(),
-              paid: billServices.payedAmount.toString(),
-              change: billChange.toString(),
-            )
+        transactorName: tempTransactorName,
+        transactionType: "selling",
+        transactionAmount: billServices.totalBill.toString(),
+        date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        hour: DateFormat('h:mm a').format(DateTime.now()),
+        branch: tempBranchName,
+        customerName: billServices.selectedBuyerType == 'Employee'
+            ? selectedEmployee.name
+            : billServices.selectedBuyerType == 'Client'
+            ? selectedClient.name
+            : 'المشتري عامل',
+        customerType: billServices.selectedBuyerType,
+        sellingProducts: sellingProducts(),
+        paid: billServices.payedAmount.toString(),
+        change: billChange.toString(),
+      )
           : MyTransaction(
-              transactorName: tempTransactorName,
-              transactionType: "buying",
-              transactionAmount: billServices.payedAmount.toString(),
-              date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-              hour: DateFormat('h:mm a').format(DateTime.now()),
-              branch: tempBranchName,
-              buyingProducts: sellingProducts(),
-            );
+        transactorName: tempTransactorName,
+        transactionType: "buying",
+        transactionAmount: billServices.payedAmount.toString(),
+        date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        hour: DateFormat('h:mm a').format(DateTime.now()),
+        branch: tempBranchName,
+        buyingProducts: sellingProducts(),
+      );
 
       transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction);
 
@@ -220,23 +229,23 @@ class PanelBillCheckout extends StatelessWidget {
               content: billChange < 0
                   ? Text('تحذير سيتم اضافه باقي الفاتوره علي حساب العميل هل تريد المتابعه ؟')
                   : billChange > 0
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CheckboxListTile(
-                              title: Text("هل تريد وضع الباقي في حساب العميل"),
-                              value: billServices.isCredit,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  billServices.changeIsCredit();
-                                });
-                              },
-                            ),
-                            SizedBox(height: _dimensions.heightPercent(0.5)),
-                            Text("عدم الاختيار تعني ان الباقي قد تم تسليمه بالكامل للعميل"),
-                          ],
-                        )
-                      : Text("هل تريد اتمام العمليه ؟"),
+                  ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CheckboxListTile(
+                    title: Text("هل تريد وضع الباقي في حساب العميل"),
+                    value: billServices.isCredit,
+                    onChanged: (bool value) {
+                      setState(() {
+                        billServices.changeIsCredit();
+                      });
+                    },
+                  ),
+                  SizedBox(height: _dimensions.heightPercent(0.5)),
+                  Text("عدم الاختيار تعني ان الباقي قد تم تسليمه بالكامل للعميل"),
+                ],
+              )
+                  : Text("هل تريد اتمام العمليه ؟"),
               actions: <Widget>[
                 TextButton(
                   child: Text('الغاء'),
@@ -268,7 +277,8 @@ class PanelBillCheckout extends StatelessWidget {
                       }
 
                       totalModel.updateTotal(data: {
-                        'cash': calculateNewTreasury(oldCash: total[0].cash, cashToAdd: billServices.payedAmount)
+                        'cash': calculateNewTreasury(
+                            oldCash: total[0].cash, cashToAdd: billServices.payedAmount)
                       }, docId: branch);
 
                       print('الباقي اقل');
@@ -285,7 +295,8 @@ class PanelBillCheckout extends StatelessWidget {
                         updateEmployeeCash(selectedEmployee.cash, selectedEmployee.id, false);
                       }
                       totalModel.updateTotal(data: {
-                        'cash': calculateNewTreasury(oldCash: total[0].cash, cashToAdd: billServices.payedAmount)
+                        'cash': calculateNewTreasury(
+                            oldCash: total[0].cash, cashToAdd: billServices.payedAmount)
                       }, docId: branch);
                       print('الباقي اكتر');
 
@@ -295,7 +306,8 @@ class PanelBillCheckout extends StatelessWidget {
                     if (!billServices.isCredit && billChange > 0) {
                       transaction();
                       totalModel.updateTotal(data: {
-                        'cash': calculateNewTreasury(oldCash: total[0].cash, cashToAdd: billServices.totalBill)
+                        'cash': calculateNewTreasury(
+                            oldCash: total[0].cash, cashToAdd: billServices.totalBill)
                       }, docId: branch);
                       //الاجمالي يروح للخزنه
                     }
@@ -303,13 +315,14 @@ class PanelBillCheckout extends StatelessWidget {
                     if (billChange == 0) {
                       transaction();
                       totalModel.updateTotal(data: {
-                        'cash': calculateNewTreasury(oldCash: total[0].cash, cashToAdd: billServices.totalBill)
+                        'cash': calculateNewTreasury(
+                            oldCash: total[0].cash, cashToAdd: billServices.totalBill)
                       }, docId: branch);
                       //الاجمالي يروح للخزنه
 
                     }
+                    //todo: productModel.checkLimit(netTotalQuantity, quantityLimit);
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-
                     _autoClosePanel();
                   },
                 ),
@@ -320,7 +333,8 @@ class PanelBillCheckout extends StatelessWidget {
       );
     }
 
-    _noSelectedBuyerNameOrTypeDialog() => showDialog<void>(
+    _noSelectedBuyerNameOrTypeDialog() =>
+        showDialog<void>(
           context: context,
           builder: (BuildContext dialogContext) {
             return AlertDialog(
@@ -348,7 +362,8 @@ class PanelBillCheckout extends StatelessWidget {
       }
     }
 
-    _confirmBuyingTransactionDialog() => showDialog<void>(
+    _confirmBuyingTransactionDialog() =>
+        showDialog<void>(
           context: context,
           barrierDismissible: true,
           // false = user must tap button, true = tap outside dialog
@@ -363,11 +378,15 @@ class PanelBillCheckout extends StatelessWidget {
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
                     transaction();
                     totalModel.updateTotal(
-                        data: {'cash': calculateNewTreasury(oldCash: total[0].cash, cashToAdd: billServices.totalBill)},
+                        data: {
+                          'cash': calculateNewTreasury(
+                              oldCash: total[0].cash, cashToAdd: billServices.totalBill)
+                        },
                         docId: branch);
                     // productModel.cleanProductSelection();
                     // billServices.totalBill = 0;
                     // _autoClosePanel();
+                    //todo: productModel.checkLimit(netTotalQuantity, quantityLimit);
                   },
                 ),
                 TextButton(
@@ -391,7 +410,7 @@ class PanelBillCheckout extends StatelessWidget {
                 minWidth: 200.0,
                 height: _dimensions.heightPercent(5),
                 child: _formWidget.formButtonTemplate(
-                  minWidth: _dimensions.widthPercent(15),
+                    minWidth: _dimensions.widthPercent(15),
                     height: _dimensions.heightPercent(7),
                     context: context,
                     text: "إتمام العمليه",

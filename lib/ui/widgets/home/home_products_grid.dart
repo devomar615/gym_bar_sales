@@ -9,6 +9,7 @@ import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/widgets/general_item.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Timer timer;
 
@@ -145,11 +146,12 @@ class ProductsGrid extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(
-                  // top: _dimensions.widthPercent(1),
+                  top: _dimensions.widthPercent(kIsWeb ? 1 : 0),
                   right: _dimensions.widthPercent(1)),
               child: GridView.builder(
                 itemCount: productModel.filterProduct(selectedCategory).length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+                gridDelegate:
+                    SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: kIsWeb ? 6 : 5),
                 itemBuilder: (BuildContext context, int index) {
                   return products.isEmpty
                       ? Center(child: Text('لا يوجد منتجات هنا'))
@@ -157,7 +159,6 @@ class ProductsGrid extends StatelessWidget {
                           padding: EdgeInsets.only(
                             left: _dimensions.widthPercent(1),
                             bottom: _dimensions.widthPercent(1),
-                            // right: _dimensions.widthPercent(1)
                           ),
                           child: showGeneralCard(index),
                         );
