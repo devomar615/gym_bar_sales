@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
@@ -16,71 +16,79 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 File file;
-var branch = "بيفرلي";
+var branchName = "بيفرلي";
 var transactorName = "عمر";
 
 class OneClientInfo extends StatelessWidget {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
-    ClientModel clientModel = Provider.of<ClientModel>(context);
+    TextStyles _textStyles = TextStyles(context: context);
+    Dimensions _dimensions = Dimensions(context);
+    FormWidget _formWidget = FormWidget(context: context);
+
     TotalModel totalModel = Provider.of<TotalModel>(context, listen: false);
+    ClientModel clientModel = Provider.of<ClientModel>(context);
+    TransactionModel transactionModel = Provider.of<TransactionModel>(context);
+
+    // List<Total> total = totalModel.total;
+    // List<MyTransaction> filteredTransactions = transactionModel.filteredTransactions;
 
     Client selectedClient = clientModel.selectedClient;
-    List<Total> total = totalModel.total;
-
-    FormWidget _formWidget = FormWidget(context: context);
-    Dimensions _dimensions = Dimensions(context);
-    TextStyles _textStyles = TextStyles(context: context);
-
-    var transactionModel = Provider.of<TransactionModel>(context);
-
-    // var filteredTransactions = transactionModel.filteredTransactions;
+    var filteredTransactions = transactionModel.filteredTransactions;
+    // var branchName = Provider.of<BranchModel>(context).selectedBranch;
 
     transaction(type) {
       transactionModel.addTransaction(
-          branchName: branch,
+          branchName: branchName,
           transaction: MyTransaction(
             transactorName: transactorName,
             transactionType: type,
-            transactionAmount: clientModel.cashToAdd.toString(),
+            transactionAmount: clientModel.cashToAdd.text,
             customerName: selectedClient.name,
             date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
             hour: DateFormat('h:mm a').format(DateTime.now()),
-            branch: branch,
+            branch: branchName,
           ));
     }
 
     updateTreasury({String transactionType}) async {
-      totalModel.fetchTotal();
-
-      double currentCash = double.parse(total[0].cash);
+      Total total = await totalModel.fetchTotal(branchName);
+      print("printing cash... ${total.cash}");
+      double currentCash = double.parse(total.cash);
+      print("printing cash...again");
+      print(currentCash);
+      print("${clientModel.cashToAdd.text}");
 
       double updatedCash = transactionType == "ايداع"
-          ? currentCash + clientModel.cashToAdd
-          : currentCash - clientModel.cashToAdd;
+          ? currentCash + double.tryParse(clientModel.cashToAdd.text)
+          : currentCash - double.tryParse(clientModel.cashToAdd.text);
 
-      totalModel
-          .updateTotal(docId: branch, data: {'cash': updatedCash.toString()});
+      print("updated cash " + updatedCash.toString());
+      totalModel.updateTotal(docId: branchName, total: Total(cash: updatedCash.toString()));
     }
 
     updateClientCash({String transactionType}) async {
-      Client client = await clientModel.fetchClientById(
-          branchName: branch, id: selectedClient.id);
-      double currentCash = double.parse(client.cash);
+      double currentCash;
+      await clientModel.fetchClientById(branchName: branchName, id: selectedClient.id).then((client) {
+        currentCash = double.tryParse(client.cash);
+        print("current cash for ${client.name} is: ${currentCash.toString()}");
 
-      double updatedCash = transactionType == "ايداع"
-          ? currentCash + clientModel.cashToAdd
-          : currentCash - clientModel.cashToAdd;
+        double updatedCash = transactionType == "ايداع"
+            ? currentCash + double.tryParse(clientModel.cashToAdd.text)
+            : currentCash - double.tryParse(clientModel.cashToAdd.text);
 
-      String updatedType;
-      if (updatedCash == 0) updatedType = "خالص";
-      if (updatedCash < 0) updatedType = "دائن";
-      if (updatedCash > 0) updatedType = "مدين";
+        String updatedType;
+        if (updatedCash == 0) updatedType = "خالص";
+        if (updatedCash < 0) updatedType = "دائن";
+        if (updatedCash > 0) updatedType = "مدين";
 
-      clientModel.updateClient(
-          branchName: branch,
-          clientId: selectedClient.id,
-          data: {'cash': updatedCash.toString(), 'type': updatedType});
+        clientModel.updateClient(
+            branchName: branchName,
+            clientId: selectedClient.id,
+            data: {'cash': updatedCash.toString(), 'type': updatedType});
+      });
     }
 
     onTapTransaction(String type) => showDialog<void>(
@@ -90,37 +98,49 @@ class OneClientInfo extends StatelessWidget {
           builder: (BuildContext dialogContext) {
             return AlertDialog(
               title: Text(type),
-              content: TextField(
-                onChanged: (value) {
-                  print(value);
-                  clientModel.cashToAdd = double.parse(value);
-                  print(clientModel.cashToAdd);
-                },
-                decoration: InputDecoration(labelText: 'اكتب المبلغ هنا'),
-                keyboardType: TextInputType.number,
-                maxLength: 3,
-                maxLengthEnforced: true,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                ],
-              ),
+              content: Form(
+                  key: _formKey,
+                  child: _formWidget.formTextFieldTemplate(
+                    controller: clientModel.cashToAdd,
+                    border: false,
+                    hint: 'اكتب المبلغ هنا',
+                    keyboardType: TextInputType.number,
+                    maxLength: 3,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    ],
+                  )),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: Text('اتمام'),
                   onPressed: () {
-                    if (clientModel.cashToAdd > 0) {
-                      updateClientCash(transactionType: type);
-                      transaction(type);
-                      updateTreasury(transactionType: type);
-                    } else
-                      print("cash cannot be null or equal 0");
-                    Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                    Navigator.of(dialogContext).pop();
+                    try {
+                      // Dismiss alert dialog
+                      if (_formKey.currentState.validate()) {
+                        updateClientCash(transactionType: type);
+                        transaction(type);
+                        updateTreasury(transactionType: type);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('العملية تمت بنجاح'),
+                          ),
+                        );
+                      }
+                    } catch (err) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(err.toString()),
+                        ),
+                      );
+                    }
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: Text('الغاء'),
                   onPressed: () {
-                    Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                    Navigator.of(dialogContext).pop();
+                    clientModel.clear();
                   },
                 ),
               ],
@@ -131,15 +151,16 @@ class OneClientInfo extends StatelessWidget {
     Widget transactionChoices(String type) {
       return GestureDetector(
         onTap: () {
+          clientModel.clear();
           onTapTransaction(type);
         },
         child: Container(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(_dimensions.heightPercent(3)),
             child: Image.asset(
                 type == "ايداع"
-                    ? 'assets/images/deposit.png'
-                    : 'assets/images/withdraw.png',
+                    ? 'assets/images/employee_clients/deposit.png'
+                    : 'assets/images/employee_clients/withdraw.png',
                 width: _dimensions.widthPercent(7),
                 height: _dimensions.widthPercent(7)),
           ),
@@ -150,87 +171,152 @@ class OneClientInfo extends StatelessWidget {
     Widget addPhoto() {
       if (file == null) {
         return _formWidget.logo(
-            imageContent:
-                Image.asset("assets/images/myprofile.jpg", fit: BoxFit.cover),
+            imageContent: Image.asset("assets/images/employee_clients/default_profile.jpg", fit: BoxFit.cover),
             backgroundColor: Colors.white);
       } else
-        return _formWidget.logo(
-            imageContent: Image.file(file, fit: BoxFit.cover));
+        return _formWidget.logo(imageContent: Image.file(file, fit: BoxFit.cover));
     }
 
     tableHead() {
       return Container(
         decoration: BoxDecoration(
           color: Colors.blue,
-          borderRadius:
-              BorderRadius.all(Radius.circular(_dimensions.widthPercent(1)) //
-                  ),
+          borderRadius: BorderRadius.all(Radius.circular(_dimensions.widthPercent(1)) //
+              ),
         ),
-        height: _dimensions.heightPercent(6),
+        height: _dimensions.heightPercent(kIsWeb ? 8 :6),
+        // color: Colors.blue,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
+            GestureDetector(
+                onTap: () {
+                  // transactionModel.changeAmountAscendingState();
+                  transactionModel.onSortAmount();
+                },
+                child: Center(
+                    child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("القيمة", style: _textStyles.billTableTitleStyle()),
+                    // SizedBox(width: _dimensions.widthPercent(3)),
+                    Icon(
+                      transactionModel.sortAmountIcon,
+                      size: _dimensions.widthPercent(3.5),
+                    )
+                  ],
+                ))),
+            GestureDetector(
+                onTap: () {
+                  // transactionModel.changeHourAscendingState();
+                  transactionModel.onSortHour();
+                },
+                child: Center(
+                    child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("الساعة", style: _textStyles.billTableTitleStyle()),
+                    // SizedBox(width: _dimensions.widthPercent(3)),
+                    Icon(
+                      transactionModel.sortHourIcon,
+                      size: _dimensions.widthPercent(3.5),
+                    )
+                  ],
+                ))),
+            GestureDetector(
+                onTap: () {
+                  // transactionModel.changeHourAscendingState();
+                  transactionModel.onSortDate();
+                },
+                child: Center(
+                    child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("التاريخ", style: _textStyles.billTableTitleStyle()),
+                    // SizedBox(width: _dimensions.widthPercent(3)),
+                    Icon(
+                      transactionModel.sortDateIcon,
+                      size: _dimensions.widthPercent(3.5),
+                    )
+                  ],
+                ))),
             Center(
                 child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("التاريخ", style: _textStyles.billTableTitleStyle()),
-                SizedBox(width: _dimensions.widthPercent(2)),
-              ],
-            )),
-            Center(
-                child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("القيمه", style: _textStyles.billTableTitleStyle()),
-                SizedBox(width: _dimensions.widthPercent(2)),
-              ],
-            )),
-            Center(
-                child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("المدفوع", style: _textStyles.billTableTitleStyle()),
-                SizedBox(width: _dimensions.widthPercent(2)),
-              ],
-            )),
-            Center(
-                child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("الاسم", style: _textStyles.billTableTitleStyle()),
-                SizedBox(width: _dimensions.widthPercent(2)),
+                Text("النوع", style: _textStyles.billTableTitleStyle()),
+                // SizedBox(width: _dimensions.widthPercent(3)),
+                Icon(
+                  Icons.add,
+                  color: Colors.transparent,
+                  size: _dimensions.widthPercent(3.5),
+                )
               ],
             )),
           ],
         ),
       );
     }
+    //
+    // tableHead() {
+    //   return Container(
+    //     decoration: BoxDecoration(
+    //       color: Colors.blue,
+    //       borderRadius: BorderRadius.all(Radius.circular(_dimensions.widthPercent(1)) //
+    //           ),
+    //     ),
+    //     height: _dimensions.heightPercent(6),
+    //     child: Row(
+    //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //       children: <Widget>[
+    //         Center(
+    //             child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           children: <Widget>[
+    //             Text("التاريخ", style: _textStyles.billTableTitleStyle()),
+    //             SizedBox(width: _dimensions.widthPercent(2)),
+    //           ],
+    //         )),
+    //         Center(
+    //             child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           children: <Widget>[
+    //             Text("الساعة", style: _textStyles.billTableTitleStyle()),
+    //             SizedBox(width: _dimensions.widthPercent(2)),
+    //           ],
+    //         )),
+    //         Center(
+    //             child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           children: <Widget>[
+    //             Text("القيمة", style: _textStyles.billTableTitleStyle()),
+    //             SizedBox(width: _dimensions.widthPercent(2)),
+    //           ],
+    //         )),
+    //         Center(
+    //             child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           children: <Widget>[
+    //             Text("الاسم", style: _textStyles.billTableTitleStyle()),
+    //             SizedBox(width: _dimensions.widthPercent(2)),
+    //           ],
+    //         )),
+    //       ],
+    //     ),
+    //   );
+    // }
 
     tableBuilder() {
-      return StreamBuilder(
-        stream: transactionModel.fetchTransactionStreamByCustomerName(
-            branchName: branch, customerName: selectedClient.name),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.hasError) {
-            return Text('Something went wrong');
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            print("Loading");
-          }
-
-          List<MyTransaction> filteredTransactions;
-          if (snapshot.hasData) {
-            filteredTransactions = snapshot.data.docs
-                .map<MyTransaction>((DocumentSnapshot document) =>
-                    MyTransaction.fromMap(document.data(), document.id))
-                .toList();
-            filteredTransactions.sort((a, b) => b.date.compareTo(a.date));
-          }
-
-          return snapshot.hasData
-              ? ListView.builder(
+      return filteredTransactions == null
+          ? Center(child: CircularProgressIndicator())
+          : filteredTransactions.isEmpty
+              ? Center(
+                  child: Text(
+                    "لا يوجد عمليات ",
+                    style: _textStyles.warningStyle(),
+                  ),
+                )
+              : ListView.builder(
                   shrinkWrap: true,
                   itemCount: filteredTransactions.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -246,7 +332,7 @@ class OneClientInfo extends StatelessWidget {
                             children: <Widget>[
                               SizedBox(width: _dimensions.widthPercent(4)),
                               Container(
-                                child: Text(filteredTransactions[index].date,
+                                child: Text(filteredTransactions[index].transactionAmount,
                                     style: _textStyles.billTableContentStyle()),
                                 constraints: BoxConstraints(
                                   maxWidth: _dimensions.widthPercent(10),
@@ -255,10 +341,8 @@ class OneClientInfo extends StatelessWidget {
                               ),
                               SizedBox(width: _dimensions.widthPercent(7.5)),
                               Container(
-                                child: Text(
-                                    filteredTransactions[index]
-                                        .transactionAmount,
-                                    style: _textStyles.billTableContentStyle()),
+                                child:
+                                    Text(filteredTransactions[index].hour, style: _textStyles.billTableContentStyle()),
                                 constraints: BoxConstraints(
                                   maxWidth: _dimensions.widthPercent(10),
                                   minWidth: _dimensions.widthPercent(10),
@@ -272,10 +356,8 @@ class OneClientInfo extends StatelessWidget {
                                       maxWidth: _dimensions.widthPercent(10),
                                       minWidth: _dimensions.widthPercent(10),
                                     ),
-                                    child: Text(
-                                        filteredTransactions[index].paid,
-                                        style: _textStyles
-                                            .billTableContentStyle()),
+                                    child: Text(filteredTransactions[index].date,
+                                        style: _textStyles.billTableContentStyle()),
                                   ),
                                   SizedBox(width: _dimensions.widthPercent(7)),
                                 ],
@@ -286,15 +368,12 @@ class OneClientInfo extends StatelessWidget {
                                     minWidth: _dimensions.widthPercent(10),
                                   ),
                                   child: Text(
-                                      filteredTransactions[index]
-                                                  .transactionType ==
-                                              "selling"
-                                          ? filteredTransactions[index]
-                                              .buyingProducts
-                                          : filteredTransactions[index]
-                                              .transactionType,
-                                      style:
-                                          _textStyles.billTableContentStyle())),
+                                      filteredTransactions[index].transactionType == "selling"
+                                          ? "بيع"
+                                          : filteredTransactions[index].transactionType == "buying"
+                                              ? "شراء"
+                                              : filteredTransactions[index].transactionType,
+                                      style: _textStyles.billTableContentStyle())),
                             ],
                           ),
                         ),
@@ -306,12 +385,7 @@ class OneClientInfo extends StatelessWidget {
                       ],
                     );
                   },
-                )
-              : Center(
-                  child: CircularProgressIndicator(),
                 );
-        },
-      );
     }
 
     return selectedClient == null
@@ -326,10 +400,7 @@ class OneClientInfo extends StatelessWidget {
             child: ListView(
               children: <Widget>[
                 SizedBox(height: _dimensions.heightPercent(3)),
-                Container(
-                    width: _dimensions.widthPercent(12),
-                    height: _dimensions.widthPercent(12),
-                    child: addPhoto()),
+                Container(width: _dimensions.widthPercent(12), height: _dimensions.widthPercent(12), child: addPhoto()),
                 SizedBox(height: _dimensions.heightPercent(2)),
                 Center(
                     child: Text(

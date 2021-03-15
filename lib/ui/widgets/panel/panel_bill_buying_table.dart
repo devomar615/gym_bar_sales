@@ -10,6 +10,7 @@ import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Timer timer;
 
@@ -79,7 +80,7 @@ class PanelBillBuyingTable extends StatelessWidget {
 
     tableHead() {
       return Container(
-        height: _dimensions.heightPercent(6),
+        height: _dimensions.heightPercent(kIsWeb ? 8 :6),
         color: Colors.blue,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,

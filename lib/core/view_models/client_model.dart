@@ -5,32 +5,28 @@ import 'package:gym_bar_sales/core/models/client.dart';
 
 class ClientModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final TextEditingController cashToAdd = TextEditingController();
 
-  double _cashToAdd = 0;
+  clear() => cashToAdd.clear();
 
-  double get cashToAdd => _cashToAdd;
-
-  set cashToAdd(double value) {
-    _cashToAdd = value;
-    notifyListeners();
-  }
-
-  bool nameAscending = false;
-  bool cashAscending = false;
-
-  Status _status = Status.Busy;
-
-  Status get status => _status;
+  bool _nameAscending = false;
+  bool _cashAscending = false;
 
   List<Client> _client;
   Client _selectedClient;
-
   String _selectedClientType = 'all';
+  Status _status = Status.Busy;
+
+  List<Client> get clients => _client;
+
+  Client get selectedClient => _selectedClient;
 
   String get selectedClientType => _selectedClientType;
 
-  set selectedClientType(String value) {
-    _selectedClientType = value;
+  Status get status => _status;
+
+  set client(List<Client> value) {
+    _client = value;
     notifyListeners();
   }
 
@@ -39,47 +35,42 @@ class ClientModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Client> get clients => _client;
-
-  Client get selectedClient => _selectedClient;
-
-  changeNameAscendingState() {
-    nameAscending = !nameAscending;
+  set selectedClientType(String value) {
+    _selectedClientType = value;
     notifyListeners();
   }
 
-  changeCashAscendingState() {
-    cashAscending = !cashAscending;
+  onSortName(List<Client> liveClients) {
+    _nameAscending = !_nameAscending;
+    _nameAscending
+        ? liveClients.sort((a, b) => a.name.compareTo(b.name))
+        : liveClients.sort((a, b) => b.name.compareTo(a.name));
     notifyListeners();
   }
 
-  List<Client> filterClients(String selectedClientType) {
-    if (selectedClientType == "all") {
-      return _client;
-    } else
-      return _client
-          .where((client) => client.type == selectedClientType)
-          .toList();
+  onSortCash(List<Client> liveClients) {
+    _cashAscending = !_cashAscending;
+    _cashAscending
+        ? liveClients.sort((a, b) => a.cash.compareTo(b.cash))
+        : liveClients.sort((a, b) => b.cash.compareTo(a.cash));
+    notifyListeners();
   }
 
-  Future fetchClients({branchName}) async {
-    _status = Status.Busy;
-    var result = await _db.collection("clients/branches/$branchName/").get();
-    _client =
-        result.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList();
-    _status = Status.Idle;
-    notifyListeners();
+  List<Client> filterClients({String selectedClientType, List<Client> liveClients}) {
+    if (liveClients == null) {
+      return [];
+    } else {
+      if (selectedClientType == "all") {
+        return liveClients;
+      } else
+        return liveClients.where((client) => client.type == selectedClientType).toList();
+    }
   }
 
   Future fetchClientById({branchName, id}) async {
-    print("Printing IDDDDDDDD");
     print(id);
     _status = Status.Busy;
-    Client client = await _db
-        .collection("clients/branches/$branchName/")
-        .doc(id)
-        .get()
-        .then((snapshot) {
+    Client client = await _db.collection("clients/branches/$branchName/").doc(id).get().then((snapshot) {
       return Client.fromMap(snapshot.data(), id);
     });
 
@@ -89,20 +80,31 @@ class ClientModel extends ChangeNotifier {
     return client;
   }
 
-  fetchClientStream({branchName}) {
-    Stream<QuerySnapshot> result =
-        _db.collection("clients/branches/$branchName/").snapshots();
-    return result;
+  Future fetchClients({branchName}) async {
+    _status = Status.Busy;
+    var result = await _db.collection("clients/branches/$branchName/").get();
+    _client = result.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList();
+    _status = Status.Idle;
+    notifyListeners();
   }
 
-  Future updateClient(
-      {clientId, Map<String, dynamic> data, String branchName}) async {
+  Stream<List<Client>> fetchClientStream({branchName}) {
+    return _db
+        .collection("clients/branches/$branchName/")
+        .snapshots()
+        .map((snapShot) => snapShot.docs.map((doc) => Client.fromMap(doc.data(), doc.id)).toList());
+  }
+
+  Future addClient({Client client, String branchName}) async {
+    _status = Status.Busy;
+    await _db.collection("clients/branches/$branchName/").add(client.toJson());
+    _status = Status.Idle;
+  }
+
+  Future updateClient({clientId, Map<String, dynamic> data, String branchName}) async {
     _status = Status.Busy;
 
-    await _db
-        .collection("clients/branches/$branchName/")
-        .doc(clientId)
-        .update(data);
+    await _db.collection("clients/branches/$branchName/").doc(clientId).update(data);
     _status = Status.Idle;
     notifyListeners();
   }

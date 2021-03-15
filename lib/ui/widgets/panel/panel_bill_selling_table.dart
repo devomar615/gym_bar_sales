@@ -79,7 +79,7 @@ class PanelBillSellingTable extends StatelessWidget {
 
     tableHead() {
       return Container(
-        height: kIsWeb ? _dimensions.heightPercent(9) : _dimensions.heightPercent(6),
+        height: _dimensions.heightPercent(kIsWeb ? 8 :6),
         color: Colors.blue,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -142,7 +142,7 @@ class PanelBillSellingTable extends StatelessWidget {
           return snapshot.hasData
               ? Container(
                   height: kIsWeb
-                      ? _dimensions.heightPercent(40)
+                      ? _dimensions.heightPercent(35)
                       : selectedList.length <= 3
                           ? _dimensions.heightPercent(20)
                           : _dimensions.heightPercent(24.5),

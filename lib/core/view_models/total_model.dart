@@ -3,58 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/total.dart';
 import 'package:gym_bar_sales/core/services/api.dart';
-
 class TotalModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Status _status = Status.Busy;
+  Total _total;
 
-  // Status get status => _status;
+  Total get total => _total;
 
-  List<Total> _total;
-
-  List<Total> get total => _total;
-
-  set total(List<Total> value) {
+  set total(Total value) {
     _total = value;
     notifyListeners();
   }
 
-  Future fetchTotal() async {
-    // _status = Status.Busy;
-
-    var result = await _db.collection("total").get();
-    _total =
-        result.docs.map((doc) => Total.fromMap(doc.data(), doc.id)).toList();
-    // _status = Status.Idle;
+  Future<Total> fetchTotal(branchName) async {
+    _total = await _db.collection("total").doc(branchName).get().then((doc) => Total.fromMap(doc.data(), doc.id));
 
     notifyListeners();
+    return total;
   }
 
-  // fetchTotalStream() {
-  //   Stream<QuerySnapshot> result = _db.collection("total").doc().snapshots();
-  //   return result;
-  // }
-
-  Stream fetchTotalStream(branchName) {
-    var result =_db.collection("total").doc(branchName).snapshots();
-    return result;
+  Stream<String> fetchTotalCashStream(branchName) {
+    return _db.collection("total").doc(branchName).snapshots().map((snapShot) => snapShot.data()['cash']);
   }
 
-  // updateTotal({docId, Total total}) async {
-  //   Api.checkDocExist("total", docId).then((value) async {
-  //     if (!value) {
-  //       await _api.addDocumentCustomId(docId, total.toJson(), "total");
-  //     }
-  //     if (value) {
-  //       await _api.updateDocument(docId, total.toJson(), "total");
-  //     }
-  //   });
-  // }
+  Future addTotal({Total total, String branchName}) async {
+    await _db.collection("total").doc(branchName).set(total.toJson());
+  }
 
-  Future updateTotal({docId, Map<String, dynamic> data}) async {
-    // _status = Status.Busy;
-    await _db.collection("total").doc(docId).update(data);
-    // _status = Status.Idle;
+  Future updateTotal({docId, Total total}) async {
+    await _db.collection("total").doc(docId).update(total.toJson());
   }
 }

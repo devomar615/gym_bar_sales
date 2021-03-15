@@ -6,6 +6,11 @@ class TextStyles {
 
   TextStyles({@required this.context});
 
+  homeTitlesStyle() => TextStyle(
+        fontSize: Dimensions(context).widthPercent(5),
+        fontFamily: 'Tajawal',
+      );
+
   billTitleStyle() =>
       TextStyle(fontSize: Dimensions(context).widthPercent(3), fontWeight: FontWeight.w900, fontFamily: 'Tajawal');
 
@@ -58,6 +63,12 @@ class TextStyles {
       fontFamily: 'Tajawal',
       color: Colors.black);
 
+  listCashStyle(String type) => TextStyle(
+        color: type == 'دائن' ? Colors.red : Colors.green,
+        fontSize: Dimensions(context).widthPercent(5.5),
+        fontFamily: 'Tajawal',
+      );
+
   popupMenuButtonStyle() =>
       TextStyle(fontSize: Dimensions(context).widthPercent(2), fontFamily: 'Tajawal', color: Colors.black);
 
@@ -90,7 +101,6 @@ class TextStyles {
   itemImageStatistics() =>
       TextStyle(fontSize: Dimensions(context).widthPercent(2), fontFamily: 'Tajawal', color: Colors.white);
 
-
 // form_widget styles
   formLabelsStyle() => TextStyle(
         fontSize: Dimensions(context).widthPercent(1.5),
@@ -111,7 +121,7 @@ class TextStyles {
       color: Colors.black);
 
   clientTableContentStyle() =>
-      TextStyle(fontSize: Dimensions(context).widthPercent(1.9), fontFamily: 'Tajawal', color: Colors.black);
+      TextStyle(fontSize: Dimensions(context).widthPercent(1.5), fontFamily: 'Tajawal', color: Colors.black);
 
 // clients_widgets styles
   iconTitle() => TextStyle(
@@ -119,4 +129,15 @@ class TextStyles {
       fontWeight: FontWeight.bold,
       fontFamily: 'Tajawal',
       color: Colors.black);
+
+  warningStyle() => TextStyle(fontSize: Dimensions(context).widthPercent(5));
+
+  listTileTitleStyle() => TextStyle(fontSize: Dimensions(context).widthPercent(2));
+
+  listTileSubtitleStyle(String type) => TextStyle(
+    color: type == 'دائن' ? Colors.red : Colors.green,
+    fontSize: Dimensions(context).widthPercent(1.5),
+    fontFamily: 'Tajawal',
+  );
+
 }

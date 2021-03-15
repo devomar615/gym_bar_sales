@@ -27,50 +27,70 @@ class FormWidget {
   }
 
   Widget formTextFieldTemplate({
+    Key key,
     controller,
     validator,
     hint,
     ValueChanged<String> onChanged,
     secure = false,
-    double height = 51,
-    double left = 10,
-    double right = 10,
-    double bottom = 0,
-    double top = 0,
-    TextInputType keyboardType,
+    border = true,
+    maxLength = 50,
+    MaxLengthEnforcement maxLengthEnforced = MaxLengthEnforcement.enforced,
     List<TextInputFormatter> inputFormatters,
+    keyboardType,
+    double left = 20,
+    double right = 20,
+    double bottom = 0,
+    double top = 30,
   }) {
-    return Container(
-      margin: EdgeInsets.only(left: left, right: right, bottom: bottom, top: top),
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Container(
-          height: height,
-          child: TextFormField(
-            inputFormatters: inputFormatters,
-            onChanged: onChanged,
-            controller: controller,
-            validator: validator,
-            obscureText: secure,
-            textAlign: TextAlign.right,
-            decoration: InputDecoration(
-              isDense: true,
-//            contentPadding: EdgeInsets.only(top: height, right: 10,),
-//               labelStyle: formLabelsStyle,
-              labelText: hint,
-//          hintStyle: TextStyle(decoration: ),
-              border: OutlineInputBorder(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(10.0),
-                ),
-              ),
+    TextStyles _textStyles = TextStyles(context: context);
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: TextFormField(
+        key: key,
+        onChanged: onChanged,
+        controller: controller,
+        validator: validator == null
+            ? (value) {
+          if (value.isEmpty) {
+            return "برجاء ملأ جميع الخانات";
+          }
+          if (value.length > maxLength) {
+            return "الاسم كبير جدا";
+          }
+          return null;
+        }
+            : validator,
+        obscureText: secure,
+        textAlign: TextAlign.right,
+        keyboardType: keyboardType,
+        maxLength: maxLength,
+        maxLengthEnforcement: maxLengthEnforced,
+        inputFormatters: inputFormatters,
+        decoration: InputDecoration(
+            contentPadding: EdgeInsets.only(
+              left: left,
+              right: right,
+              top: top,
+              bottom: bottom,
             ),
-            keyboardType: keyboardType,
-          ),
-        ),
+            isDense: true,
+//            contentPadding: EdgeInsets.only(top: height, right: 10,),
+            labelStyle: _textStyles.formLabelsStyle(),
+            labelText: hint,
+
+//          hintStyle: TextStyle(decoration: ),
+            border: border
+                ? OutlineInputBorder(
+              borderRadius: const BorderRadius.all(
+                Radius.circular(10.0),
+              ),
+            )
+                : null),
       ),
     );
   }
+
 
   Widget formButtonTemplate({
     @required context,

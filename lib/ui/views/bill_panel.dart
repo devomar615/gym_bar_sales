@@ -39,7 +39,7 @@ class _BillPanelState extends State<BillPanel> {
       print(branch);
       Provider.of<EmployeeModel>(context).fetchEmployees(branchName: branch);
       Provider.of<ClientModel>(context).fetchClients(branchName: branch);
-      Provider.of<TotalModel>(context).fetchTotal();
+      Provider.of<TotalModel>(context).fetchTotal(branch);
       Provider.of<TransactionModel>(context).fetchTransaction(branchName: branch);
       Provider.of<CategoryModel>(context).fetchCategories();
     }
@@ -54,8 +54,8 @@ class _BillPanelState extends State<BillPanel> {
     HomeServices homeServices = Provider.of<HomeServices>(context);
 
     BorderRadiusGeometry radius = BorderRadius.only(
-        topLeft: Radius.circular(_dimensions.heightPercent(3)),
-        topRight: Radius.circular(_dimensions.heightPercent(3)));
+        topLeft: Radius.circular(_dimensions.heightPercent(kIsWeb ? 4 : 3)),
+        topRight: Radius.circular(_dimensions.heightPercent(kIsWeb ? 4 : 3)));
     return Scaffold(
       body: productModel.status == Status.Busy
           ? Center(child: CircularProgressIndicator())
@@ -65,10 +65,6 @@ class _BillPanelState extends State<BillPanel> {
                 controller: _pc,
                 maxHeight: _dimensions.heightPercent(85),
                 minHeight: _dimensions.heightPercent(13),
-                // panelSnapping: false,
-                // onPanelOpened: () {},
-                // onPanelClosed: onPanelClosed(),
-                // parallaxEnabled: true,
                 isDraggable: false,
                 // backdropEnabled: true,
                 backdropOpacity: 0.3,

@@ -81,18 +81,41 @@ class PanelBillDetails extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             GestureDetector(
-                onTap: () {
-                  if (selectedBuyerType != "House" && homeServices.transactionType != "شراء") {
-                    _changePayAmountDialog();
-                  }
-                  if (selectedBuyerType == "House" || homeServices.transactionType == "شراء") {
-                    print("house pay must be equal to total bill");
-                  }
-                },
-                child: Text(payedAmount.toString(), style: _textStyles.billInfoStyle())),
-            SizedBox(width: _dimensions.widthPercent(3)),
-            Text('المدفوع', style: _textStyles.billInfoStyle()),
-            SizedBox(width: _dimensions.widthPercent(2.5)),
+              onTap: () {
+                if (selectedBuyerType != "House" && homeServices.transactionType != "شراء") {
+                  _changePayAmountDialog();
+                }
+                if (selectedBuyerType == "House" || homeServices.transactionType == "شراء") {
+                  print("house pay must be equal to total bill");
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    constraints:
+                        BoxConstraints(minWidth: _dimensions.widthPercent(3), maxWidth: _dimensions.widthPercent(5)),
+                    // width: _dimensions.widthPercent(9),
+                    child: Text(
+                      payedAmount.toString(),
+                      style: _textStyles.billInfoStyle(),
+                    ),
+                  ),
+                  SizedBox(width: _dimensions.widthPercent(1)),
+                  Container(
+                    width: _dimensions.widthPercent(9),
+                    child: Text(
+                      'المدفوع',
+                      style: _textStyles.billInfoStyle(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // SizedBox(width: _dimensions.widthPercent(3)),
+            // Text('المدفوع', style: _textStyles.billInfoStyle()),
+            // SizedBox(width: _dimensions.widthPercent(2.5)),
           ],
         ),
         SizedBox(height: _dimensions.heightPercent(2)),
