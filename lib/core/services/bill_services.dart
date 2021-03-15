@@ -73,4 +73,12 @@ class BillServices extends ChangeNotifier {
     billChange = 0;
     notifyListeners();
   }
+
+  String calculatePersonCashType(double cash) {
+    if (cash == 0) return "خالص";
+   else if (cash < 0) return "دائن";
+   else if (cash > 0) return "مدين";
+   else return "error";
+  }
+
 }

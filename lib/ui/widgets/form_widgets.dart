@@ -52,14 +52,14 @@ class FormWidget {
         controller: controller,
         validator: validator == null
             ? (value) {
-          if (value.isEmpty) {
-            return "برجاء ملأ جميع الخانات";
-          }
-          if (value.length > maxLength) {
-            return "الاسم كبير جدا";
-          }
-          return null;
-        }
+                if (value.isEmpty) {
+                  return "برجاء ملأ جميع الخانات";
+                }
+                if (value.length > maxLength) {
+                  return "الاسم كبير جدا";
+                }
+                return null;
+              }
             : validator,
         obscureText: secure,
         textAlign: TextAlign.right,
@@ -82,15 +82,14 @@ class FormWidget {
 //          hintStyle: TextStyle(decoration: ),
             border: border
                 ? OutlineInputBorder(
-              borderRadius: const BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-            )
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(10.0),
+                    ),
+                  )
                 : null),
       ),
     );
   }
-
 
   Widget formButtonTemplate({
     @required context,
@@ -113,10 +112,7 @@ class FormWidget {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
-        child: Text(
-          text,
-          style: _textStyles.formButtonStyle(),
-        ),
+        child: Text(text, style: _textStyles.formButtonStyle()),
         onPressed: onTab,
       ),
     );
@@ -126,29 +122,32 @@ class FormWidget {
     Dimensions _dimensions = Dimensions(context);
     TextStyles _textStyles = TextStyles(context: context);
     return Padding(
-        padding: EdgeInsets.symmetric(vertical: _dimensions.heightPercent(1), horizontal: _dimensions.widthPercent(1)),
-        child: TextField(
-          textAlign: TextAlign.right,
-          controller: controller,
-          focusNode: focusNode,
-          style: _textStyles.searchTextFieldStyle(),
-          decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
-                borderSide: BorderSide(color: Colors.black54),
-              ),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-              suffixIcon: Icon(Icons.search),
-              border: InputBorder.none,
-              hintText: "... ابحث هنا",
-              hintStyle: _textStyles.searchTextFieldHintStyle(),
-              contentPadding: EdgeInsets.only(
-                  left: _dimensions.heightPercent(1),
-                  right: _dimensions.heightPercent(1),
-                  top: _dimensions.heightPercent(1.5),
-                  bottom: _dimensions.heightPercent(1.5))),
-        ));
+      padding: EdgeInsets.symmetric(vertical: _dimensions.heightPercent(1), horizontal: _dimensions.widthPercent(1)),
+      child: TextField(
+        textAlign: TextAlign.right,
+        controller: controller,
+        focusNode: focusNode,
+        style: _textStyles.searchTextFieldStyle(),
+        decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
+            borderSide: BorderSide(color: Colors.black54),
+          ),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(_dimensions.heightPercent(7))),
+              borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+          suffixIcon: Icon(Icons.search),
+          border: InputBorder.none,
+          hintText: "... ابحث هنا",
+          hintStyle: _textStyles.searchTextFieldHintStyle(),
+          contentPadding: EdgeInsets.only(
+            left: _dimensions.heightPercent(1),
+            right: _dimensions.heightPercent(1),
+            top: _dimensions.heightPercent(1.5),
+            bottom: _dimensions.heightPercent(1.5),
+          ),
+        ),
+      ),
+    );
   }
 }

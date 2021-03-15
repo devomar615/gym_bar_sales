@@ -257,54 +257,6 @@ class OneClientInfo extends StatelessWidget {
         ),
       );
     }
-    //
-    // tableHead() {
-    //   return Container(
-    //     decoration: BoxDecoration(
-    //       color: Colors.blue,
-    //       borderRadius: BorderRadius.all(Radius.circular(_dimensions.widthPercent(1)) //
-    //           ),
-    //     ),
-    //     height: _dimensions.heightPercent(6),
-    //     child: Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //       children: <Widget>[
-    //         Center(
-    //             child: Row(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: <Widget>[
-    //             Text("التاريخ", style: _textStyles.billTableTitleStyle()),
-    //             SizedBox(width: _dimensions.widthPercent(2)),
-    //           ],
-    //         )),
-    //         Center(
-    //             child: Row(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: <Widget>[
-    //             Text("الساعة", style: _textStyles.billTableTitleStyle()),
-    //             SizedBox(width: _dimensions.widthPercent(2)),
-    //           ],
-    //         )),
-    //         Center(
-    //             child: Row(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: <Widget>[
-    //             Text("القيمة", style: _textStyles.billTableTitleStyle()),
-    //             SizedBox(width: _dimensions.widthPercent(2)),
-    //           ],
-    //         )),
-    //         Center(
-    //             child: Row(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: <Widget>[
-    //             Text("الاسم", style: _textStyles.billTableTitleStyle()),
-    //             SizedBox(width: _dimensions.widthPercent(2)),
-    //           ],
-    //         )),
-    //       ],
-    //     ),
-    //   );
-    // }
 
     tableBuilder() {
       return filteredTransactions == null

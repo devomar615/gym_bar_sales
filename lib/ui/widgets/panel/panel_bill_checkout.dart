@@ -12,7 +12,6 @@ import 'package:gym_bar_sales/core/view_models/product_model.dart';
 import 'package:gym_bar_sales/core/view_models/total_model.dart';
 import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
-import 'package:gym_bar_sales/ui/shared/text_styles.dart';
 import 'package:gym_bar_sales/ui/widgets/clients/one_client_info.dart';
 import 'package:gym_bar_sales/ui/widgets/form_widgets.dart';
 import 'package:intl/intl.dart';
@@ -39,10 +38,8 @@ class PanelBillCheckout extends StatelessWidget {
     Client selectedClient = clientModel.selectedClient;
 
     List<Product> selectedList = productModel.getSelectedProducts();
-    Total total = totalModel.total;
     String selectedBuyerType = billServices.selectedBuyerType;
     double billChange = billServices.billChange;
-    TextStyles _textStyles = TextStyles(context: context);
     Dimensions _dimensions = Dimensions(context);
 
     _autoClosePanel() {
@@ -53,81 +50,75 @@ class PanelBillCheckout extends StatelessWidget {
       }
     }
 
-    updateProductQuantity({productId, selectionNo, theAmountOfSalesPerProduct}) async {
-      Product product = await productModel.fetchProductById(branchName: "بيفرلي", id: productId);
+    updateSellingProductOnDatabase() async {
+      for (int i = 0; i < selectedList.length; i++) {
+        Product product = await productModel.fetchProductById(branchName: branchName, id: selectedList[i].id);
 
-      // get currentTotalAmount from database
-      double currentTotalAmount = double.parse(product.netTotalQuantity);
-      print('printing current total amount...');
-      print(currentTotalAmount);
+        double netTotalQuantityToSell =
+            selectedList[i].selectionNo * double.parse(selectedList[i].theAmountOfSalesPerProduct);
+        double wholeSaleQuantityToSell = netTotalQuantityToSell / double.parse(product.quantityOfWholesaleUnit);
 
-      print('printing No of selected product...');
-      print(selectionNo);
-      print('printing theAmountOfSalesPerProduct...');
-      print(theAmountOfSalesPerProduct);
-      double billQuantity = selectionNo * double.parse(theAmountOfSalesPerProduct);
+        double currentNetTotalQuantity = double.parse(product.netTotalQuantity);
+        double currentWholesaleQuantity = double.parse(product.wholesaleQuantity);
 
-      print('printing bill quantity...');
-      print(billQuantity);
+        double newNetTotalQuantity = currentNetTotalQuantity - netTotalQuantityToSell;
+        double newWholesaleQuantity = currentWholesaleQuantity - wholeSaleQuantityToSell;
 
-      double newQuantity =
-          homeServices.switcherOpen ? currentTotalAmount - billQuantity : currentTotalAmount + billQuantity;
-
-      print('printing new quantity after transaction...');
-      print(newQuantity);
-
-      return newQuantity.toString();
+        productModel.updateProduct(branchName: branchName, productId: productModel.selectedProduct.id, data: {
+          "netTotalQuantity": newNetTotalQuantity.toString(),
+          "wholesaleQuantity": newWholesaleQuantity.toString(),
+          "limit": productModel.checkLimit(newNetTotalQuantity, double.parse(product.quantityLimit))
+        });
+      }
     }
 
-    updateProductWholesaleQuantity({productId, selectionNo, theAmountOfSalesPerProduct}) async {
-      Product product = await productModel.fetchProductById(branchName: "بيفرلي", id: productId);
-      //get currentWholesaleAmount from database
-      double currentWholesaleAmount = double.parse(product.quantityOfWholesaleUnit);
-      print('printing current wholesaleAmount...');
-      print(currentWholesaleAmount);
+    updateBuyingProductOnDatabase() async {
+      for (int i = 0; i < selectedList.length; i++) {
+        Product product = await productModel.fetchProductById(branchName: branchName, id: selectedList[i].id);
 
-      double newWholesaleQuantity = double.parse(await updateProductQuantity(
-              productId: productId, selectionNo: selectionNo, theAmountOfSalesPerProduct: theAmountOfSalesPerProduct)) /
-          currentWholesaleAmount;
-      print('printing new wholesaleQuantity...');
-      print(newWholesaleQuantity);
+        double netTotalQuantityToBuy = selectedList[i].selectionNo;
+        double wholeSaleQuantityToBuy = netTotalQuantityToBuy / double.parse(product.quantityOfWholesaleUnit);
 
-      return newWholesaleQuantity.toString();
+        double currentNetTotalQuantity = double.parse(product.netTotalQuantity);
+        double currentWholesaleQuantity = double.parse(product.wholesaleQuantity);
+
+        double newNetTotalQuantity = currentNetTotalQuantity + netTotalQuantityToBuy;
+        double newWholesaleQuantity = currentWholesaleQuantity + wholeSaleQuantityToBuy;
+
+        productModel.updateProduct(branchName: branchName, productId: productModel.selectedProduct.id, data: {
+          "netTotalQuantity": newNetTotalQuantity.toString(),
+          "wholesaleQuantity": newWholesaleQuantity.toString(),
+          "limit": productModel.checkLimit(newNetTotalQuantity, double.parse(product.quantityLimit))
+        });
+      }
     }
 
-    sellingProducts() {
-      var map = {};
-      selectedList.forEach((products) => map[products.name] = products.selectionNo);
-      print(map);
-      return map;
-    }
+    updateClientCash({bool addToCash}) async {
+      Client client = await clientModel.fetchClientById(branchName: branchName, id: selectedClient.id);
 
-    updateBuyerCash(oldCash, credit) {
-      double newCash;
-      newCash = double.parse(oldCash) + billChange;
-      return newCash.toString();
-    }
+      double currentCash = double.parse(client.cash);
+      double cashToAdd = billChange;
 
-    updateClientCash(clientCash, clientId, credit) {
-      double updatedCash = double.parse(updateBuyerCash(clientCash, credit));
-      var updatedType;
-      if (updatedCash == 0) updatedType = "خالص";
-      if (updatedCash < 0) updatedType = "دائن";
-      if (updatedCash > 0) updatedType = "مدين";
+      double newCash = addToCash ? currentCash + cashToAdd : currentCash - cashToAdd;
+      String newClientType = billServices.calculatePersonCashType(newCash);
 
       clientModel.updateClient(
-          branchName: branch, clientId: clientId, data: {'cash': updatedCash.toString(), 'type': updatedType});
+          branchName: branch, clientId: selectedClient.id, data: {'cash': newCash.toString(), 'type': newClientType});
     }
 
-    updateEmployeeCash(employeeCash, employeeId, credit) {
-      double updatedCash = double.parse(updateBuyerCash(employeeCash, credit));
-      var updatedType;
+    updateEmployeeCash({double cashToAdd, bool addToCash}) async {
+      Employee employee = await employeeModel.fetchEmployeeById(branchName: branchName, id: selectedEmployee.id);
 
-      if (updatedCash == 0) updatedType = "خالص";
-      if (updatedCash < 0) updatedType = "دائن";
-      if (updatedCash > 0) updatedType = "مدين";
+      double currentCash = double.parse(employee.cash);
+      double cashToAdd = billChange;
+
+      double newCash = addToCash ? currentCash + cashToAdd : currentCash - cashToAdd;
+      String newEmployeeType = billServices.calculatePersonCashType(newCash);
+
       employeeModel.updateEmployee(
-          branchName: branch, employeeId: employeeId, data: {'cash': updatedCash.toString(), 'type': updatedType});
+          branchName: branch,
+          employeeId: selectedEmployee.id,
+          data: {'cash': newCash.toString(), 'type': newEmployeeType});
     }
 
     // todo:channnnge temp data;
@@ -135,78 +126,61 @@ class PanelBillCheckout extends StatelessWidget {
     var tempTransactorName = "Omar";
     var tempBranchName = context.read<String>();
 
-    updateProductOnDatabase() async {
-      for (int i = 0; i < selectedList.length; i++) {
-        print('netTotalQuantity of prodduct number $i =' + selectedList[i].netTotalQuantity);
-        print('id of prodduct number $i is=' + selectedList[i].id);
-        print('selection number of prodduct number $i is=' + selectedList[i].selectionNo.toString());
-
-        productModel.updateProduct(branchName: tempBranchName, productId: selectedList[i].id, data: {
-          "netTotalQuantity": await updateProductQuantity(
-              productId: selectedList[i].id,
-              selectionNo: selectedList[i].selectionNo,
-              theAmountOfSalesPerProduct: selectedList[i].theAmountOfSalesPerProduct),
-
-          "wholesaleQuantity": await updateProductWholesaleQuantity(
-              productId: selectedList[i].id,
-              selectionNo: selectedList[i].selectionNo,
-              theAmountOfSalesPerProduct: selectedList[i].theAmountOfSalesPerProduct),
-          //     });
-        });
-
-        print('Products Updated');
-      }
+    mapOfSelectedProduct() {
+      Map<String, dynamic> map = {};
+      selectedList.forEach((products) => map[products.name + "(${products.unit})"] = products.selectionNo);
+      print(map);
+      return map;
     }
 
-    transaction() {
-      print('beginning transaction...');
-      MyTransaction myTransaction = homeServices.switcherOpen
-          ? MyTransaction(
-              transactorName: tempTransactorName,
-              transactionType: "selling",
-              transactionAmount: billServices.totalBill.toString(),
-              date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-              hour: DateFormat('h:mm a').format(DateTime.now()),
-              branch: tempBranchName,
-              customerName: billServices.selectedBuyerType == 'Employee'
-                  ? selectedEmployee.name
-                  : billServices.selectedBuyerType == 'Client'
-                      ? selectedClient.name
-                      : 'المشتري عامل',
-              customerType: billServices.selectedBuyerType,
-              sellingProducts: sellingProducts(),
-              paid: billServices.payedAmount.toString(),
-              change: billChange.toString(),
-            )
-          : MyTransaction(
-              transactorName: tempTransactorName,
-              transactionType: "buying",
-              transactionAmount: billServices.payedAmount.toString(),
-              date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-              hour: DateFormat('h:mm a').format(DateTime.now()),
-              branch: tempBranchName,
-              buyingProducts: sellingProducts(),
-            );
+    sellingTransaction() {
+      MyTransaction myTransaction = MyTransaction(
+        transactorName: tempTransactorName,
+        transactionType: "selling",
+        transactionAmount: billServices.totalBill.toString(),
+        date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        hour: DateFormat('h:mm a').format(DateTime.now()),
+        branch: tempBranchName,
+        customerName: billServices.selectedBuyerType == 'Employee'
+            ? selectedEmployee.name
+            : billServices.selectedBuyerType == 'Client'
+                ? selectedClient.name
+                : 'المشتري عامل',
+        customerType: billServices.selectedBuyerType,
+        sellingProducts: mapOfSelectedProduct(),
+        paid: billServices.payedAmount.toString(),
+        change: billChange.toString(),
+      );
+      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction);
+      updateSellingProductOnDatabase();
+    }
+
+    buyingTransaction() {
+      MyTransaction myTransaction = MyTransaction(
+        transactorName: "Ms Amany",
+        transactionType: "buying",
+        date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        hour: DateFormat('h:mm a').format(DateTime.now()),
+        branch: branchName,
+        buyingProducts: mapOfSelectedProduct(),
+        transactionAmount: billServices.payedAmount.toString(),
+      );
 
       transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction);
-
-      print('Transaction Added');
-      updateProductOnDatabase();
+      updateBuyingProductOnDatabase();
     }
 
-    calculateNewTreasury({String oldCash, double cashToAdd}) {
-      print("printing old cash");
-      print(oldCash);
-      double newTotal;
-      if (homeServices.switcherOpen) {
-        newTotal = double.parse(oldCash) + cashToAdd;
-      }
-      if (!homeServices.switcherOpen) {
-        newTotal = double.parse(oldCash) - cashToAdd;
-      }
-      print("printing new cash for ");
-      print(newTotal);
-      return newTotal.toString();
+    calculateNewTreasury({double cashToAdd}) async {
+      Total total = await totalModel.fetchTotal(branchName);
+
+      print("printing current cash... ${total.cash}");
+
+      double currentCash = double.parse(total.cash);
+
+      double updatedCash = homeServices.switcherOpen ? currentCash + cashToAdd : currentCash - cashToAdd;
+
+      print("updated cash " + updatedCash.toString());
+      totalModel.updateTotal(docId: branchName, total: Total(cash: updatedCash.toString()));
     }
 
     _confirmTransactionDialog() {
@@ -248,72 +222,42 @@ class PanelBillCheckout extends StatelessWidget {
                 TextButton(
                   child: Text('اتمام'),
                   onPressed: () {
-                    print("Fitshing all needed data for security reasons");
-                    totalModel.fetchTotal(branchName);
-
-                    // totalModel.fetchTotal();
-                    // if (billServices.selectedBuyerType == 'Client') {
-                    //   clientModel.fetchClients();
-                    // }
-                    // if (billServices.selectedBuyerType == 'Employee') {
-                    //   employeeModel.fetchEmployees();
-                    // }
-
                     if (billChange < 0) {
-                      transaction();
+                      sellingTransaction();
                       if (billServices.selectedBuyerType == 'Client') {
-                        updateClientCash(selectedClient.cash, selectedClient.id, true);
+                        updateClientCash(addToCash: false);
                       }
                       if (billServices.selectedBuyerType == 'Employee') {
-                        updateEmployeeCash(selectedEmployee.cash, selectedEmployee.id, true);
+                        updateEmployeeCash(addToCash: false);
                       }
-
-                      totalModel.updateTotal(
-                          total: Total(
-                              cash: calculateNewTreasury(oldCash: total.cash, cashToAdd: billServices.payedAmount)),
-                          docId: branch);
-
-                      print('الباقي اقل');
                       //المدفوع يروح للخزنه
-
+                      calculateNewTreasury(cashToAdd: billServices.payedAmount);
                     }
 
                     if (billServices.isCredit) {
-                      transaction();
+                      sellingTransaction();
                       if (billServices.selectedBuyerType == 'Client') {
-                        updateClientCash(selectedClient.cash, selectedClient.id, false);
+                        updateClientCash(addToCash: true);
                       }
                       if (billServices.selectedBuyerType == 'Employee') {
-                        updateEmployeeCash(selectedEmployee.cash, selectedEmployee.id, false);
+                        updateEmployeeCash(addToCash: true);
                       }
-                      totalModel.updateTotal(
-                          total: Total(
-                              cash: calculateNewTreasury(oldCash: total.cash, cashToAdd: billServices.payedAmount)),
-                          docId: branch);
-                      print('الباقي اكتر');
-
                       //المدفوع يروح للخزنه
+                      calculateNewTreasury(cashToAdd: billServices.payedAmount);
                     }
 
                     if (!billServices.isCredit && billChange > 0) {
-                      transaction();
-                      totalModel.updateTotal(
-                          total:
-                              Total(cash: calculateNewTreasury(oldCash: total.cash, cashToAdd: billServices.totalBill)),
-                          docId: branch);
+                      sellingTransaction();
                       //الاجمالي يروح للخزنه
+                      calculateNewTreasury(cashToAdd: billServices.totalBill);
                     }
 
                     if (billChange == 0) {
-                      transaction();
-                      totalModel.updateTotal(
-                          total:
-                              Total(cash: calculateNewTreasury(oldCash: total.cash, cashToAdd: billServices.totalBill)),
-                          docId: branch);
+                      sellingTransaction();
                       //الاجمالي يروح للخزنه
-
+                      calculateNewTreasury(cashToAdd: billServices.totalBill);
                     }
-                    //todo: productModel.checkLimit(netTotalQuantity, quantityLimit);
+
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
                     _autoClosePanel();
                   },
@@ -343,7 +287,7 @@ class PanelBillCheckout extends StatelessWidget {
           },
         );
 
-    void sellingTransaction() {
+    void sellingTransactionDialog() {
       print("yes switcher open");
       if (selectedClient == null && selectedEmployee == null && selectedBuyerType != "House") {
         _noSelectedBuyerNameOrTypeDialog();
@@ -360,17 +304,14 @@ class PanelBillCheckout extends StatelessWidget {
           builder: (BuildContext dialogContext) {
             return AlertDialog(
               title: Text('إتمام عملية شراء'),
-              content: Text('هل تود اتمام عملية الشراء وسوف يتم سحب هذا المبلغ من الغزنه'),
+              content: Text('هل تود اتمام عملية الشراء وسوف يتم سحب هذا المبلغ من الخزنه'),
               actions: <Widget>[
                 TextButton(
                   child: Text('إتمام'),
                   onPressed: () {
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
-                    transaction();
-                    totalModel.updateTotal(
-                        total:
-                            Total(cash: calculateNewTreasury(oldCash: total.cash, cashToAdd: billServices.totalBill)),
-                        docId: branch);
+                    buyingTransaction();
+                    calculateNewTreasury(cashToAdd: billServices.totalBill);
                     // productModel.cleanProductSelection();
                     // billServices.totalBill = 0;
                     // _autoClosePanel();
@@ -406,7 +347,7 @@ class PanelBillCheckout extends StatelessWidget {
                       if (homeServices.switcherOpen) {
                         print("yes switcher open");
 
-                        sellingTransaction();
+                        sellingTransactionDialog();
                       }
                       if (!homeServices.switcherOpen) {
                         print("no switcher open");
