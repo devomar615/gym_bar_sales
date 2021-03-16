@@ -133,8 +133,8 @@ class PanelBuyerSelection extends StatelessWidget {
           width: _dimensions.widthPercent(30),
           child: SearchWidget<Employee>(
             dataList: employees,
-            hideSearchBoxWhenItemSelected: false,
-            listContainerHeight: MediaQuery.of(context).size.height / 4,
+            hideSearchBoxWhenItemSelected: true,
+            // listContainerHeight: MediaQuery.of(context).size.height / 4,
             queryBuilder: (String query, List<Employee> employee) {
               return employee
                   .where((Employee employee) => employee.name.toLowerCase().contains(query.toLowerCase()))
@@ -154,7 +154,6 @@ class PanelBuyerSelection extends StatelessWidget {
                 (Employee selectedItem, VoidCallback deleteSelectedItem) {},
             onItemSelected: (Employee employee) {
               employeeModel.selectedEmployee = employee;
-              print(selectedEmployee.name);
             },
             noItemsFoundWidget: Center(child: Text("No item Found")),
             textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
@@ -169,7 +168,7 @@ class PanelBuyerSelection extends StatelessWidget {
           child: SearchWidget<Client>(
             dataList: clients,
             hideSearchBoxWhenItemSelected: false,
-            listContainerHeight: MediaQuery.of(context).size.height / 4,
+            listContainerHeight: _dimensions.heightPercent(50),
             queryBuilder: (String query, List<Client> client) {
               return client.where((Client client) => client.name.toLowerCase().contains(query.toLowerCase())).toList();
             },
@@ -187,7 +186,6 @@ class PanelBuyerSelection extends StatelessWidget {
                 (Client selectedItem, VoidCallback deleteSelectedItem) {},
             onItemSelected: (Client client) {
               clientModel.selectedClient = client;
-              print(selectedClient.name);
             },
             noItemsFoundWidget: Center(child: Text("No item Found")),
             textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {

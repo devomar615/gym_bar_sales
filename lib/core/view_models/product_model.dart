@@ -6,10 +6,6 @@ import 'package:gym_bar_sales/core/models/product.dart';
 class ProductModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Status _status = Status.Busy;
-
-  Status get status => _status;
-
   Product _selectedProduct;
 
   Product get selectedProduct => _selectedProduct;
@@ -63,8 +59,7 @@ class ProductModel extends ChangeNotifier {
   }
 
   addTheTotalBuyingPerProduct({@required double changingValue, @required productId}) {
-    _products.firstWhere((product) => product.id == productId).theTotalBillPerProduct =
-        changingValue;
+    _products.firstWhere((product) => product.id == productId).theTotalBillPerProduct = changingValue;
 
     notifyListeners();
   }
@@ -97,11 +92,10 @@ class ProductModel extends ChangeNotifier {
   }
 
   Future fetchProducts({branchName}) async {
-    _status = Status.Busy;
     var result = await _db.collection("products/branches/$branchName/").get();
     _products = result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
     print(_products[1].name);
-    _status = Status.Idle;
+
     notifyListeners();
   }
 
@@ -115,8 +109,7 @@ class ProductModel extends ChangeNotifier {
         .collection("products/branches/$branchName/")
         .where("limit", isEqualTo: "true")
         .snapshots()
-        .map((snapShot) =>
-            snapShot.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList());
+        .map((snapShot) => snapShot.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList());
   }
 
   Stream<Product> fetchProductByIdStream({branchName, id}) {
@@ -130,9 +123,8 @@ class ProductModel extends ChangeNotifier {
   Future fetchProductById({branchName, id}) async {
     print("Printing IDDDDDDDD");
     print(id);
-    _status = Status.Busy;
-    Product product =
-        await _db.collection("products/branches/$branchName/").doc(id).get().then((snapshot) {
+
+    Product product = await _db.collection("products/branches/$branchName/").doc(id).get().then((snapshot) {
       Map<String, dynamic> map = snapshot.data();
       print("prinitng name");
       print(map['name']);
@@ -141,33 +133,28 @@ class ProductModel extends ChangeNotifier {
     });
 
     print(product.name);
-    _status = Status.Idle;
+
     notifyListeners();
     return product;
   }
 
   Future fetchProductByCategoryName({branchName, categoryName}) async {
-    _status = Status.Busy;
-    var result = await _db
-        .collection("products/branches/$branchName/")
-        .where("category", isEqualTo: categoryName)
-        .get();
+    var result =
+        await _db.collection("products/branches/$branchName/").where("category", isEqualTo: categoryName).get();
     _products = result.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
-    _status = Status.Idle;
+
     notifyListeners();
   }
 
   Future updateProduct({productId, Map<String, dynamic> data, String branchName}) async {
-    // _status = Status.Busy;
-    _status = Status.Busy;
+    //
+
     await _db.collection("products/branches/$branchName/").doc(productId).update(data);
-    _status = Status.Idle;
+
     notifyListeners();
   }
 
   Future addProduct({Product product, String branchName}) async {
-    _status = Status.Busy;
     await _db.collection("products/branches/$branchName/").add(product.toJson());
-    _status = Status.Idle;
   }
 }

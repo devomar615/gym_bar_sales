@@ -31,7 +31,7 @@ class PanelBillDetails extends StatelessWidget {
             title: Text('اختيار المبلغ المدفوع'),
             content: TextField(
               onChanged: (value) {
-                billServices.payedAmount = double.tryParse(value);
+                billServices.payedAmount = value == null ? 0 : double.tryParse(value);
                 if (payedAmount == null) billServices.payedAmount = 0;
                 billServices.calculateChange();
               },
@@ -98,7 +98,8 @@ class PanelBillDetails extends StatelessWidget {
                         BoxConstraints(minWidth: _dimensions.widthPercent(3), maxWidth: _dimensions.widthPercent(5)),
                     // width: _dimensions.widthPercent(9),
                     child: Text(
-                      payedAmount.toString(),
+                      payedAmount == null ? "0.0":
+                      payedAmount.toString() ,
                       style: _textStyles.billInfoStyle(),
                     ),
                   ),

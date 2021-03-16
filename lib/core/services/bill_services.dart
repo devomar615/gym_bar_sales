@@ -7,6 +7,14 @@ class BillServices extends ChangeNotifier {
   double _billChange = 0;
   double _totalBill = 0;
   bool _isCredit = false;
+  bool _creatingTransaction = false;
+
+  bool get creatingTransaction => _creatingTransaction;
+
+  set creatingTransaction(bool value) {
+    _creatingTransaction = value;
+    notifyListeners();
+  }
 
   bool get isCredit => _isCredit;
 
@@ -46,7 +54,7 @@ class BillServices extends ChangeNotifier {
   }
 
   calculateChange() {
-    billChange = payedAmount - totalBill;
+    payedAmount == null ? billChange = 0 - totalBill : billChange = payedAmount - totalBill;
     notifyListeners();
   }
 
@@ -75,10 +83,13 @@ class BillServices extends ChangeNotifier {
   }
 
   String calculatePersonCashType(double cash) {
-    if (cash == 0) return "خالص";
-   else if (cash < 0) return "دائن";
-   else if (cash > 0) return "مدين";
-   else return "error";
+    if (cash == 0)
+      return "خالص";
+    else if (cash < 0)
+      return "دائن";
+    else if (cash > 0)
+      return "مدين";
+    else
+      return "error";
   }
-
 }

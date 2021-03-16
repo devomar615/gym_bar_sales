@@ -184,7 +184,7 @@ class OneClientInfo extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(_dimensions.widthPercent(1)) //
               ),
         ),
-        height: _dimensions.heightPercent(kIsWeb ? 8 :6),
+        height: _dimensions.heightPercent(kIsWeb ? 8 : 6),
         // color: Colors.blue,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -388,7 +388,8 @@ class OneClientInfo extends StatelessWidget {
                 SizedBox(height: _dimensions.heightPercent(2)),
                 tableHead(),
                 SizedBox(height: _dimensions.heightPercent(2)),
-                tableBuilder(),
+                Container(height: _dimensions.heightPercent(40), child: tableBuilder()),
+                // Expanded(child: tableBuilder()),
               ],
             ),
           );

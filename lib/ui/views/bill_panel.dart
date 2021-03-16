@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gym_bar_sales/core/enums.dart';
+import 'package:gym_bar_sales/core/services/bill_services.dart';
 import 'package:gym_bar_sales/core/services/home_services.dart';
 import 'package:gym_bar_sales/core/view_models/category_model.dart';
 import 'package:gym_bar_sales/core/view_models/product_model.dart';
@@ -52,13 +53,16 @@ class _BillPanelState extends State<BillPanel> {
     Dimensions _dimensions = Dimensions(context);
     var productModel = Provider.of<ProductModel>(context);
     HomeServices homeServices = Provider.of<HomeServices>(context);
+    BillServices billServices = Provider.of<BillServices>(context);
 
     BorderRadiusGeometry radius = BorderRadius.only(
         topLeft: Radius.circular(_dimensions.heightPercent(kIsWeb ? 4 : 3)),
         topRight: Radius.circular(_dimensions.heightPercent(kIsWeb ? 4 : 3)));
     return Scaffold(
-      body: productModel.status == Status.Busy
-          ? Center(child: CircularProgressIndicator())
+      body: billServices.creatingTransaction
+          ? Center(
+              child: Text("جاري اضافة العملية..."),
+            )
           : GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: SlidingUpPanel(

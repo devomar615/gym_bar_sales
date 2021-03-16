@@ -33,7 +33,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   image_picker: ^0.7.2+1
   cached_network_image: 3.0.0-nullsafety
-  search_choices: ^2.0.3
 
 #ui packs (will replace soon)
   sliding_up_panel: ^1.0.2

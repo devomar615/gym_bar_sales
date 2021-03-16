@@ -64,7 +64,7 @@ class PanelBillCheckout extends StatelessWidget {
         double newNetTotalQuantity = currentNetTotalQuantity - netTotalQuantityToSell;
         double newWholesaleQuantity = currentWholesaleQuantity - wholeSaleQuantityToSell;
 
-        productModel.updateProduct(branchName: branchName, productId: productModel.selectedProduct.id, data: {
+        productModel.updateProduct(branchName: branchName, productId: selectedList[i].id, data: {
           "netTotalQuantity": newNetTotalQuantity.toString(),
           "wholesaleQuantity": newWholesaleQuantity.toString(),
           "limit": productModel.checkLimit(newNetTotalQuantity, double.parse(product.quantityLimit))
@@ -85,7 +85,7 @@ class PanelBillCheckout extends StatelessWidget {
         double newNetTotalQuantity = currentNetTotalQuantity + netTotalQuantityToBuy;
         double newWholesaleQuantity = currentWholesaleQuantity + wholeSaleQuantityToBuy;
 
-        productModel.updateProduct(branchName: branchName, productId: productModel.selectedProduct.id, data: {
+        productModel.updateProduct(branchName: branchName, productId: selectedList[i].id, data: {
           "netTotalQuantity": newNetTotalQuantity.toString(),
           "wholesaleQuantity": newWholesaleQuantity.toString(),
           "limit": productModel.checkLimit(newNetTotalQuantity, double.parse(product.quantityLimit))
@@ -94,6 +94,7 @@ class PanelBillCheckout extends StatelessWidget {
     }
 
     updateClientCash({bool addToCash}) async {
+      print(selectedClient.name);
       Client client = await clientModel.fetchClientById(branchName: branchName, id: selectedClient.id);
 
       double currentCash = double.parse(client.cash);
@@ -107,6 +108,7 @@ class PanelBillCheckout extends StatelessWidget {
     }
 
     updateEmployeeCash({double cashToAdd, bool addToCash}) async {
+      print(selectedEmployee.name);
       Employee employee = await employeeModel.fetchEmployeeById(branchName: branchName, id: selectedEmployee.id);
 
       double currentCash = double.parse(employee.cash);
@@ -133,7 +135,7 @@ class PanelBillCheckout extends StatelessWidget {
       return map;
     }
 
-    sellingTransaction() {
+    sellingTransaction() async {
       MyTransaction myTransaction = MyTransaction(
         transactorName: tempTransactorName,
         transactionType: "selling",
@@ -151,11 +153,12 @@ class PanelBillCheckout extends StatelessWidget {
         paid: billServices.payedAmount.toString(),
         change: billChange.toString(),
       );
-      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction);
-      updateSellingProductOnDatabase();
+      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction).then((_) {
+        updateSellingProductOnDatabase();
+      });
     }
 
-    buyingTransaction() {
+    buyingTransaction() async {
       MyTransaction myTransaction = MyTransaction(
         transactorName: "Ms Amany",
         transactionType: "buying",
@@ -166,8 +169,9 @@ class PanelBillCheckout extends StatelessWidget {
         transactionAmount: billServices.payedAmount.toString(),
       );
 
-      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction);
-      updateBuyingProductOnDatabase();
+      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction).then((_) {
+        updateBuyingProductOnDatabase();
+      });
     }
 
     calculateNewTreasury({double cashToAdd}) async {
@@ -222,42 +226,78 @@ class PanelBillCheckout extends StatelessWidget {
                 TextButton(
                   child: Text('اتمام'),
                   onPressed: () {
+                    billServices.creatingTransaction = true;
+
+                    /// **************************************************************************************************************  ///
                     if (billChange < 0) {
-                      sellingTransaction();
-                      if (billServices.selectedBuyerType == 'Client') {
-                        updateClientCash(addToCash: false);
-                      }
-                      if (billServices.selectedBuyerType == 'Employee') {
-                        updateEmployeeCash(addToCash: false);
-                      }
+                      sellingTransaction().then((value) {
+                        calculateNewTreasury(cashToAdd: billServices.payedAmount).then((_) {
+                          if (billServices.selectedBuyerType == 'Client') {
+                            updateClientCash(addToCash: false).then((_) {
+                              billServices.creatingTransaction = false;
+                              productModel.cleanProductSelection();
+                            });
+                          }
+                          if (billServices.selectedBuyerType == 'Employee') {
+                            updateEmployeeCash(addToCash: false).then((_) {
+                              billServices.creatingTransaction = false;
+
+                              productModel.cleanProductSelection();
+                            });
+                          }
+                        });
+                      });
                       //المدفوع يروح للخزنه
-                      calculateNewTreasury(cashToAdd: billServices.payedAmount);
                     }
 
+                    /// **************************************************************************************************************  ///
                     if (billServices.isCredit) {
-                      sellingTransaction();
-                      if (billServices.selectedBuyerType == 'Client') {
-                        updateClientCash(addToCash: true);
-                      }
-                      if (billServices.selectedBuyerType == 'Employee') {
-                        updateEmployeeCash(addToCash: true);
-                      }
+                      sellingTransaction().then((_) {
+                        calculateNewTreasury(cashToAdd: billServices.payedAmount).then((_) {
+                          if (billServices.selectedBuyerType == 'Client') {
+                            updateClientCash(addToCash: true).then((_) {
+                              billServices.creatingTransaction = false;
+
+                              productModel.cleanProductSelection();
+                            });
+                          }
+                          if (billServices.selectedBuyerType == 'Employee') {
+                            updateEmployeeCash(addToCash: true).then((_) {
+                              billServices.creatingTransaction = false;
+
+                              productModel.cleanProductSelection();
+                            });
+                          }
+                        });
+                      });
                       //المدفوع يروح للخزنه
-                      calculateNewTreasury(cashToAdd: billServices.payedAmount);
                     }
+
+                    /// **************************************************************************************************************  ///
 
                     if (!billServices.isCredit && billChange > 0) {
-                      sellingTransaction();
+                      sellingTransaction().then((_) {
+                        calculateNewTreasury(cashToAdd: billServices.totalBill).then((_) {
+                          productModel.cleanProductSelection();
+                          billServices.creatingTransaction = false;
+                        });
+                      });
                       //الاجمالي يروح للخزنه
-                      calculateNewTreasury(cashToAdd: billServices.totalBill);
                     }
+
+                    /// **************************************************************************************************************  ///
 
                     if (billChange == 0) {
-                      sellingTransaction();
+                      sellingTransaction().then((_) {
+                        calculateNewTreasury(cashToAdd: billServices.totalBill).then((_) {
+                          productModel.cleanProductSelection();
+                          billServices.creatingTransaction = false;
+                        });
+                      });
                       //الاجمالي يروح للخزنه
-                      calculateNewTreasury(cashToAdd: billServices.totalBill);
                     }
 
+                    /// **************************************************************************************************************  ///
                     Navigator.of(dialogContext).pop(); // Dismiss alert dialog
                     _autoClosePanel();
                   },
