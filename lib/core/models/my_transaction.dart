@@ -10,25 +10,23 @@ class MyTransaction {
       date,
       hour,
       branch,
-      customerName, //الشخص اللي اتعمل عليه العمليه ويمكن ان يكون عميل او موظف حسب العمليه
 
       //info about selling only
+      customerName, //الشخص اللي اتعمل عليه العمليه ويمكن ان يكون عميل او موظف حسب العمليه
       customerId,
-      customerType,
-      paid, //increase [$incomeCash].
-      change; //change could be sent as deposit
-
+      customerType, // client, employee, house
+      paid,
+      change;
   Map<String, dynamic> sellingProducts;
 
   //info about buying
-
   Map<String, dynamic> buyingProducts;
   String buyingProductCategory, buyingCompanyName, notes;
 
   MyTransaction(
       {this.id,
       @required this.transactorName,
-      this.transactorId,
+      @required this.transactorId,
       @required this.transactionType,
       @required this.transactionAmount,
       @required this.date,

@@ -121,13 +121,8 @@ class ProductModel extends ChangeNotifier {
   }
 
   Future fetchProductById({branchName, id}) async {
-    print("Printing IDDDDDDDD");
-    print(id);
-
     Product product = await _db.collection("products/branches/$branchName/").doc(id).get().then((snapshot) {
       Map<String, dynamic> map = snapshot.data();
-      print("prinitng name");
-      print(map['name']);
 
       return Product.fromMap(map, id);
     });

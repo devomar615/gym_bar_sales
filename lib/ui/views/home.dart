@@ -33,8 +33,7 @@ class Home extends StatelessWidget {
 
                     if (snapshot.hasData) {
                       liveProducts = snapshot.data.docs
-                          .map<Product>((DocumentSnapshot document) =>
-                              Product.fromMap(document.data(), document.id))
+                          .map<Product>((DocumentSnapshot document) => Product.fromMap(document.data(), document.id))
                           .toList();
                     }
 

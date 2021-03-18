@@ -110,6 +110,7 @@ class _BillPanelState extends State<BillPanel> {
                       print("oops you pressed hard dude!");
                       FocusScope.of(context).unfocus();
                       _pc.close();
+                      setState(() {});
                     }
                   },
                   child: Home(),

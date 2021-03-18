@@ -52,15 +52,15 @@ class PanelBillSellingTable extends StatelessWidget {
 
     onPlusProduct(index, List<Product> liveProducts) {
       if (selectedList[index].selectionNo >=
-          double.parse(liveProducts.firstWhere((element) => element.id == selectedList[index].id).netTotalQuantity)) {
+          double.parse(liveProducts.firstWhere((element) => element.id == selectedList[index].id).netQuantityOfUnit)) {
         print("product needed");
       }
 
-      if (double.parse(liveProducts.firstWhere((element) => element.id == selectedList[index].id).netTotalQuantity) >
+      if (double.parse(liveProducts.firstWhere((element) => element.id == selectedList[index].id).netQuantityOfUnit) >
               0 &&
           selectedList[index].selectionNo <
               double.parse(
-                  liveProducts.firstWhere((element) => element.id == selectedList[index].id).netTotalQuantity)) {
+                  liveProducts.firstWhere((element) => element.id == selectedList[index].id).netQuantityOfUnit)) {
         productModel.addProductSelectionById(selectedList[index].id);
 
         productModel.calculateTheTotalPerProduct(billServices.selectedBuyerType);
@@ -79,7 +79,7 @@ class PanelBillSellingTable extends StatelessWidget {
 
     tableHead() {
       return Container(
-        height: _dimensions.heightPercent(kIsWeb ? 8 :6),
+        height: _dimensions.heightPercent(kIsWeb ? 8 : 6),
         color: Colors.blue,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:gym_bar_sales/core/enums.dart';
 import 'package:gym_bar_sales/core/models/product.dart';
 import 'package:gym_bar_sales/core/services/bill_services.dart';
 import 'package:gym_bar_sales/core/services/home_services.dart';
@@ -14,7 +13,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 Timer timer;
 
 class ProductsGrid extends StatelessWidget {
-  final liveProducts;
+  final List<Product> liveProducts;
 
   const ProductsGrid({Key key, this.liveProducts}) : super(key: key);
 
@@ -57,14 +56,11 @@ class ProductsGrid extends StatelessWidget {
     }
 
     onPlusItem(index) {
-      if (double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity) <
-              0 ||
+      if (double.parse(liveProducts.firstWhere((element) => element.id == products[index].id).netQuantityOfUnit) < 0 ||
           products[index].selectionNo >=
-              double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity)) {
+                  double.parse(
+                      liveProducts.firstWhere((element) => element.id == products[index].id).netQuantityOfUnit) &&
+              switcherOpen) {
         print('product needed');
       }
 
@@ -72,14 +68,9 @@ class ProductsGrid extends StatelessWidget {
         productModel.addProductSelectionById(products[index].id);
       }
 
-      if (double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity) >
-              0 &&
+      if (double.parse(liveProducts.firstWhere((element) => element.id == products[index].id).netQuantityOfUnit) > 0 &&
           products[index].selectionNo <
-              double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity) &&
+              double.parse(liveProducts.firstWhere((element) => element.id == products[index].id).netQuantityOfUnit) &&
           switcherOpen) {
         productModel.addProductSelectionById(products[index].id);
       }
@@ -101,13 +92,8 @@ class ProductsGrid extends StatelessWidget {
     }
 
     Widget showGeneralCard(index) {
-      if (double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity) <=
-              0 ||
-          double.parse(liveProducts
-                  .firstWhere((element) => element.id == products[index].id)
-                  .netTotalQuantity) ==
+      if (double.parse(liveProducts.firstWhere((element) => element.id == products[index].id).netQuantityOfUnit) <= 0 ||
+          double.parse(liveProducts.firstWhere((element) => element.id == products[index].id).netQuantityOfUnit) ==
               null) {
         if (switcherOpen) {
           return _generalItem.customCard(
@@ -145,13 +131,11 @@ class ProductsGrid extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(
-                  top: _dimensions.widthPercent(kIsWeb ? 1 : 0),
-                  right: _dimensions.widthPercent(1)),
+              padding:
+                  EdgeInsets.only(top: _dimensions.widthPercent(kIsWeb ? 1 : 0), right: _dimensions.widthPercent(1)),
               child: GridView.builder(
                 itemCount: productModel.filterProduct(selectedCategory).length,
-                gridDelegate:
-                    SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: kIsWeb ? 6 : 5),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: kIsWeb ? 6 : 5),
                 itemBuilder: (BuildContext context, int index) {
                   return products.isEmpty
                       ? Center(child: Text('لا يوجد منتجات هنا'))

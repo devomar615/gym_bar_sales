@@ -80,6 +80,7 @@ class OneClientInfo extends StatelessWidget {
             : currentCash - double.tryParse(clientModel.cashToAdd.text);
 
         String updatedType;
+
         if (updatedCash == 0) updatedType = "خالص";
         if (updatedCash < 0) updatedType = "دائن";
         if (updatedCash > 0) updatedType = "مدين";

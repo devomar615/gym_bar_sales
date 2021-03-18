@@ -52,15 +52,15 @@ class PanelBillBuyingTable extends StatelessWidget {
 
     onPlusProduct(index) {
       if (selectedList[index].selectionNo >=
-          double.parse(selectedList[index].netTotalQuantity)) {
+          double.parse(selectedList[index].netQuantityOfUnit)) {
         if (homeServices.switcherOpen) {
           print("product needed");
         }
       }
 
-      if (double.parse(selectedList[index].netTotalQuantity) > 0 &&
+      if (double.parse(selectedList[index].netQuantityOfUnit) > 0 &&
           selectedList[index].selectionNo <
-              double.parse(selectedList[index].netTotalQuantity)) {
+              double.parse(selectedList[index].netQuantityOfUnit)) {
         productModel.addProductSelectionById(selectedList[index].id);
 
         billServices.calculateTheTotalBill(selectedList);

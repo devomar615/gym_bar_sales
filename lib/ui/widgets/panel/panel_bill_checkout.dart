@@ -26,6 +26,7 @@ class PanelBillCheckout extends StatelessWidget {
   Widget build(BuildContext context) {
     String branch = context.read<String>();
     FormWidget _formWidget = FormWidget(context: context);
+
     ProductModel productModel = Provider.of<ProductModel>(context);
     ClientModel clientModel = Provider.of<ClientModel>(context);
     TransactionModel transactionModel = Provider.of<TransactionModel>(context);
@@ -50,45 +51,54 @@ class PanelBillCheckout extends StatelessWidget {
       }
     }
 
-    updateSellingProductOnDatabase() async {
+    Future updateSellingProductOnDatabase() async {
       for (int i = 0; i < selectedList.length; i++) {
-        Product product = await productModel.fetchProductById(branchName: branchName, id: selectedList[i].id);
+        await productModel.fetchProductById(branchName: branchName, id: selectedList[i].id).then((product) {
+          double netQuantityOfUnitToSell = selectedList[i].selectionNo;
 
-        double netTotalQuantityToSell =
-            selectedList[i].selectionNo * double.parse(selectedList[i].theAmountOfSalesPerProduct);
-        double wholeSaleQuantityToSell = netTotalQuantityToSell / double.parse(product.quantityOfWholesaleUnit);
+          print("netQuantityOfUnitToSell is ${netQuantityOfUnitToSell.toString()}");
 
-        double currentNetTotalQuantity = double.parse(product.netTotalQuantity);
-        double currentWholesaleQuantity = double.parse(product.wholesaleQuantity);
+          double netQuantityOfWholesaleUnitToSell =
+              netQuantityOfUnitToSell / double.parse(product.quantityPerWholesaleUnit);
+          print("netQuantityOfWholesaleUnitToSell is ${netQuantityOfWholesaleUnitToSell.toString()}");
 
-        double newNetTotalQuantity = currentNetTotalQuantity - netTotalQuantityToSell;
-        double newWholesaleQuantity = currentWholesaleQuantity - wholeSaleQuantityToSell;
+          double currentNetQuantityOfUnit = double.parse(product.netQuantityOfUnit);
+          double currentNetQuantityOfWholesaleUnit = double.parse(product.netQuantityOfWholesaleUnit);
+          print(
+              "current is ${currentNetQuantityOfUnit.toString()} and ${currentNetQuantityOfWholesaleUnit.toString()}");
 
-        productModel.updateProduct(branchName: branchName, productId: selectedList[i].id, data: {
-          "netTotalQuantity": newNetTotalQuantity.toString(),
-          "wholesaleQuantity": newWholesaleQuantity.toString(),
-          "limit": productModel.checkLimit(newNetTotalQuantity, double.parse(product.quantityLimit))
+          double newNetQuantityOfUnit = currentNetQuantityOfUnit - netQuantityOfUnitToSell;
+          double newNetQuantityOfWholesaleUnit = currentNetQuantityOfWholesaleUnit - netQuantityOfWholesaleUnitToSell;
+          print("new is ${newNetQuantityOfUnit.toString()} and ${newNetQuantityOfWholesaleUnit.toString()}");
+
+          productModel.updateProduct(branchName: branchName, productId: selectedList[i].id, data: {
+            "netQuantityOfUnit": newNetQuantityOfUnit.toString(),
+            "netQuantityOfWholesaleUnit": newNetQuantityOfWholesaleUnit.toString(),
+            "reachLimit": productModel.checkLimit(newNetQuantityOfUnit, double.parse(product.quantityLimit))
+          });
         });
       }
     }
 
-    updateBuyingProductOnDatabase() async {
+    Future updateBuyingProductOnDatabase() async {
       for (int i = 0; i < selectedList.length; i++) {
-        Product product = await productModel.fetchProductById(branchName: branchName, id: selectedList[i].id);
+        await productModel.fetchProductById(branchName: branchName, id: selectedList[i].id).then((product) {
+          double netQuantityOfUnitToBuy = selectedList[i].selectionNo;
 
-        double netTotalQuantityToBuy = selectedList[i].selectionNo;
-        double wholeSaleQuantityToBuy = netTotalQuantityToBuy / double.parse(product.quantityOfWholesaleUnit);
+          double netQuantityOfWholesaleUnitToBuy =
+              netQuantityOfUnitToBuy / double.parse(product.quantityPerWholesaleUnit);
 
-        double currentNetTotalQuantity = double.parse(product.netTotalQuantity);
-        double currentWholesaleQuantity = double.parse(product.wholesaleQuantity);
+          double currentNetQuantityOfUnit = double.parse(product.netQuantityOfUnit);
+          double currentNetQuantityOfWholesaleUnit = double.parse(product.netQuantityOfWholesaleUnit);
 
-        double newNetTotalQuantity = currentNetTotalQuantity + netTotalQuantityToBuy;
-        double newWholesaleQuantity = currentWholesaleQuantity + wholeSaleQuantityToBuy;
+          double newNetQuantityOfUnit = currentNetQuantityOfUnit + netQuantityOfUnitToBuy;
+          double newNetQuantityOfWholesaleUnit = currentNetQuantityOfWholesaleUnit + netQuantityOfWholesaleUnitToBuy;
 
-        productModel.updateProduct(branchName: branchName, productId: selectedList[i].id, data: {
-          "netTotalQuantity": newNetTotalQuantity.toString(),
-          "wholesaleQuantity": newWholesaleQuantity.toString(),
-          "limit": productModel.checkLimit(newNetTotalQuantity, double.parse(product.quantityLimit))
+          productModel.updateProduct(branchName: branchName, productId: selectedList[i].id, data: {
+            "netQuantityOfUnit": newNetQuantityOfUnit.toString(),
+            "netQuantityOfWholesaleUnit": newNetQuantityOfWholesaleUnit.toString(),
+            "reachLimit": productModel.checkLimit(newNetQuantityOfUnit, double.parse(product.quantityLimit))
+          });
         });
       }
     }
@@ -126,6 +136,7 @@ class PanelBillCheckout extends StatelessWidget {
     // todo:channnnge temp data;
 
     var tempTransactorName = "Omar";
+    var tempTransactorId = "ID";
     var tempBranchName = context.read<String>();
 
     mapOfSelectedProduct() {
@@ -138,6 +149,7 @@ class PanelBillCheckout extends StatelessWidget {
     sellingTransaction() async {
       MyTransaction myTransaction = MyTransaction(
         transactorName: tempTransactorName,
+        transactorId: tempTransactorId,
         transactionType: "selling",
         transactionAmount: billServices.totalBill.toString(),
         date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
@@ -153,14 +165,13 @@ class PanelBillCheckout extends StatelessWidget {
         paid: billServices.payedAmount.toString(),
         change: billChange.toString(),
       );
-      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction).then((_) {
-        updateSellingProductOnDatabase();
-      });
+      transactionModel.addTransaction(branchName: tempBranchName, transaction: myTransaction).then((_) {});
     }
 
     buyingTransaction() async {
       MyTransaction myTransaction = MyTransaction(
         transactorName: "Ms Amany",
+        transactorId: tempTransactorId,
         transactionType: "buying",
         date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
         hour: DateFormat('h:mm a').format(DateTime.now()),
@@ -230,56 +241,34 @@ class PanelBillCheckout extends StatelessWidget {
 
                     /// **************************************************************************************************************  ///
                     if (billChange < 0) {
+                      print("billChange < 0");
                       sellingTransaction().then((value) {
                         calculateNewTreasury(cashToAdd: billServices.payedAmount).then((_) {
                           if (billServices.selectedBuyerType == 'Client') {
-                            updateClientCash(addToCash: false).then((_) {
-                              billServices.creatingTransaction = false;
-                              productModel.cleanProductSelection();
-                            });
+                            updateClientCash(addToCash: false);
                           }
-                          if (billServices.selectedBuyerType == 'Employee') {
-                            updateEmployeeCash(addToCash: false).then((_) {
-                              billServices.creatingTransaction = false;
 
-                              productModel.cleanProductSelection();
-                            });
+                          if (billServices.selectedBuyerType == 'Employee') {
+                            updateEmployeeCash(addToCash: false);
                           }
                         });
-                      });
-                      //المدفوع يروح للخزنه
-                    }
-
-                    /// **************************************************************************************************************  ///
-                    if (billServices.isCredit) {
-                      sellingTransaction().then((_) {
-                        calculateNewTreasury(cashToAdd: billServices.payedAmount).then((_) {
-                          if (billServices.selectedBuyerType == 'Client') {
-                            updateClientCash(addToCash: true).then((_) {
-                              billServices.creatingTransaction = false;
-
-                              productModel.cleanProductSelection();
-                            });
-                          }
-                          if (billServices.selectedBuyerType == 'Employee') {
-                            updateEmployeeCash(addToCash: true).then((_) {
-                              billServices.creatingTransaction = false;
-
-                              productModel.cleanProductSelection();
-                            });
-                          }
-                        });
-                      });
-                      //المدفوع يروح للخزنه
-                    }
-
-                    /// **************************************************************************************************************  ///
-
-                    if (!billServices.isCredit && billChange > 0) {
-                      sellingTransaction().then((_) {
-                        calculateNewTreasury(cashToAdd: billServices.totalBill).then((_) {
-                          productModel.cleanProductSelection();
+                        updateSellingProductOnDatabase().then((_) {
                           billServices.creatingTransaction = false;
+                          productModel.cleanProductSelection();
+                        });
+                      });
+                      //المدفوع يروح للخزنه
+                    }
+
+                    /// **************************************************************************************************************  ///
+
+                    else if (!billServices.isCredit && billChange > 0) {
+                      print("!billServices.isCredit && billChange > 0");
+                      sellingTransaction().then((_) {
+                        calculateNewTreasury(cashToAdd: billServices.totalBill);
+                        updateSellingProductOnDatabase().then((_) {
+                          billServices.creatingTransaction = false;
+                          productModel.cleanProductSelection();
                         });
                       });
                       //الاجمالي يروح للخزنه
@@ -287,11 +276,39 @@ class PanelBillCheckout extends StatelessWidget {
 
                     /// **************************************************************************************************************  ///
 
-                    if (billChange == 0) {
+                    else if (billServices.isCredit && billChange > 0) {
+                      print("billServices.isCredit && billChange > 0");
+
                       sellingTransaction().then((_) {
-                        calculateNewTreasury(cashToAdd: billServices.totalBill).then((_) {
-                          productModel.cleanProductSelection();
+                        calculateNewTreasury(cashToAdd: billServices.payedAmount).then((_) {
+                          if (billServices.selectedBuyerType == 'Client') {
+                            updateClientCash(addToCash: true);
+                            updateSellingProductOnDatabase().then((_) {
+                              billServices.creatingTransaction = false;
+                              productModel.cleanProductSelection();
+                            });
+                          }
+                          if (billServices.selectedBuyerType == 'Employee') {
+                            updateEmployeeCash(addToCash: true);
+                            updateSellingProductOnDatabase().then((_) {
+                              billServices.creatingTransaction = false;
+                              productModel.cleanProductSelection();
+                            });
+                          }
+                        });
+                      });
+                      //المدفوع يروح للخزنه
+                    }
+
+                    /// **************************************************************************************************************  ///
+
+                    else if (billChange == 0) {
+                      print("billChange == 0");
+                      sellingTransaction().then((_) {
+                        calculateNewTreasury(cashToAdd: billServices.totalBill);
+                        updateSellingProductOnDatabase().then((_) {
                           billServices.creatingTransaction = false;
+                          productModel.cleanProductSelection();
                         });
                       });
                       //الاجمالي يروح للخزنه
