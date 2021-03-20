@@ -6,8 +6,6 @@ import 'package:gym_bar_sales/ui/widgets/clients/one_client_info.dart';
 
 SortSelection selectedSort;
 File file;
-var branch = "بيفرلي";
-
 class Clients extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

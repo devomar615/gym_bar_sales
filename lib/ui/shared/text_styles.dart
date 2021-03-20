@@ -135,9 +135,8 @@ class TextStyles {
   listTileTitleStyle() => TextStyle(fontSize: Dimensions(context).widthPercent(2));
 
   listTileSubtitleStyle(String type) => TextStyle(
-    color: type == 'دائن' ? Colors.red : Colors.green,
-    fontSize: Dimensions(context).widthPercent(1.5),
-    fontFamily: 'Tajawal',
-  );
-
+        color: type == 'دائن' ? Colors.red : Colors.green,
+        fontSize: Dimensions(context).widthPercent(1.5),
+        fontFamily: 'Tajawal',
+      );
 }

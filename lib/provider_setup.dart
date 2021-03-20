@@ -8,10 +8,10 @@ import 'package:gym_bar_sales/core/view_models/transaction_model.dart';
 import 'package:provider/provider.dart';
 import 'core/view_models/category_model.dart';
 
-final String branch = "بيفرلي";
+final String _branch = "فرع القرية الذكية";
 
 var providers = [
-  Provider(create: (_) => branch),
+  Provider(create: (_) => _branch),
   ChangeNotifierProvider(create: (_) => CategoryModel()),
   ChangeNotifierProvider(create: (_) => ProductModel()),
   ChangeNotifierProvider(create: (_) => EmployeeModel()),

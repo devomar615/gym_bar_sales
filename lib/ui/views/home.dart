@@ -13,6 +13,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     CategoryModel categoryModel = Provider.of<CategoryModel>(context);
     ProductModel productModel = Provider.of<ProductModel>(context);
+    String branch = context.read<String>();
 
     return categoryModel.status == Status.Busy
         ? Center(child: CircularProgressIndicator())
@@ -22,7 +23,7 @@ class Home extends StatelessWidget {
               children: [
                 HomeAppBar(),
                 StreamBuilder(
-                  stream: productModel.fetchProductStream("بيفرلي"),
+                  stream: productModel.fetchProductStream(branch),
                   builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                     if (snapshot.hasError) {
                       return Text('Something went wrong');

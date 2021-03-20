@@ -45,8 +45,7 @@ class GeneralItem {
               width: _dimensions.widthPercent(70),
               height: _dimensions.widthPercent(70),
               child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(_dimensions.heightPercent(1))),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_dimensions.heightPercent(1))),
                 elevation: 5,
                 color: networkImage == null ? backGround : Colors.black,
                 semanticContainer: true,
@@ -59,17 +58,16 @@ class GeneralItem {
                       width: double.infinity,
                       height: double.infinity,
                       child: Opacity(
-                        opacity: 0.4,
+                        opacity: 0.7,
                         child: FittedBox(
                           fit: BoxFit.fill,
-                          child: assetImage == null
-                              ? CachedNetworkImage(
+                          child: networkImage == null || networkImage == "photo" || networkImage.length < 0
+                              ? Image.asset(assetImage)
+                              : CachedNetworkImage(
                                   imageUrl: networkImage,
-                                  placeholder: (context, url) =>
-                                      Center(child: CircularProgressIndicator()),
+                                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
                                   errorWidget: (context, url, error) => new Icon(Icons.error),
-                                )
-                              : Image.asset(assetImage),
+                                ),
                         ),
                       ),
                     ),

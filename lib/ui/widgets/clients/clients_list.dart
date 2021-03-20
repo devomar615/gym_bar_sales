@@ -12,12 +12,13 @@ import 'package:provider/provider.dart';
 
 SortSelection selectedSort;
 File file;
-var branch = "بيفرلي";
 
 class ClientsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TransactionModel transactionModel = Provider.of<TransactionModel>(context, listen: false);
+    String branchName = context.read<String>();
+
 
     ClientModel clientModel = Provider.of<ClientModel>(context);
     // BranchModel branchModel = Provider.of<BranchModel>(context);
@@ -34,7 +35,7 @@ class ClientsList extends StatelessWidget {
       var customerName = clientModel.selectedClient.name;
       // print("tapping clienttt");
       // print(customerName);
-      transactionModel.fetchTransactionByCustomerName(branchName: "بيفرلي", customerName: customerName);
+      transactionModel.fetchTransactionByCustomerName(branchName: branchName, customerName: customerName);
     }
 
     Widget popUpSortSelection(List<Client> _liveClients) => PopupMenuButton<SortSelection>(

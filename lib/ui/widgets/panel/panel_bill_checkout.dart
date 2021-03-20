@@ -24,7 +24,7 @@ class PanelBillCheckout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String branch = context.read<String>();
+    String branchName = context.read<String>();
     FormWidget _formWidget = FormWidget(context: context);
 
     ProductModel productModel = Provider.of<ProductModel>(context);
@@ -114,7 +114,7 @@ class PanelBillCheckout extends StatelessWidget {
       String newClientType = billServices.calculatePersonCashType(newCash);
 
       clientModel.updateClient(
-          branchName: branch, clientId: selectedClient.id, data: {'cash': newCash.toString(), 'type': newClientType});
+          branchName: branchName, clientId: selectedClient.id, data: {'cash': newCash.toString(), 'type': newClientType});
     }
 
     updateEmployeeCash({double cashToAdd, bool addToCash}) async {
@@ -128,7 +128,7 @@ class PanelBillCheckout extends StatelessWidget {
       String newEmployeeType = billServices.calculatePersonCashType(newCash);
 
       employeeModel.updateEmployee(
-          branchName: branch,
+          branchName: branchName,
           employeeId: selectedEmployee.id,
           data: {'cash': newCash.toString(), 'type': newEmployeeType});
     }

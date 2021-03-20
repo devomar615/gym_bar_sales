@@ -120,8 +120,10 @@ class ProductsGrid extends StatelessWidget {
         topSpace: SizedBox(height: _dimensions.heightPercent(9)),
         betweenSpace: SizedBox(height: _dimensions.heightPercent(2)),
         title: products[index].name,
-        assetImage: "assets/images/products.jpg",
-        networkImage: '',
+        assetImage: "assets/images/details/products.jpeg",
+        networkImage: products[index].photo == "photo"
+            ? null
+            : products[index].photo,
       );
     }
 

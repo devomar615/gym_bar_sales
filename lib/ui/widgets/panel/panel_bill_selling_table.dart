@@ -25,6 +25,8 @@ class PanelBillSellingTable extends StatelessWidget {
 
     var billServices = Provider.of<BillServices>(context);
 
+    String branchName = context.read<String>();
+
     List<Product> selectedList = productModel.getSelectedProducts();
 
     String selectedBuyerType = billServices.selectedBuyerType;
@@ -123,7 +125,7 @@ class PanelBillSellingTable extends StatelessWidget {
 
     billTableBuilder() {
       return StreamBuilder(
-        stream: productModel.fetchProductStream("بيفرلي"),
+        stream: productModel.fetchProductStream(branchName),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasError) {
             return Text('Something went wrong');

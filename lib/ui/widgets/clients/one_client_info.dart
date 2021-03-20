@@ -16,7 +16,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 File file;
-var branchName = "بيفرلي";
 var transactorName = "عمر";
 
 class OneClientInfo extends StatelessWidget {
@@ -27,6 +26,9 @@ class OneClientInfo extends StatelessWidget {
     TextStyles _textStyles = TextStyles(context: context);
     Dimensions _dimensions = Dimensions(context);
     FormWidget _formWidget = FormWidget(context: context);
+
+    String branchName = context.read<String>();
+
 
     TotalModel totalModel = Provider.of<TotalModel>(context, listen: false);
     ClientModel clientModel = Provider.of<ClientModel>(context);
