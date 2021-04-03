@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gym_bar_sales/ui/shared/dimensions.dart';
 import 'package:gym_bar_sales/ui/shared/text_styles.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class GeneralItem {
   final context;
@@ -45,7 +46,9 @@ class GeneralItem {
               width: _dimensions.widthPercent(70),
               height: _dimensions.widthPercent(70),
               child: Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_dimensions.heightPercent(1))),
+                shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(_dimensions.heightPercent(1))),
                 elevation: 5,
                 color: networkImage == null ? backGround : Colors.black,
                 semanticContainer: true,
@@ -61,13 +64,19 @@ class GeneralItem {
                         opacity: 0.7,
                         child: FittedBox(
                           fit: BoxFit.fill,
-                          child: networkImage == null || networkImage == "photo" || networkImage.length < 0
+                          child: networkImage == null ||
+                                  networkImage == "photo" ||
+                                  networkImage.length < 0
                               ? Image.asset(assetImage)
-                              : CachedNetworkImage(
-                                  imageUrl: networkImage,
-                                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-                                  errorWidget: (context, url, error) => new Icon(Icons.error),
-                                ),
+                              : kIsWeb
+                                  ? Image.network(networkImage)
+                                  : CachedNetworkImage(
+                                      imageUrl: networkImage,
+                                      placeholder: (context, url) => Center(
+                                          child: CircularProgressIndicator()),
+                                      errorWidget: (context, url, error) =>
+                                          new Icon(Icons.error),
+                                    ),
                         ),
                       ),
                     ),
@@ -97,7 +106,8 @@ class GeneralItem {
                     // height: _dimensions.heightPercent(2.),
                     decoration: BoxDecoration(
                       color: Colors.red,
-                      borderRadius: BorderRadius.circular(_dimensions.widthPercent(30)),
+                      borderRadius:
+                          BorderRadius.circular(_dimensions.widthPercent(30)),
                     ),
                     constraints: BoxConstraints(
                       minWidth: _dimensions.widthPercent(2.5),
@@ -137,7 +147,9 @@ class GeneralItem {
         betweenSpace != null ? betweenSpace : SizedBox(),
         Text(
           title,
-          style: bigTitle ? _textStyles.itemImageTitle() : _textStyles.itemImageTitleSmall(),
+          style: bigTitle
+              ? _textStyles.itemImageTitle()
+              : _textStyles.itemImageTitleSmall(),
         ),
       ],
     );
@@ -148,7 +160,9 @@ class GeneralItem {
 
     return Text(
       title,
-      style: bigTitle ? _textStyles.itemImageTitle() : _textStyles.itemImageTitleSmall(),
+      style: bigTitle
+          ? _textStyles.itemImageTitle()
+          : _textStyles.itemImageTitleSmall(),
     );
   }
 }
